@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { getTransactions, formatRupees } from "../utils/transactions";
+import { openCategoryManagerModal } from "../utils/categoryService";
 
 export default function Dashboard({ student }) {
   const transactions = getTransactions(student);
@@ -50,6 +51,15 @@ export default function Dashboard({ student }) {
         <div style={styles.actions}>
           <Link to="/income" style={styles.addIncome}>+ Add income</Link>
           <Link to="/expenses" style={styles.addExpense}>+ Add expense</Link>
+          <span style={styles.divider} aria-hidden="true" />
+          <button
+            type="button"
+            onClick={() => openCategoryManagerModal()}
+            style={styles.addCategory}
+            title="Manage or add categories"
+          >
+            + Add Category
+          </button>
         </div>
       </div>
 
@@ -194,6 +204,7 @@ const styles = {
   },
   actions: {
     display: "flex",
+    alignItems: "center",
     flexWrap: "wrap",
     gap: 10,
   },
@@ -215,6 +226,27 @@ const styles = {
     borderRadius: 9,
     fontSize: 13,
     fontWeight: 800,
+  },
+  divider: {
+    display: "inline-block",
+    width: "1.5px",
+    height: "26px",
+    background: "#cbd5e1",
+    margin: "0 3px",
+  },
+  addCategory: {
+    cursor: "pointer",
+    background: "#eff6ff",
+    color: "#1d4ed8",
+    border: "1px solid #bfdbfe",
+    padding: "10px 15px",
+    borderRadius: 9,
+    fontSize: 13,
+    fontWeight: 800,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    transition: "all 0.15s ease",
   },
   balance: {
     display: "flex",

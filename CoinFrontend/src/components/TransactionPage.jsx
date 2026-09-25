@@ -1,24 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   getTransactions,
   saveTransactions,
   formatRupees,
   getToday,
 } from "../utils/transactions";
+import { getCategories, openCategoryManagerModal } from "../utils/categoryService";
 
 export default function TransactionPage({ student, type }) {
   const isIncome = type === "income";
-  const categories = isIncome
-    ? ["Salary", "Commission", "Bonus", "Allowance", "Part-time Job", "Scholarship", "Gift", "Other"]
-    : ["Food", "Transport", "Hostel / Rent", "Academics", "Subscriptions", "Entertainment", "Shopping", "Health", "Bills", "Miscellaneous"];
+  const defaultFallbackCategories = isIncome
+    ? ["Salary", "Commission", "Bonus", "Allowance", "Part-time Job", "Scholarship", "Freelance", "Other Income"]
+    : ["Food & Dining", "Transport", "Hostel & Rent", "Academics & Books", "Entertainment", "Utilities & Internet", "Personal Care"];
 
   const [transactions, setTransactions] = useState(() => getTransactions(student));
+  const [categoriesList, setCategoriesList] = useState(defaultFallbackCategories);
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState(categories[0]);
+  const [category, setCategory] = useState(defaultFallbackCategories[0]);
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(getToday());
   const [note, setNote] = useState("");
   const [message, setMessage] = useState("");
+
+  const loadCategories = useCallback(async () => {
+    try {
+      const dbCategories = await getCategories(type);
+      if (dbCategories && dbCategories.length > 0) {
+        const names = dbCategories.map((c) => c.name);
+        setCategoriesList(names);
+        setCategory((prev) => (names.includes(prev) ? prev : names[0]));
+      }
+    } catch (err) {
+      console.error("Could not fetch categories:", err);
+    }
+  }, [type]);
+
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
 
   const records = transactions.filter((item) => item.type === type);
   const total = records.reduce((sum, item) => sum + Number(item.amount || 0), 0);
@@ -122,13 +141,30 @@ export default function TransactionPage({ student, type }) {
           </label>
 
           <label style={styles.label}>
-            Category
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
+              <span>Category</span>
+              <button
+                type="button"
+                onClick={() => openCategoryManagerModal(() => loadCategories())}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#2563eb",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  padding: "0 2px",
+                }}
+              >
+                ⚙ Manage / + Add Category
+              </button>
+            </div>
             <select
               style={styles.input}
               value={category}
               onChange={(event) => setCategory(event.target.value)}
             >
-              {categories.map((item) => (
+              {categoriesList.map((item) => (
                 <option key={item} value={item}>{item}</option>
               ))}
             </select>

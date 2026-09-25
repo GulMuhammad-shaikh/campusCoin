@@ -86,7 +86,7 @@ exports.createCategory = async (req, res) => {
   }
 };
 
-// @desc    Delete category
+// @desc    Delete category (can delete any category, including default)
 // @route   DELETE /api/categories/:id
 exports.deleteCategory = async (req, res) => {
   try {
@@ -109,6 +109,42 @@ exports.deleteCategory = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to delete category.",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Update category (e.g. toggle is_default or rename)
+// @route   PUT /api/categories/:id
+exports.updateCategory = async (req, res) => {
+  try {
+    const { name, type, is_default } = req.body;
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (type !== undefined) updateData.type = type.toLowerCase();
+    if (is_default !== undefined) updateData.is_default = Boolean(is_default);
+
+    const category = await Category.findByIdAndUpdate(req.params.id, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Category updated successfully.",
+      category,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update category.",
       error: error.message,
     });
   }
