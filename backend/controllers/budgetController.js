@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Budget = require("../models/Budget");
 
 // @desc    Get all budgets (optionally by user_id and month)
@@ -12,7 +13,13 @@ exports.getBudgets = async (req, res) => {
     const { month } = req.query;
     const filter = {};
 
-    if (userId) filter.user_id = userId;
+    if (userId) {
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        filter.user_id = userId;
+      } else {
+        return res.status(200).json({ success: true, count: 0, budgets: [] });
+      }
+    }
     if (month) filter.month = month; // e.g. "2026-09"
 
     const budgets = await Budget.find(filter)

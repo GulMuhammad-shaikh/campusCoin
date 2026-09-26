@@ -15,18 +15,15 @@ export default function Navbar({ student, onLogout }) {
   return (
     <header style={styles.header}>
       <div style={styles.inner}>
-        <Link to="/" style={styles.brand}>
+        <Link to={student ? "/dashboard" : "/"} style={styles.brand}>
           Campus<span style={{ color: "#34d399" }}>Coin</span>
         </Link>
 
         <nav style={styles.nav}>
-          <NavLink to="/" end style={navStyle}>Home</NavLink>
-
           {student ? (
             <>
               <NavLink to="/dashboard" style={navStyle}>Dashboard</NavLink>
-              <NavLink to="/income" style={navStyle}>Income</NavLink>
-              <NavLink to="/expenses" style={navStyle}>Expenses</NavLink>
+              <NavLink to="/analytics" style={navStyle}>Analytics</NavLink>
               <NavLink to="/savings" style={navStyle}>Savings</NavLink>
               <NavLink to="/tips" style={navStyle}>Tips</NavLink>
               <NavLink to="/profile" style={navStyle}>Profile</NavLink>
@@ -36,6 +33,7 @@ export default function Navbar({ student, onLogout }) {
             </>
           ) : (
             <>
+              <NavLink to="/" end style={navStyle}>Home</NavLink>
               <NavLink to="/login" style={navStyle}>Login</NavLink>
               <Link to="/register" style={styles.register}>Register</Link>
             </>

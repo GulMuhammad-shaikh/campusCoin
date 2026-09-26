@@ -8,7 +8,7 @@ dotenv.config();
 
 // Connect to MongoDB
 connectDB();
-
+//
 const app = express();
 //
 // Middlewares
@@ -59,11 +59,12 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`=========================================`);
-  console.log(` CampusCoin Server is running on port ${PORT}`);
-  console.log(` Environment: ${process.env.NODE_ENV || "development"}`);
-  console.log(` Base URL: http://localhost:${PORT}`);
-  console.log(`=========================================`);
-});
+// const PORT = process.env.PORT || 5000;
+// app.listen(PORT, () => {
+//   console.log(`=========================================`);
+//   console.log(` CampusCoin Server is running on port ${PORT}`);
+//   console.log(` Environment: ${process.env.NODE_ENV || "development"}`);
+//   console.log(` Base URL: http://localhost:${PORT}`);
+//   console.log(`=========================================`);
+// });
+module.exports = app;

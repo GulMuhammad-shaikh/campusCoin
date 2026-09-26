@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Transaction = require("../models/Transaction");
 const Category = require("../models/Category");
 
@@ -10,11 +11,19 @@ exports.getTransactions = async (req, res) => {
       req.query.user_id ||
       req.headers["x-user-id"];
 
-    const { type, startDate, endDate, category_id } = req.query;
+    const { type, startDate, endDate, category_id, category_name, month } = req.query;
     const filter = {};
 
     if (userId) {
-      filter.user_id = userId;
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        filter.user_id = userId;
+      } else {
+        return res.status(200).json({
+          success: true,
+          count: 0,
+          transactions: [],
+        });
+      }
     }
 
     if (type) {
@@ -25,10 +34,27 @@ exports.getTransactions = async (req, res) => {
       filter.category_id = category_id;
     }
 
-    if (startDate || endDate) {
+    if (category_name) {
+      const matchedCat = await Category.findOne({ name: category_name });
+      if (matchedCat) {
+        filter.category_id = matchedCat._id;
+      }
+    }
+
+    if (month) {
+      // month in YYYY-MM format e.g. "2026-09"
+      const [year, m] = month.split("-").map(Number);
+      const start = new Date(year, m - 1, 1);
+      const end = new Date(year, m, 0, 23, 59, 59, 999);
+      filter.date = { $gte: start, $lte: end };
+    } else if (startDate || endDate) {
       filter.date = {};
       if (startDate) filter.date.$gte = new Date(startDate);
-      if (endDate) filter.date.$lte = new Date(endDate);
+      if (endDate) {
+        const endD = new Date(endDate);
+        endD.setHours(23, 59, 59, 999);
+        filter.date.$lte = endD;
+      }
     }
 
     const transactions = await Transaction.find(filter)
@@ -97,10 +123,10 @@ exports.createTransaction = async (req, res) => {
       date,
     } = req.body;
 
-    if (!userId) {
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json({
         success: false,
-        message: "User ID is required (pass via token or user_id in body/query).",
+        message: "Valid User ID is required. Please sign in again.",
       });
     }
 
@@ -111,9 +137,31 @@ exports.createTransaction = async (req, res) => {
       });
     }
 
+    // Resolve category_id if provided as ObjectId or by name
+    let resolvedCategoryId = null;
+    const catInput = category_id || req.body.category;
+    if (catInput) {
+      if (mongoose.Types.ObjectId.isValid(catInput)) {
+        resolvedCategoryId = catInput;
+      } else {
+        const catName = String(catInput).trim();
+        let matchedCat = await Category.findOne({
+          name: new RegExp(`^${catName}$`, "i"),
+        });
+        if (!matchedCat) {
+          matchedCat = await Category.create({
+            name: catName,
+            type: type.toLowerCase(),
+            is_default: false,
+          });
+        }
+        resolvedCategoryId = matchedCat._id;
+      }
+    }
+
     const transaction = await Transaction.create({
       user_id: userId,
-      category_id: category_id || null,
+      category_id: resolvedCategoryId,
       amount: Number(amount),
       type: type.toLowerCase(),
       description: description || "",
@@ -143,16 +191,42 @@ exports.createTransaction = async (req, res) => {
 // @route   PUT /api/transactions/:id
 exports.updateTransaction = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({
+        success: false,
+        message: "Transaction not found.",
+      });
+    }
+
     const { amount, type, description, category_id, date, ai_suggested_category } = req.body;
 
     const updateData = {};
     if (amount !== undefined) updateData.amount = Number(amount);
     if (type !== undefined) updateData.type = type.toLowerCase();
     if (description !== undefined) updateData.description = description;
-    if (category_id !== undefined) updateData.category_id = category_id;
     if (date !== undefined) updateData.date = new Date(date);
     if (ai_suggested_category !== undefined)
       updateData.ai_suggested_category = ai_suggested_category;
+
+    const catInput = category_id || req.body.category;
+    if (catInput !== undefined) {
+      if (mongoose.Types.ObjectId.isValid(catInput)) {
+        updateData.category_id = catInput;
+      } else if (catInput) {
+        const catName = String(catInput).trim();
+        let matchedCat = await Category.findOne({
+          name: new RegExp(`^${catName}$`, "i"),
+        });
+        if (!matchedCat) {
+          matchedCat = await Category.create({
+            name: catName,
+            type: (type || "expense").toLowerCase(),
+            is_default: false,
+          });
+        }
+        updateData.category_id = matchedCat._id;
+      }
+    }
 
     const transaction = await Transaction.findByIdAndUpdate(
       req.params.id,
@@ -187,6 +261,13 @@ exports.updateTransaction = async (req, res) => {
 // @route   DELETE /api/transactions/:id
 exports.deleteTransaction = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({
+        success: false,
+        message: "Transaction not found.",
+      });
+    }
+
     const transaction = await Transaction.findById(req.params.id);
 
     if (!transaction) {
@@ -222,7 +303,19 @@ exports.getSummary = async (req, res) => {
 
     const filter = {};
     if (userId) {
-      filter.user_id = userId;
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        filter.user_id = userId;
+      } else {
+        return res.status(200).json({
+          success: true,
+          summary: {
+            totalIncome: 0,
+            totalExpense: 0,
+            balance: 0,
+            transactionCount: 0,
+          },
+        });
+      }
     }
 
     const transactions = await Transaction.find(filter);

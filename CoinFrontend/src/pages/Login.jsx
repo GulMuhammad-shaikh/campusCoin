@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { authAPI } from "../utils/api";
 
 export default function Login({ onLogin }) {
   const navigate = useNavigate();
@@ -7,46 +8,52 @@ export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    let accounts = [];
+    if (!normalizedEmail || !password) {
+      setError("Please enter both email and password.");
+      return;
+    }
 
+    setLoading(true);
     try {
-      accounts = JSON.parse(
-        localStorage.getItem("campusCoinAccounts") || "[]"
-      );
-    } catch {
-      setError("Your saved account data could not be read. Please register again.");
-      return;
+      const res = await authAPI.login(normalizedEmail, password);
+
+      if (res?.token) {
+        localStorage.setItem("campusCoinToken", res.token);
+      }
+
+      const rawId = res.user?.user_id || res.user?._id || res.user?.id;
+      const signedInStudent = {
+        user_id: rawId,
+        _id: rawId,
+        id: rawId,
+        name: res.user?.name || "Student",
+        email: res.user?.email || normalizedEmail,
+        academic_year: res.user?.academic_year || "",
+        monthly_savings_goal: res.user?.monthly_savings_goal || 0,
+      };
+
+      if (typeof onLogin === "function") {
+        onLogin(signedInStudent);
+      }
+
+      navigate("/dashboard", { replace: true });
+    } catch (apiError) {
+      const msg =
+        apiError?.message ||
+        (typeof apiError === "string" ? apiError : "Incorrect email or password. Please try again.");
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
-
-    const account = accounts.find(
-      (item) => item.email?.trim().toLowerCase() === normalizedEmail
-    );
-
-    if (!account || account.password !== password) {
-      setError("Incorrect email or password. Please try again.");
-      return;
-    }
-
-    const signedInStudent = {
-      id: account.id || Date.now().toString(),
-      name: account.name,
-      email: account.email,
-      studentId: account.studentId || "",
-    };
-
-    if (typeof onLogin === "function") {
-      onLogin(signedInStudent);
-    }
-
-    navigate("/dashboard", { replace: true });
   };
 
   return (
@@ -110,8 +117,8 @@ export default function Login({ onLogin }) {
             </button>
           </div>
 
-          <button type="submit" style={styles.submitButton}>
-            Sign in
+          <button type="submit" disabled={loading} style={{ ...styles.submitButton, opacity: loading ? 0.7 : 1 }}>
+            {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>
 

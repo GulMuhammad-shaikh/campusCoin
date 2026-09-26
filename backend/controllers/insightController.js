@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Insight = require("../models/Insight");
 
 // @desc    Get all insights (optionally by user_id and month)
@@ -12,7 +13,13 @@ exports.getInsights = async (req, res) => {
     const { month } = req.query;
     const filter = {};
 
-    if (userId) filter.user_id = userId;
+    if (userId) {
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        filter.user_id = userId;
+      } else {
+        return res.status(200).json({ success: true, count: 0, insights: [] });
+      }
+    }
     if (month) filter.month = month;
 
     const insights = await Insight.find(filter)
@@ -43,7 +50,16 @@ exports.getLatestInsight = async (req, res) => {
       req.headers["x-user-id"];
 
     const filter = {};
-    if (userId) filter.user_id = userId;
+    if (userId) {
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        filter.user_id = userId;
+      } else {
+        return res.status(404).json({
+          success: false,
+          message: "No insights found.",
+        });
+      }
+    }
 
     const insight = await Insight.findOne(filter).sort({ generated_at: -1 });
 

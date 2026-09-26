@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { authAPI } from "../utils/api";
 
 export default function Register({ onRegister }) {
   const navigate = useNavigate();
@@ -11,9 +12,10 @@ export default function Register({ onRegister }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
 
@@ -36,59 +38,43 @@ export default function Register({ onRegister }) {
       return;
     }
 
-    let accounts = [];
-
+    setLoading(true);
     try {
-      accounts = JSON.parse(
-        localStorage.getItem("campusCoinAccounts") || "[]"
-      );
-    } catch {
-      setError("Your saved account data could not be read. Please try again.");
-      return;
+      const res = await authAPI.register({
+        name: normalizedName,
+        email: normalizedEmail,
+        password,
+        academic_year: normalizedStudentId,
+      });
+
+      if (res?.token) {
+        localStorage.setItem("campusCoinToken", res.token);
+      }
+
+      const rawId = res.user?.user_id || res.user?._id || res.user?.id;
+      const signedInStudent = {
+        user_id: rawId,
+        _id: rawId,
+        id: rawId,
+        name: res.user?.name || normalizedName,
+        email: res.user?.email || normalizedEmail,
+        academic_year: res.user?.academic_year || normalizedStudentId,
+        monthly_savings_goal: res.user?.monthly_savings_goal || 0,
+      };
+
+      if (typeof onRegister === "function") {
+        onRegister(signedInStudent);
+      }
+
+      navigate("/dashboard", { replace: true });
+    } catch (apiError) {
+      const msg =
+        apiError?.message ||
+        (typeof apiError === "string" ? apiError : "Registration failed. Please try again.");
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
-
-    const emailAlreadyExists = accounts.some(
-      (account) =>
-        account.email?.trim().toLowerCase() === normalizedEmail
-    );
-
-    if (emailAlreadyExists) {
-      setError("An account with this email already exists. Please sign in.");
-      return;
-    }
-
-    const newAccount = {
-      id: Date.now().toString(),
-      name: normalizedName,
-      email: normalizedEmail,
-      studentId: normalizedStudentId,
-      password,
-    };
-
-    const updatedAccounts = [...accounts, newAccount];
-
-    try {
-      localStorage.setItem(
-        "campusCoinAccounts",
-        JSON.stringify(updatedAccounts)
-      );
-    } catch {
-      setError("Could not save your account in this browser. Please try again.");
-      return;
-    }
-
-    const signedInStudent = {
-      id: newAccount.id,
-      name: newAccount.name,
-      email: newAccount.email,
-      studentId: newAccount.studentId,
-    };
-
-    if (typeof onRegister === "function") {
-      onRegister(signedInStudent);
-    }
-
-    navigate("/dashboard", { replace: true });
   };
 
   return (
@@ -216,8 +202,8 @@ export default function Register({ onRegister }) {
             </button>
           </div>
 
-          <button type="submit" style={styles.submitButton}>
-            Create account
+          <button type="submit" disabled={loading} style={{ ...styles.submitButton, opacity: loading ? 0.7 : 1 }}>
+            {loading ? "Creating account…" : "Create account"}
           </button>
         </form>
 
