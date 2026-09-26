@@ -3,10 +3,9 @@ const router = express.Router();
 const categoryController = require("../controllers/categoryController");
 const { authMiddleware } = require("../middlewares/authMiddleware");
 
-// Category routes (can be accessed directly or with token)
-router.get("/", categoryController.getCategories);
+router.get("/",    categoryController.getCategories);
 router.get("/:id", categoryController.getCategoryById);
-router.post("/", authMiddleware, categoryController.createCategory);
+router.post("/",   authMiddleware, categoryController.createCategory);
 router.put("/:id", authMiddleware, categoryController.updateCategory);
 router.delete("/:id", authMiddleware, categoryController.deleteCategory);
 

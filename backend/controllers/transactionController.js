@@ -2,15 +2,9 @@ const mongoose = require("mongoose");
 const Transaction = require("../models/Transaction");
 const Category = require("../models/Category");
 
-// @desc    Get transactions (supports token OR direct ?user_id= query)
-// @route   GET /api/transactions
 exports.getTransactions = async (req, res) => {
   try {
-    const userId =
-      req.user?.user_id ||
-      req.query.user_id ||
-      req.headers["x-user-id"];
-
+    const userId = req.user?.user_id || req.query.user_id || req.headers["x-user-id"];
     const { type, startDate, endDate, category_id, category_name, month } = req.query;
     const filter = {};
 
@@ -18,35 +12,21 @@ exports.getTransactions = async (req, res) => {
       if (mongoose.Types.ObjectId.isValid(userId)) {
         filter.user_id = userId;
       } else {
-        return res.status(200).json({
-          success: true,
-          count: 0,
-          transactions: [],
-        });
+        return res.status(200).json({ success: true, count: 0, transactions: [] });
       }
     }
 
-    if (type) {
-      filter.type = type.toLowerCase();
-    }
-
-    if (category_id) {
-      filter.category_id = category_id;
-    }
+    if (type) filter.type = type.toLowerCase();
+    if (category_id) filter.category_id = category_id;
 
     if (category_name) {
-      const matchedCat = await Category.findOne({ name: category_name });
-      if (matchedCat) {
-        filter.category_id = matchedCat._id;
-      }
+      const cat = await Category.findOne({ name: category_name });
+      if (cat) filter.category_id = cat._id;
     }
 
     if (month) {
-      // month in YYYY-MM format e.g. "2026-09"
       const [year, m] = month.split("-").map(Number);
-      const start = new Date(year, m - 1, 1);
-      const end = new Date(year, m, 0, 23, 59, 59, 999);
-      filter.date = { $gte: start, $lte: end };
+      filter.date = { $gte: new Date(year, m - 1, 1), $lte: new Date(year, m, 0, 23, 59, 59, 999) };
     } else if (startDate || endDate) {
       filter.date = {};
       if (startDate) filter.date.$gte = new Date(startDate);
@@ -62,22 +42,12 @@ exports.getTransactions = async (req, res) => {
       .populate("user_id", "name email")
       .sort({ date: -1, created_at: -1 });
 
-    return res.status(200).json({
-      success: true,
-      count: transactions.length,
-      transactions,
-    });
+    return res.status(200).json({ success: true, count: transactions.length, transactions });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to retrieve transactions.",
-      error: error.message,
-    });
+    return res.status(500).json({ success: false, message: "Failed to retrieve transactions.", error: error.message });
   }
 };
 
-// @desc    Get single transaction by ID
-// @route   GET /api/transactions/:id
 exports.getTransactionById = async (req, res) => {
   try {
     const transaction = await Transaction.findById(req.params.id)
@@ -85,59 +55,27 @@ exports.getTransactionById = async (req, res) => {
       .populate("user_id", "name email");
 
     if (!transaction) {
-      return res.status(404).json({
-        success: false,
-        message: "Transaction not found.",
-      });
+      return res.status(404).json({ success: false, message: "Transaction not found." });
     }
 
-    return res.status(200).json({
-      success: true,
-      transaction,
-    });
+    return res.status(200).json({ success: true, transaction });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to retrieve transaction.",
-      error: error.message,
-    });
+    return res.status(500).json({ success: false, message: "Failed to retrieve transaction.", error: error.message });
   }
 };
 
-// @desc    Create a new transaction (income or expense)
-// @route   POST /api/transactions
 exports.createTransaction = async (req, res) => {
   try {
-    const userId =
-      req.user?.user_id ||
-      req.body.user_id ||
-      req.query.user_id ||
-      req.headers["x-user-id"];
-
-    const {
-      category_id,
-      amount,
-      type,
-      description,
-      ai_suggested_category,
-      date,
-    } = req.body;
+    const userId = req.user?.user_id || req.body.user_id || req.query.user_id || req.headers["x-user-id"];
+    const { category_id, amount, type, description, ai_suggested_category, date } = req.body;
 
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Valid User ID is required. Please sign in again.",
-      });
+      return res.status(400).json({ success: false, message: "Valid User ID is required." });
     }
-
     if (!amount || !type) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide amount and type ('income' or 'expense').",
-      });
+      return res.status(400).json({ success: false, message: "Please provide amount and type." });
     }
 
-    // Resolve category_id if provided as ObjectId or by name
     let resolvedCategoryId = null;
     const catInput = category_id || req.body.category;
     if (catInput) {
@@ -145,17 +83,9 @@ exports.createTransaction = async (req, res) => {
         resolvedCategoryId = catInput;
       } else {
         const catName = String(catInput).trim();
-        let matchedCat = await Category.findOne({
-          name: new RegExp(`^${catName}$`, "i"),
-        });
-        if (!matchedCat) {
-          matchedCat = await Category.create({
-            name: catName,
-            type: type.toLowerCase(),
-            is_default: false,
-          });
-        }
-        resolvedCategoryId = matchedCat._id;
+        let cat = await Category.findOne({ name: new RegExp(`^${catName}$`, "i") });
+        if (!cat) cat = await Category.create({ name: catName, type: type.toLowerCase(), is_default: false });
+        resolvedCategoryId = cat._id;
       }
     }
 
@@ -173,40 +103,26 @@ exports.createTransaction = async (req, res) => {
       .populate("category_id", "name type")
       .populate("user_id", "name email");
 
-    return res.status(201).json({
-      success: true,
-      message: "Transaction created successfully.",
-      transaction: populated,
-    });
+    return res.status(201).json({ success: true, message: "Transaction created successfully.", transaction: populated });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to create transaction.",
-      error: error.message,
-    });
+    return res.status(500).json({ success: false, message: "Failed to create transaction.", error: error.message });
   }
 };
 
-// @desc    Update a transaction
-// @route   PUT /api/transactions/:id
 exports.updateTransaction = async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(404).json({
-        success: false,
-        message: "Transaction not found.",
-      });
+      return res.status(404).json({ success: false, message: "Transaction not found." });
     }
 
     const { amount, type, description, category_id, date, ai_suggested_category } = req.body;
-
     const updateData = {};
+
     if (amount !== undefined) updateData.amount = Number(amount);
     if (type !== undefined) updateData.type = type.toLowerCase();
     if (description !== undefined) updateData.description = description;
     if (date !== undefined) updateData.date = new Date(date);
-    if (ai_suggested_category !== undefined)
-      updateData.ai_suggested_category = ai_suggested_category;
+    if (ai_suggested_category !== undefined) updateData.ai_suggested_category = ai_suggested_category;
 
     const catInput = category_id || req.body.category;
     if (catInput !== undefined) {
@@ -214,139 +130,71 @@ exports.updateTransaction = async (req, res) => {
         updateData.category_id = catInput;
       } else if (catInput) {
         const catName = String(catInput).trim();
-        let matchedCat = await Category.findOne({
-          name: new RegExp(`^${catName}$`, "i"),
-        });
-        if (!matchedCat) {
-          matchedCat = await Category.create({
-            name: catName,
-            type: (type || "expense").toLowerCase(),
-            is_default: false,
-          });
-        }
-        updateData.category_id = matchedCat._id;
+        let cat = await Category.findOne({ name: new RegExp(`^${catName}$`, "i") });
+        if (!cat) cat = await Category.create({ name: catName, type: (type || "expense").toLowerCase(), is_default: false });
+        updateData.category_id = cat._id;
       }
     }
 
-    const transaction = await Transaction.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true, runValidators: true }
-    )
+    const transaction = await Transaction.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true })
       .populate("category_id", "name type")
       .populate("user_id", "name email");
 
     if (!transaction) {
-      return res.status(404).json({
-        success: false,
-        message: "Transaction not found.",
-      });
+      return res.status(404).json({ success: false, message: "Transaction not found." });
     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Transaction updated successfully.",
-      transaction,
-    });
+    return res.status(200).json({ success: true, message: "Transaction updated.", transaction });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to update transaction.",
-      error: error.message,
-    });
+    return res.status(500).json({ success: false, message: "Failed to update transaction.", error: error.message });
   }
 };
 
-// @desc    Delete a transaction
-// @route   DELETE /api/transactions/:id
 exports.deleteTransaction = async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(404).json({
-        success: false,
-        message: "Transaction not found.",
-      });
+      return res.status(404).json({ success: false, message: "Transaction not found." });
     }
 
     const transaction = await Transaction.findById(req.params.id);
-
     if (!transaction) {
-      return res.status(404).json({
-        success: false,
-        message: "Transaction not found.",
-      });
+      return res.status(404).json({ success: false, message: "Transaction not found." });
     }
 
     await transaction.deleteOne();
-
-    return res.status(200).json({
-      success: true,
-      message: "Transaction deleted successfully.",
-    });
+    return res.status(200).json({ success: true, message: "Transaction deleted." });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to delete transaction.",
-      error: error.message,
-    });
+    return res.status(500).json({ success: false, message: "Failed to delete transaction.", error: error.message });
   }
 };
 
-// @desc    Get summary totals (Income, Expense, Balance)
-// @route   GET /api/transactions/summary
 exports.getSummary = async (req, res) => {
   try {
-    const userId =
-      req.user?.user_id ||
-      req.query.user_id ||
-      req.headers["x-user-id"];
-
+    const userId = req.user?.user_id || req.query.user_id || req.headers["x-user-id"];
     const filter = {};
+
     if (userId) {
       if (mongoose.Types.ObjectId.isValid(userId)) {
         filter.user_id = userId;
       } else {
-        return res.status(200).json({
-          success: true,
-          summary: {
-            totalIncome: 0,
-            totalExpense: 0,
-            balance: 0,
-            transactionCount: 0,
-          },
-        });
+        return res.status(200).json({ success: true, summary: { totalIncome: 0, totalExpense: 0, balance: 0, transactionCount: 0 } });
       }
     }
 
     const transactions = await Transaction.find(filter);
-
     let totalIncome = 0;
     let totalExpense = 0;
 
     transactions.forEach((tx) => {
-      if (tx.type === "income") {
-        totalIncome += Number(tx.amount || 0);
-      } else if (tx.type === "expense") {
-        totalExpense += Number(tx.amount || 0);
-      }
+      if (tx.type === "income") totalIncome += Number(tx.amount || 0);
+      else if (tx.type === "expense") totalExpense += Number(tx.amount || 0);
     });
-
-    const balance = totalIncome - totalExpense;
 
     return res.status(200).json({
       success: true,
-      summary: {
-        totalIncome,
-        totalExpense,
-        balance,
-        transactionCount: transactions.length,
-      },
+      summary: { totalIncome, totalExpense, balance: totalIncome - totalExpense, transactionCount: transactions.length },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to compute financial summary.",
-      error: error.message,
-    });
+    return res.status(500).json({ success: false, message: "Failed to compute summary.", error: error.message });
   }
 };

@@ -1,23 +1,16 @@
 const mongoose = require("mongoose");
 
-// ─── Connection cache (prevents new connection on every serverless invocation) ─
 let cached = global._mongooseCache;
 if (!cached) {
   cached = global._mongooseCache = { conn: null, promise: null };
 }
 
-/**
- * Resolves SRV locally on Windows dev (where Windows DNS blocks TXT records).
- * On Vercel/Linux servers, the standard SRV URI works fine — skip this.
- */
 async function buildUri(srvUri) {
   const isWindows = process.platform === "win32";
   const isVercel  = !!process.env.VERCEL;
 
-  // On Vercel or non-Windows: use the SRV URI directly — it works
   if (isVercel || !isWindows) return srvUri;
 
-  // Local Windows dev: manually resolve SRV via Google DNS to bypass Windows DNS timeout
   try {
     const { Resolver } = require("dns").promises;
     const resolver = new Resolver();
@@ -34,17 +27,16 @@ async function buildUri(srvUri) {
     try {
       const txtRecords = await resolver.resolveTxt(srvHost);
       extraOptions = txtRecords.flat().join("&");
-    } catch { /* TXT lookup may still fail — use default */ }
+    } catch {}
 
     return `mongodb://${credentials}@${hosts}/?ssl=true&${extraOptions}`;
   } catch (err) {
-    console.warn("⚠️  Local SRV resolve failed, using original URI:", err.message);
+    console.warn("SRV resolve failed, using original URI:", err.message);
     return srvUri;
   }
 }
 
 const connectDB = async () => {
-  // Return cached connection if already open
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
@@ -59,7 +51,7 @@ const connectDB = async () => {
       connectTimeoutMS: 10000,
       bufferCommands: false,
     }).then((m) => {
-      console.log(`✅ MongoDB Connected: ${m.connection.host}`);
+      console.log(`MongoDB Connected: ${m.connection.host}`);
       return m;
     });
   }
@@ -67,9 +59,9 @@ const connectDB = async () => {
   try {
     cached.conn = await cached.promise;
   } catch (err) {
-    cached.promise = null; // reset so next request can retry
-    console.error("❌ MongoDB Connection Error:", err.message);
-    throw err; // let the request handler return 500, don't exit
+    cached.promise = null;
+    console.error("MongoDB Connection Error:", err.message);
+    throw err;
   }
 
   await seedDefaultCategories();
@@ -95,10 +87,9 @@ async function seedDefaultCategories() {
         { name: "Freelance",                type: "income",  is_default: true },
         { name: "Other Income",             type: "income",  is_default: true },
       ]);
-      console.log("✅ Default categories seeded.");
     }
   } catch (err) {
-    console.error("⚠️  Seed error:", err.message);
+    console.error("Seed error:", err.message);
   }
 }
 
