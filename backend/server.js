@@ -6,15 +6,23 @@ const connectDB = require("./config/db");
 // Load environment variables
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
-//
 const app = express();
-//
-// Middlewares
+
+// ── Middlewares ──────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ── DB connection middleware (cached — only connects once, works on Vercel) ──
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error("DB connection failed:", err.message);
+    res.status(500).json({ success: false, message: "Database connection failed." });
+  }
+});
 
 // Welcome route / API Health Check
 app.get("/", (req, res) => {
