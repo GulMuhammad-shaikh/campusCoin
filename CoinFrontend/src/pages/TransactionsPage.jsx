@@ -108,7 +108,8 @@ export default function TransactionsPage({ student, onClose }) {
   }, [fetchTransactions]);
 
   const handleDelete = async (item) => {
-    if (!window.confirm(`Delete "${item.description}"?`)) return;
+    const desc = item.description || item.category || "this transaction";
+    if (!window.confirm(`Delete "${desc}"?`)) return;
     try {
       await transactionAPI.delete(item.id);
       window.dispatchEvent(

@@ -74,8 +74,8 @@ export default function TransactionModal({
     setError("");
     const numericAmount = Number(amount);
 
-    if (!description.trim() || !Number.isFinite(numericAmount) || numericAmount <= 0) {
-      setError("Please enter a description and a valid amount greater than zero.");
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+      setError("Please enter a valid amount greater than zero.");
       return;
     }
 

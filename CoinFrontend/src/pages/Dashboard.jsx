@@ -78,7 +78,8 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
   }, [loadDashboard]);
 
   const handleDelete = async (item) => {
-    if (!window.confirm(`Delete "${item.description}"?`)) return;
+    const desc = item.description || item.category || "this transaction";
+    if (!window.confirm(`Delete "${desc}"?`)) return;
     try {
       await transactionAPI.delete(item.id);
       window.dispatchEvent(new CustomEvent("campusCoinDataChanged", { detail: { action: "delete" } }));

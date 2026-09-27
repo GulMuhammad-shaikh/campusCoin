@@ -301,131 +301,142 @@ export default function Analytics({ student }) {
         )}
       </ChartCard>
 
-      {/* ── Chart 2: Pie – Income / Expenses / Savings ── */}
-      <ChartCard
-        title={
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-            <i className="fa-solid fa-chart-pie" style={{ color: "#6366f1" }}></i>
-            Financial Distribution
-          </span>
-        }
-        subtitle="Breakdown of where your money goes — expenses, savings goal, and remaining balance"
-      >
-        {pieData.length === 0 ? (
-          <EmptyChart msg="No financial data for this month." />
-        ) : (
-          <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 24 }}>
-            <ResponsiveContainer width={280} height={280} style={{ flexShrink: 0 }}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={120}
-                  dataKey="value"
-                  labelLine={false}
-                  label={renderPieLabel}
-                >
-                  {pieData.map((entry, i) => (
-                    <Cell key={entry.name} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(v) => formatRupees(v)} />
-              </PieChart>
-            </ResponsiveContainer>
+      {/* ── 2 Donut Charts in 1 Horizontal Row ── */}
+      <div style={S.twoColChartsRow}>
+        {/* ── Chart 2: Donut – Income / Expenses / Savings ── */}
+        <ChartCard
+          style={{ marginBottom: 0 }}
+          title={
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <i className="fa-solid fa-circle-notch" style={{ color: "#6366f1" }}></i>
+              Financial Distribution
+            </span>
+          }
+          subtitle="Breakdown of expenses, savings goal, and balance"
+        >
+          {pieData.length === 0 ? (
+            <EmptyChart msg="No financial data for this month." />
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ width: "100%", height: 250 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={3}
+                      dataKey="value"
+                      labelLine={false}
+                      label={renderPieLabel}
+                    >
+                      {pieData.map((entry) => (
+                        <Cell key={entry.name} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(v) => formatRupees(v)} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
 
-            {/* Legend */}
-            <div style={{ flex: 1, minWidth: 180 }}>
-              {pieData.map((entry) => {
-                const total = pieData.reduce((s, d) => s + d.value, 0);
-                const pct   = total > 0 ? ((entry.value / total) * 100).toFixed(1) : "0";
-                return (
-                  <div key={entry.name} style={S.pieLegendRow}>
-                    <span style={{ ...S.pieDot, background: entry.color }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: "#17283e" }}>{entry.name}</div>
-                      <div style={{ fontSize: 12, color: "#718096" }}>{formatRupees(entry.value)} · {pct}%</div>
-                    </div>
-                  </div>
-                );
-              })}
-              {savings.goalAmount > 0 && (
-                <div style={{ marginTop: 12, padding: "10px 12px", background: "#eff6ff", borderRadius: 10, fontSize: 12, color: "#1d4ed8" }}>
-                  <i className="fa-solid fa-bullseye" style={{ marginRight: 6 }}></i>
-                  Savings goal: {formatRupees(savings.goalAmount)}
-                  {balance <= 0 && (
-                    <div style={{ color: "#ef4444", marginTop: 4 }}>
-                      <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: 5 }}></i>
-                      No remaining income to fund savings goal!
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </ChartCard>
-
-      {/* ── Chart 3: Donut – Expenses by Category ── */}
-      <ChartCard
-        title={
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-            <i className="fa-solid fa-circle-dot" style={{ color: "#f59e0b" }}></i>
-            Expenses by Category
-          </span>
-        }
-        subtitle="How your spending is distributed across categories this month"
-      >
-        {donutData.length === 0 ? (
-          <EmptyChart msg="No expense transactions recorded this month." />
-        ) : (
-          <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 24 }}>
-            <ResponsiveContainer width={280} height={280} style={{ flexShrink: 0 }}>
-              <PieChart>
-                <Pie
-                  data={donutData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={75}
-                  outerRadius={125}
-                  dataKey="value"
-                  paddingAngle={2}
-                  labelLine={false}
-                  label={renderPieLabel}
-                >
-                  {donutData.map((entry, i) => (
-                    <Cell key={entry.name} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(v, n) => [formatRupees(v), n]} />
-              </PieChart>
-            </ResponsiveContainer>
-
-            {/* Category legend */}
-            <div style={{ flex: 1, minWidth: 180 }}>
-              {donutData.map((entry) => {
-                const total = donutData.reduce((s, d) => s + d.value, 0);
-                const pct   = total > 0 ? ((entry.value / total) * 100).toFixed(1) : "0";
-                return (
-                  <div key={entry.name} style={S.pieLegendRow}>
-                    <span style={{ ...S.pieDot, background: entry.color }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: "#17283e" }}>{entry.name}</div>
-                      <div style={{ fontSize: 12, color: "#718096" }}>{formatRupees(entry.value)} · {pct}%</div>
-                    </div>
-                    {/* mini bar */}
-                    <div style={{ width: 80 }}>
-                      <div style={{ height: 6, background: "#f0f4f8", borderRadius: 20, overflow: "hidden" }}>
-                        <div style={{ height: "100%", width: `${pct}%`, background: entry.color, borderRadius: 20 }} />
+              {/* Legend */}
+              <div style={{ width: "100%" }}>
+                {pieData.map((entry) => {
+                  const total = pieData.reduce((s, d) => s + d.value, 0);
+                  const pct   = total > 0 ? ((entry.value / total) * 100).toFixed(1) : "0";
+                  return (
+                    <div key={entry.name} style={S.pieLegendRow}>
+                      <span style={{ ...S.pieDot, background: entry.color }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#17283e" }}>{entry.name}</div>
+                        <div style={{ fontSize: 12, color: "#718096" }}>{formatRupees(entry.value)} · {pct}%</div>
                       </div>
                     </div>
+                  );
+                })}
+                {savings.goalAmount > 0 && (
+                  <div style={{ marginTop: 12, padding: "10px 12px", background: "#eff6ff", borderRadius: 10, fontSize: 12, color: "#1d4ed8" }}>
+                    <i className="fa-solid fa-bullseye" style={{ marginRight: 6 }}></i>
+                    Savings goal: {formatRupees(savings.goalAmount)}
+                    {balance <= 0 && (
+                      <div style={{ color: "#ef4444", marginTop: 4 }}>
+                        <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: 5 }}></i>
+                        No remaining income to fund savings goal!
+                      </div>
+                    )}
                   </div>
-                );
-              })}
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </ChartCard>
+          )}
+        </ChartCard>
+
+        {/* ── Chart 3: Donut – Expenses by Category ── */}
+        <ChartCard
+          style={{ marginBottom: 0 }}
+          title={
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <i className="fa-solid fa-chart-pie" style={{ color: "#f59e0b" }}></i>
+              Expenses by Category
+            </span>
+          }
+          subtitle="How spending is distributed across categories"
+        >
+          {donutData.length === 0 ? (
+            <EmptyChart msg="No expense transactions recorded this month." />
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ width: "100%", height: 250 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={donutData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={3}
+                      dataKey="value"
+                      labelLine={false}
+                      label={renderPieLabel}
+                    >
+                      {donutData.map((entry) => (
+                        <Cell key={entry.name} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(v, n) => [formatRupees(v), n]} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Category legend */}
+              <div style={{ width: "100%", maxHeight: 220, overflowY: "auto" }}>
+                {donutData.map((entry) => {
+                  const total = donutData.reduce((s, d) => s + d.value, 0);
+                  const pct   = total > 0 ? ((entry.value / total) * 100).toFixed(1) : "0";
+                  return (
+                    <div key={entry.name} style={S.pieLegendRow}>
+                      <span style={{ ...S.pieDot, background: entry.color }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#17283e" }}>{entry.name}</div>
+                        <div style={{ fontSize: 12, color: "#718096" }}>{formatRupees(entry.value)} · {pct}%</div>
+                      </div>
+                      {/* mini bar */}
+                      <div style={{ width: 70 }}>
+                        <div style={{ height: 6, background: "#f0f4f8", borderRadius: 20, overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${pct}%`, background: entry.color, borderRadius: 20 }} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </ChartCard>
+      </div>
 
       {/* ── Chart 4: Yearly Monthly Overview ── */}
       <ChartCard
@@ -469,9 +480,9 @@ export default function Analytics({ student }) {
 }
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
-function ChartCard({ title, subtitle, children, headerRight }) {
+function ChartCard({ title, subtitle, children, headerRight, style }) {
   return (
-    <div style={S.card}>
+    <div style={{ ...S.card, ...style }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 18 }}>
         <div>
           <h2 style={S.cardTitle}>{title}</h2>
@@ -496,7 +507,7 @@ function Pill({ label, value, color, bg }) {
 function EmptyChart({ msg }) {
   return (
     <div style={S.empty}>
-      <span style={{ fontSize: 36 }}>📭</span>
+      <i className="fa-solid fa-inbox" style={{ fontSize: 36, color: "#94a3b8" }}></i>
       <p style={{ color: "#94a3b8", fontSize: 13, marginTop: 10 }}>{msg}</p>
     </div>
   );
@@ -504,6 +515,12 @@ function EmptyChart({ msg }) {
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const S = {
+  twoColChartsRow: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 460px), 1fr))",
+    gap: 20,
+    marginBottom: 22,
+  },
   page: {
     maxWidth: 1100,
     margin: "0 auto",

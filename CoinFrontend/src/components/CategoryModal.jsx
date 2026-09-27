@@ -535,13 +535,14 @@ export default function CategoryModal({ onClose, onCategoryAdded }) {
             <div style={styles.listHeader}>
               <div>
                 <h3 style={styles.sectionTitle}>
-                  📋 Added Categories in Database
+                  <i className="fa-solid fa-layer-group" style={{ marginRight: 8, color: "#2563eb" }}></i>
+                  Added Categories in Database
                 </h3>
                 <p style={styles.sectionSub}>
-                  Edit name/type, toggle default, or permanently delete categories
+                  Categories separated by Income and Expense. Edit name/type, toggle default, or delete.
                 </p>
               </div>
-              <span style={styles.counter}>{categories.length} added</span>
+              <span style={styles.counter}>{categories.length} Total</span>
             </div>
 
             {loading ? (
@@ -553,83 +554,192 @@ export default function CategoryModal({ onClose, onCategoryAdded }) {
                 No categories in database yet. Add from suggestions above!
               </p>
             ) : (
-              <div style={styles.categoryGrid}>
-                {categories.map((cat) => {
-                  const catId = cat._id || cat.id || cat.category_id;
-                  const isExpense = cat.type === "expense";
-                  const isDef = Boolean(cat.is_default);
-                  const isCurrentEditing = editingId === catId;
-
-                  return (
-                    <div
-                      key={catId}
-                      style={{
-                        ...styles.categoryItem,
-                        border: isCurrentEditing
-                          ? "2px solid #2563eb"
-                          : "1px solid #e2e8f0",
-                        background: isCurrentEditing ? "#eff6ff" : "#ffffff",
-                      }}
-                    >
-                      <div style={styles.itemTop}>
-                        <span
-                          style={{
-                            ...styles.typeBadge,
-                            background: isExpense ? "#fee2e2" : "#dcfce7",
-                            color: isExpense ? "#b91c1c" : "#15803d",
-                          }}
-                        >
-                          {cat.type}
-                        </span>
-                        {isDef && (
-                          <span style={styles.defaultBadge}>Default</span>
-                        )}
-                      </div>
-
-                      <strong style={styles.catName} title={cat.name}>
-                        {cat.name}
-                      </strong>
-
-                      {/* Action buttons: Edit, Default Toggle, Delete */}
-                      <div style={styles.itemActions}>
-                        <button
-                          type="button"
-                          onClick={() => handleStartEdit(cat)}
-                          style={styles.editBtn}
-                          title="Edit this category"
-                        >
-                          ✎ Edit
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleToggleDefault(cat)}
-                          style={{
-                            ...styles.toggleBtn,
-                            background: isDef ? "#f1f5f9" : "#eff6ff",
-                            color: isDef ? "#64748b" : "#2563eb",
-                          }}
-                          title={
-                            isDef
-                              ? "Remove default status"
-                              : "Make default category"
-                          }
-                        >
-                          {isDef ? "Unset Default" : "Make Default"}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteCategory(cat)}
-                          style={styles.deleteBtn}
-                          title="Delete from database"
-                        >
-                          ✕ Delete
-                        </button>
+              <div style={styles.twoColumnCategoryRow}>
+                {/* ── Income Categories Card ── */}
+                <div style={styles.typeCategoryCard}>
+                  <div style={styles.typeCategoryHeader}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={styles.incomeIconBadge}>
+                        <i className="fa-solid fa-arrow-trend-up"></i>
+                      </span>
+                      <div>
+                        <h4 style={styles.cardHeaderTitle}>Income Categories</h4>
+                        <span style={styles.cardHeaderSub}>Money received</span>
                       </div>
                     </div>
-                  );
-                })}
+                    <span style={styles.incomeCountBadge}>
+                      {categories.filter((c) => c.type === "income").length} added
+                    </span>
+                  </div>
+
+                  {categories.filter((c) => c.type === "income").length === 0 ? (
+                    <p style={styles.emptyNotice}>No income categories added yet.</p>
+                  ) : (
+                    <div style={styles.categorySubGrid}>
+                      {categories
+                        .filter((c) => c.type === "income")
+                        .map((cat) => {
+                          const catId = cat._id || cat.id || cat.category_id;
+                          const isDef = Boolean(cat.is_default);
+                          const isCurrentEditing = editingId === catId;
+
+                          return (
+                            <div
+                              key={catId}
+                              style={{
+                                ...styles.categoryItem,
+                                border: isCurrentEditing
+                                  ? "2px solid #07845e"
+                                  : "1px solid #d1fae5",
+                                background: isCurrentEditing ? "#f0fdf4" : "#ffffff",
+                              }}
+                            >
+                              <div style={styles.itemTop}>
+                                <span style={{ ...styles.typeBadge, background: "#dcfce7", color: "#15803d" }}>
+                                  INCOME
+                                </span>
+                                {isDef && (
+                                  <span style={styles.defaultBadge}>Default</span>
+                                )}
+                              </div>
+
+                              <strong style={styles.catName} title={cat.name}>
+                                {cat.name}
+                              </strong>
+
+                              <div style={styles.itemActions}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEdit(cat)}
+                                  style={styles.editBtn}
+                                  title="Edit category"
+                                >
+                                  <i className="fa-solid fa-pen-to-square" style={{ marginRight: 4 }}></i>
+                                  Edit
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleDefault(cat)}
+                                  style={{
+                                    ...styles.toggleBtn,
+                                    background: isDef ? "#f1f5f9" : "#eef2ff",
+                                    color: isDef ? "#64748b" : "#4f46e5",
+                                  }}
+                                  title={isDef ? "Remove default status" : "Make default"}
+                                >
+                                  {isDef ? "Unset" : "Default"}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteCategory(cat)}
+                                  style={styles.deleteBtn}
+                                  title="Delete from database"
+                                >
+                                  <i className="fa-solid fa-trash-can" style={{ marginRight: 4 }}></i>
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Expense Categories Card ── */}
+                <div style={styles.typeCategoryCard}>
+                  <div style={styles.typeCategoryHeader}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={styles.expenseIconBadge}>
+                        <i className="fa-solid fa-arrow-trend-down"></i>
+                      </span>
+                      <div>
+                        <h4 style={styles.cardHeaderTitle}>Expense Categories</h4>
+                        <span style={styles.cardHeaderSub}>Money spent</span>
+                      </div>
+                    </div>
+                    <span style={styles.expenseCountBadge}>
+                      {categories.filter((c) => c.type === "expense").length} added
+                    </span>
+                  </div>
+
+                  {categories.filter((c) => c.type === "expense").length === 0 ? (
+                    <p style={styles.emptyNotice}>No expense categories added yet.</p>
+                  ) : (
+                    <div style={styles.categorySubGrid}>
+                      {categories
+                        .filter((c) => c.type === "expense")
+                        .map((cat) => {
+                          const catId = cat._id || cat.id || cat.category_id;
+                          const isDef = Boolean(cat.is_default);
+                          const isCurrentEditing = editingId === catId;
+
+                          return (
+                            <div
+                              key={catId}
+                              style={{
+                                ...styles.categoryItem,
+                                border: isCurrentEditing
+                                  ? "2px solid #ef4444"
+                                  : "1px solid #fee2e2",
+                                background: isCurrentEditing ? "#fff5f5" : "#ffffff",
+                              }}
+                            >
+                              <div style={styles.itemTop}>
+                                <span style={{ ...styles.typeBadge, background: "#fee2e2", color: "#b91c1c" }}>
+                                  EXPENSE
+                                </span>
+                                {isDef && (
+                                  <span style={styles.defaultBadge}>Default</span>
+                                )}
+                              </div>
+
+                              <strong style={styles.catName} title={cat.name}>
+                                {cat.name}
+                              </strong>
+
+                              <div style={styles.itemActions}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEdit(cat)}
+                                  style={styles.editBtn}
+                                  title="Edit category"
+                                >
+                                  <i className="fa-solid fa-pen-to-square" style={{ marginRight: 4 }}></i>
+                                  Edit
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleDefault(cat)}
+                                  style={{
+                                    ...styles.toggleBtn,
+                                    background: isDef ? "#f1f5f9" : "#eef2ff",
+                                    color: isDef ? "#64748b" : "#4f46e5",
+                                  }}
+                                  title={isDef ? "Remove default status" : "Make default"}
+                                >
+                                  {isDef ? "Unset" : "Default"}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteCategory(cat)}
+                                  style={styles.deleteBtn}
+                                  title="Delete from database"
+                                >
+                                  <i className="fa-solid fa-trash-can" style={{ marginRight: 4 }}></i>
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -960,6 +1070,90 @@ const styles = {
     padding: "4px 10px",
     fontSize: 11,
     fontWeight: 800,
+  },
+  twoColumnCategoryRow: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 360px), 1fr))",
+    gap: 16,
+    marginTop: 10,
+  },
+  typeCategoryCard: {
+    background: "#f8fafc",
+    border: "1px solid #e2e8f0",
+    borderRadius: 14,
+    padding: "16px",
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+  },
+  typeCategoryHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingBottom: 10,
+    borderBottom: "1px solid #e2e8f0",
+  },
+  incomeIconBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    background: "#dcfce7",
+    color: "#15803d",
+    display: "grid",
+    placeItems: "center",
+    fontSize: 13,
+  },
+  expenseIconBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    background: "#fee2e2",
+    color: "#b91c1c",
+    display: "grid",
+    placeItems: "center",
+    fontSize: 13,
+  },
+  cardHeaderTitle: {
+    margin: 0,
+    fontSize: 14,
+    fontWeight: 800,
+    color: "#0f172a",
+  },
+  cardHeaderSub: {
+    fontSize: 11,
+    color: "#64748b",
+  },
+  incomeCountBadge: {
+    background: "#dcfce7",
+    color: "#15803d",
+    fontSize: 11,
+    fontWeight: 700,
+    padding: "3px 9px",
+    borderRadius: 12,
+  },
+  expenseCountBadge: {
+    background: "#fee2e2",
+    color: "#b91c1c",
+    fontSize: 11,
+    fontWeight: 700,
+    padding: "3px 9px",
+    borderRadius: 12,
+  },
+  categorySubGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+    gap: 10,
+    maxHeight: 320,
+    overflowY: "auto",
+    padding: "2px",
+  },
+  emptyNotice: {
+    fontSize: 12,
+    color: "#94a3b8",
+    padding: "20px 0",
+    textAlign: "center",
+    margin: 0,
+    fontStyle: "italic",
   },
   categoryGrid: {
     maxHeight: 280,
