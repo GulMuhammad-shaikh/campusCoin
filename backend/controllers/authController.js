@@ -6,7 +6,7 @@ const generateToken = (user) => {
   return jwt.sign(
     { user_id: user._id, email: user.email, name: user.name },
     process.env.JWT_SECRET || "campus_coin_jwt_secret_key_2026",
-    { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+    { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
   );
 };
 

@@ -23,23 +23,65 @@ import Profile from "./pages/Profile";
 import Analytics from "./pages/Analytics";
 
 const STUDENT_KEY = "campusCoinCurrentStudent";
+const TOKEN_KEY = "campusCoinToken";
 
-function readStudent() {
+function isTokenValid(token) {
+  if (!token || typeof token !== "string") return false;
   try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return false;
+    const payload = JSON.parse(atob(parts[1]));
+    if (payload.exp && payload.exp * 1000 < Date.now()) {
+      return false; // Token expired
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function readAuthenticatedStudent() {
+  try {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!isTokenValid(token)) {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(STUDENT_KEY);
+      return null;
+    }
     return JSON.parse(localStorage.getItem(STUDENT_KEY) || "null");
   } catch {
     return null;
   }
 }
 
-function ProtectedRoute({ student, children }) {
-  return student ? children : <Navigate to="/login" replace />;
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem(TOKEN_KEY);
+  const storedStudent = localStorage.getItem(STUDENT_KEY);
+
+  // If token is missing, expired, or invalid, redirect to login
+  if (!token || !storedStudent || !isTokenValid(token)) {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(STUDENT_KEY);
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
 }
 
 function AppLayout() {
-  const [student, setStudent] = useState(readStudent);
+  const [student, setStudent] = useState(readAuthenticatedStudent);
   const [modalType, setModalType] = useState(null); // null | "income" | "expense" | "category"
   const navigate = useNavigate();
+
+  // Listen for auth expiration from API response interceptor
+  React.useEffect(() => {
+    const onAuthExpired = () => {
+      setStudent(null);
+      navigate("/login", { replace: true });
+    };
+    window.addEventListener("campusCoinAuthExpired", onAuthExpired);
+    return () => window.removeEventListener("campusCoinAuthExpired", onAuthExpired);
+  }, [navigate]);
 
   function handleLogin(studentData) {
     const rawId = studentData?.user_id || studentData?._id || studentData?.id;
@@ -61,9 +103,9 @@ function AppLayout() {
 
   function handleLogout() {
     localStorage.removeItem(STUDENT_KEY);
-    localStorage.removeItem("campusCoinToken");
+    localStorage.removeItem(TOKEN_KEY);
     setStudent(null);
-    navigate("/");
+    navigate("/login");
   }
 
   function openModal(type) {

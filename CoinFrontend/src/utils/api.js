@@ -8,19 +8,12 @@ import axios from "axios";
  */
 export const getApiBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) {
-    return import.meta.env.VITE_API_BASE_URL;
+    return import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, "");
   }
   if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+    return import.meta.env.VITE_API_URL.replace(/\/+$/, "");
   }
-  if (
-    typeof window !== "undefined" &&
-    window.location.hostname !== "localhost" &&
-    window.location.hostname !== "127.0.0.1"
-  ) {
-    return `${window.location.origin}/api`;
-  }
-  return "https://campus-coin-backend.vercel.app/api";
+  return "https://campus-coin-backend.vercel.app";
 };
 
 export const API_MAIN_URL = getApiBaseUrl();
@@ -28,7 +21,7 @@ export const API_MAIN_URL = getApiBaseUrl();
 // Axios instance configured with auto-detected base URL
 const api = axios.create({
   baseURL: API_MAIN_URL,
-  timeout: 10000,
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -48,6 +41,21 @@ api.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+// Response interceptor to handle 401 Unauthorized (expired/missing token)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Clear expired credentials
+      localStorage.removeItem("campusCoinToken");
+      localStorage.removeItem("campusCoinCurrentStudent");
+      // Notify application to redirect to login
+      window.dispatchEvent(new CustomEvent("campusCoinAuthExpired"));
+    }
+    return Promise.reject(error);
+  }
 );
 
 // ─────────────────────────────────────────────────────────────
