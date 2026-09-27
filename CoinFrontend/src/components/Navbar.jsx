@@ -25,7 +25,7 @@ export default function Navbar({ student, onLogout }) {
               <NavLink to="/dashboard" style={navStyle}>Dashboard</NavLink>
               <NavLink to="/analytics" style={navStyle}>Analytics</NavLink>
               <NavLink to="/savings" style={navStyle}>Savings</NavLink>
-              <NavLink to="/tips" style={navStyle}>Tips</NavLink>
+              <NavLink to="/tips" style={navStyle}>AI Tips</NavLink>
               <NavLink to="/profile" style={navStyle}>Profile</NavLink>
               <button type="button" onClick={onLogout} style={styles.logout}>
                 Log out

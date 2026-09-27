@@ -177,7 +177,7 @@ function AppLayout() {
             path="/tips"
             element={
               <ProtectedRoute student={student}>
-                <Tips />
+                <Tips student={student} />
               </ProtectedRoute>
             }
           />
