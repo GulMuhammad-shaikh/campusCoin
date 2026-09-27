@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { authAPI } from "../utils/api";
 import { CURRENCIES, getCurrencyCode, setCurrencyCode, getCurrency } from "../utils/transactions";
+import { fireConfetti } from "../utils/confetti";
+import sound from "../utils/audio";
 
 export default function Profile({ student }) {
   const userId = student?.user_id || student?._id || student?.id;
@@ -21,6 +23,7 @@ export default function Profile({ student }) {
   }, [student]);
 
   function handleCurrencySelect(newCode) {
+    sound.playPop();
     setCurrency(newCode);
     setCurrencyCode(newCode);
     window.dispatchEvent(new CustomEvent("campusCoinCurrencyChanged", { detail: newCode }));
@@ -51,7 +54,9 @@ export default function Profile({ student }) {
       window.dispatchEvent(new CustomEvent("campusCoinDataChanged"));
       window.dispatchEvent(new CustomEvent("campusCoinCurrencyChanged", { detail: currency }));
 
-      setProfileMsg("Profile updated successfully.");
+      sound.playChime();
+      fireConfetti();
+      setProfileMsg("Profile updated successfully!");
     } catch {
       setProfileMsg("Could not save profile. Please try again.");
     } finally {
@@ -230,7 +235,7 @@ export default function Profile({ student }) {
                 Registered Email Address
               </label>
               <input
-                style={{ ...S.input, background: "#f8fafc", color: "#64748b", cursor: "not-allowed" }}
+                style={{ ...S.input, background: "rgba(255, 255, 255, 0.03)", color: "#94a3b8", cursor: "not-allowed", border: "1.5px solid rgba(255, 255, 255, 0.06)" }}
                 value={student?.email || ""}
                 readOnly
               />
@@ -267,7 +272,8 @@ const S = {
     maxWidth: 1100,
     margin: "0 auto",
     padding: "36px 20px 70px",
-    fontFamily: "'Inter', Arial, sans-serif",
+    fontFamily: "'Plus Jakarta Sans', sans-serif",
+    color: "#f8fafc",
   },
   headerWrap: {
     marginBottom: 28,
@@ -275,7 +281,7 @@ const S = {
   eyebrow: {
     display: "inline-flex",
     alignItems: "center",
-    color: "#07845e",
+    color: "#10b981",
     fontSize: 12,
     fontWeight: 800,
     letterSpacing: 1.2,
@@ -284,13 +290,13 @@ const S = {
   title: {
     margin: "0 0 6px",
     fontSize: "clamp(24px, 3.5vw, 32px)",
-    color: "#111827",
+    color: "#ffffff",
     fontWeight: 800,
     letterSpacing: "-0.6px",
   },
   subtitle: {
     margin: 0,
-    color: "#64748b",
+    color: "#94a3b8",
     fontSize: 14,
     lineHeight: 1.5,
   },
@@ -301,35 +307,36 @@ const S = {
     alignItems: "start",
   },
   sideCard: {
-    background: "#ffffff",
-    border: "1px solid #e2e8f0",
+    background: "rgba(16, 24, 40, 0.75)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    backdropFilter: "blur(18px)",
     borderRadius: 16,
     padding: "26px 22px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.03)",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
     textAlign: "center",
   },
   avatar: {
     width: 68,
     height: 68,
     borderRadius: "50%",
-    background: "linear-gradient(135deg, #07845e, #10b981)",
+    background: "linear-gradient(135deg, #10b981, #059669)",
     color: "#ffffff",
     display: "grid",
     placeItems: "center",
     fontSize: 26,
     margin: "0 auto 14px",
-    boxShadow: "0 8px 18px rgba(7, 132, 94, 0.2)",
+    boxShadow: "0 8px 24px rgba(16, 185, 129, 0.35)",
   },
   cardName: {
     margin: "0 0 4px",
-    fontSize: 19,
+    fontSize: 20,
     fontWeight: 800,
-    color: "#0f172a",
+    color: "#ffffff",
   },
   cardEmail: {
     margin: "0 0 14px",
     fontSize: 13,
-    color: "#64748b",
+    color: "#94a3b8",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -337,16 +344,16 @@ const S = {
   curBadge: {
     display: "inline-flex",
     alignItems: "center",
-    background: "#ecfdf5",
-    color: "#065f46",
-    border: "1px solid #a7f3d0",
-    padding: "5px 12px",
+    background: "rgba(16, 185, 129, 0.15)",
+    color: "#34d399",
+    border: "1px solid rgba(16, 185, 129, 0.35)",
+    padding: "6px 14px",
     borderRadius: 20,
     fontSize: 12,
   },
   divider: {
     height: 1,
-    background: "#f1f5f9",
+    background: "rgba(255, 255, 255, 0.08)",
     margin: "20px 0 16px",
   },
   infoList: {
@@ -360,34 +367,36 @@ const S = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "8px 0",
-    borderBottom: "1px solid #f8fafc",
+    borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
     fontSize: 13,
   },
   infoLabel: {
-    color: "#64748b",
+    color: "#94a3b8",
   },
   infoVal: {
-    color: "#0f172a",
+    color: "#ffffff",
     fontWeight: 600,
   },
   mainFormCard: {
-    background: "#ffffff",
-    border: "1px solid #e2e8f0",
+    background: "rgba(16, 24, 40, 0.75)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    backdropFilter: "blur(18px)",
     borderRadius: 16,
     padding: "26px 26px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.03)",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
   },
   formHeader: {
     marginBottom: 20,
     paddingBottom: 14,
-    borderBottom: "1px solid #f1f5f9",
+    borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
   },
   formIcon: {
-    width: 36,
-    height: 36,
+    width: 38,
+    height: 38,
     borderRadius: 10,
-    background: "#f1f5f9",
-    color: "#0f172a",
+    background: "rgba(255, 255, 255, 0.06)",
+    color: "#60a5fa",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
     display: "grid",
     placeItems: "center",
     fontSize: 15,
@@ -396,12 +405,12 @@ const S = {
     margin: "0 0 2px",
     fontSize: 18,
     fontWeight: 800,
-    color: "#0f172a",
+    color: "#ffffff",
   },
   sectionSub: {
     margin: 0,
     fontSize: 13,
-    color: "#64748b",
+    color: "#94a3b8",
   },
   form: {
     display: "grid",
@@ -416,17 +425,17 @@ const S = {
   label: {
     fontSize: 13,
     fontWeight: 700,
-    color: "#334155",
+    color: "#cbd5e1",
     display: "flex",
     alignItems: "center",
   },
   input: {
-    padding: "11px 14px",
-    border: "1.5px solid #e2e8f0",
+    padding: "12px 14px",
+    border: "1.5px solid rgba(255, 255, 255, 0.12)",
     borderRadius: 10,
     fontSize: 14,
-    color: "#0f172a",
-    background: "#ffffff",
+    color: "#ffffff",
+    background: "rgba(255, 255, 255, 0.05)",
     outline: "none",
     fontFamily: "inherit",
     boxSizing: "border-box",
@@ -438,12 +447,12 @@ const S = {
     width: "100%",
   },
   select: {
-    padding: "11px 36px 11px 14px",
-    border: "1.5px solid #e2e8f0",
+    padding: "12px 36px 12px 14px",
+    border: "1.5px solid rgba(255, 255, 255, 0.12)",
     borderRadius: 10,
     fontSize: 14,
-    color: "#0f172a",
-    background: "#ffffff",
+    color: "#ffffff",
+    background: "#141d30",
     outline: "none",
     fontFamily: "inherit",
     boxSizing: "border-box",
@@ -457,12 +466,12 @@ const S = {
     top: "50%",
     transform: "translateY(-50%)",
     pointerEvents: "none",
-    color: "#64748b",
+    color: "#94a3b8",
     fontSize: 12,
   },
   fieldHint: {
     fontSize: 11,
-    color: "#64748b",
+    color: "#94a3b8",
     marginTop: 2,
   },
   actionRow: {
@@ -474,17 +483,17 @@ const S = {
     marginTop: 8,
   },
   saveBtn: {
-    background: "linear-gradient(135deg, #07845e, #10b981)",
+    background: "linear-gradient(135deg, #10b981, #059669)",
     color: "#ffffff",
     border: "none",
     padding: "12px 24px",
     borderRadius: 10,
     fontSize: 14,
-    fontWeight: 700,
+    fontWeight: 800,
     cursor: "pointer",
     display: "inline-flex",
     alignItems: "center",
-    boxShadow: "0 4px 14px rgba(7, 132, 94, 0.2)",
+    boxShadow: "0 4px 16px rgba(16, 185, 129, 0.35)",
     fontFamily: "inherit",
   },
   msgBox: {

@@ -1,21 +1,23 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { LineChart, Line, ResponsiveContainer, Tooltip } from "recharts";
 import { transactionAPI } from "../utils/api";
 import { formatRupees, getCurrency } from "../utils/transactions";
+import { fireConfetti, fireCelebration } from "../utils/confetti";
+import { sound } from "../utils/audio";
 
 export default function Dashboard({ student, onOpenModal, onViewAll }) {
-  const name   = student?.name || student?.fullName || "Student";
-  const userId = student?.user_id || student?._id || student?.id;
-
-  const [loading,      setLoading]      = useState(true);
-  const [summary,      setSummary]      = useState({ totalIncome: 0, totalExpense: 0, balance: 0 });
-  const [allTxns,      setAllTxns]      = useState([]);
-  const [recent,       setRecent]       = useState([]);
+  const [summary, setSummary]           = useState({ totalIncome: 0, totalExpense: 0, balance: 0 });
+  const [recent, setRecent]             = useState([]);
+  const [allTxns, setAllTxns]           = useState([]);
+  const [txnCount, setTxnCount]         = useState(0);
   const [spendingCats, setSpendingCats] = useState([]);
-  const [txnCount,     setTxnCount]     = useState(0);
-  const [error,        setError]        = useState("");
-  const [, setCurrencyKey] = useState(0);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState("");
+  const [, setCurrencyKey]              = useState(0);
+  const [cardFlipped, setCardFlipped]   = useState(false);
 
+  const name = student?.name || student?.username || "Student";
+  const userId = student?.user_id || student?._id || student?.id;
   const activeCur = getCurrency();
 
   const loadDashboard = useCallback(async () => {
@@ -23,29 +25,43 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
     setError("");
     try {
       const isValidId = userId && /^[0-9a-fA-F]{24}$/.test(String(userId));
-      const params    = isValidId ? { user_id: userId } : {};
+      const params = isValidId ? { user_id: userId } : {};
 
       const [sumRes, txnRes] = await Promise.all([
-        transactionAPI.getSummary(isValidId ? userId : null),
-        transactionAPI.getAll(params),
+        transactionAPI.getSummary(params).catch(() => null),
+        transactionAPI.getAll(params).catch(() => null),
       ]);
-
-      if (sumRes?.summary) setSummary(sumRes.summary);
 
       const txns = txnRes?.transactions || [];
       setAllTxns(txns);
+
+      if (sumRes?.summary) {
+        setSummary(sumRes.summary);
+      } else {
+        let totalIncome = 0, totalExpense = 0;
+        txns.forEach((t) => {
+          if (t.type === "income")  totalIncome  += Number(t.amount || 0);
+          if (t.type === "expense") totalExpense += Number(t.amount || 0);
+        });
+        setSummary({ totalIncome, totalExpense, balance: totalIncome - totalExpense });
+      }
+
       setTxnCount(txns.length);
 
-      setRecent(txns.slice(0, 4).map((t) => ({
-        id:          t._id || t.id,
-        _id:         t._id || t.id,
-        type:        t.type,
-        description: t.description || "",
-        category:    t.category_id?.name || t.category || "General",
-        category_id: t.category_id?._id || t.category_id || null,
-        amount:      Number(t.amount || 0),
-        date:        (t.date || "").slice(0, 10),
-      })));
+      const sorted = [...txns].sort(
+        (a, b) => new Date(b.date || b.created_at) - new Date(a.date || a.created_at)
+      );
+
+      setRecent(
+        sorted.slice(0, 4).map((t) => ({
+          id:          t._id || t.id,
+          type:        t.type,
+          description: t.description || "",
+          category:    t.category_id?.name || t.category || "General",
+          amount:      Number(t.amount || 0),
+          date:        (t.date || "").slice(0, 10),
+        }))
+      );
 
       const catMap = {};
       txns.filter((t) => t.type === "expense").forEach((t) => {
@@ -81,6 +97,7 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
     const desc = item.description || item.category || "this transaction";
     if (!window.confirm(`Delete "${desc}"?`)) return;
     try {
+      sound.playPop();
       await transactionAPI.delete(item.id);
       window.dispatchEvent(new CustomEvent("campusCoinDataChanged", { detail: { action: "delete" } }));
       await loadDashboard();
@@ -138,40 +155,119 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
   const savingsProgress = savingsGoal > 0 ? Math.min(100, (kpi.thisNet / savingsGoal) * 100) : 0;
   const maxCat = Math.max(1, ...spendingCats.map((c) => c.amount));
 
-  if (loading) return (
-    <div style={S.center}>
-      <div style={S.spinner} />
-      <p style={{ color: "#64748b", marginTop: 14, fontSize: 14 }}>Loading financial overview…</p>
-    </div>
-  );
+  // Gamified Financial Health Score & Rank
+  const healthScore = useMemo(() => {
+    if (allTxns.length === 0) return 72;
+    let score = 50;
+    if (kpi.thisNet > 0) score += 25;
+    if (savingsGoal > 0 && savingsProgress >= 50) score += 15;
+    if (recent.length >= 2) score += 10;
+    return Math.min(99, Math.max(30, score));
+  }, [allTxns, kpi, savingsGoal, savingsProgress, recent]);
+
+  const studentRank = useMemo(() => {
+    if (healthScore >= 88) return { title: "Campus Baller 👑", badge: "LEVEL 5 • ELITE", color: "#10b981" };
+    if (healthScore >= 75) return { title: "Savvy Scholar 🚀", badge: "LEVEL 4 • PRO", color: "#06b6d4" };
+    if (healthScore >= 60) return { title: "Disciplined Saver 🌟", badge: "LEVEL 3 • SOLID", color: "#8b5cf6" };
+    return { title: "Budget Apprentice 🌱", badge: "LEVEL 2 • GROWING", color: "#f59e0b" };
+  }, [healthScore]);
+
+  const handleCardClick = () => {
+    sound.playPop();
+    fireConfetti();
+    setCardFlipped((prev) => !prev);
+  };
+
+  const handleCelebrate = () => {
+    sound.playChime();
+    fireCelebration();
+  };
+
+  if (loading) {
+    return (
+      <div style={S.center}>
+        <div style={S.spinner} />
+        <p style={{ color: "#94a3b8", marginTop: 16, fontSize: 15, fontWeight: 600 }}>
+          Summoning your student financial overview…
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div style={S.page} className="animate-fade-in">
-      {/* Header */}
-      <div style={S.heading}>
+      {/* ─── Hero Header & Speed Bar ─── */}
+      <div style={S.headerTop}>
         <div>
-          <span style={S.eyebrow}>
-            <i className="fa-solid fa-graduation-cap" style={{ marginRight: 6 }}></i>
-            STUDENT FINANCIAL OVERVIEW
-          </span>
-          <h1 style={S.title}>Welcome back, {name}</h1>
-          <p style={S.subtitle}>Here is your current financial status and recent activity.</p>
+          <div style={S.badgeRow}>
+            <span style={S.livePill}>
+              <span style={S.liveDot} />
+              REAL-TIME CAMPUS VAULT
+            </span>
+            <span style={{ ...S.rankPill, borderColor: studentRank.color, color: studentRank.color }}>
+              {studentRank.badge}
+            </span>
+          </div>
+          <h1 style={S.welcomeTitle}>
+            Hey, {name}! <span style={{ fontSize: 24 }}>👋</span>
+          </h1>
+          <p style={S.welcomeSub}>
+            Here is your live financial snapshot, smart card status, and recent activity.
+          </p>
         </div>
-        <div style={S.actions}>
-          <button style={S.addIncome} className="btn-glow" onClick={() => onOpenModal("income")}>
+
+        {/* Speed Actions */}
+        <div style={S.speedActions}>
+          <button
+            style={S.addIncomeBtn}
+            className="btn-glow"
+            onClick={() => {
+              sound.playPop();
+              onOpenModal("income");
+            }}
+          >
             <i className="fa-solid fa-plus" style={{ marginRight: 6 }}></i>
             Add Income
           </button>
-          <button style={S.addExpense} className="btn-glow" onClick={() => onOpenModal("expense")}>
+          <button
+            style={S.addExpenseBtn}
+            className="btn-glow"
+            onClick={() => {
+              sound.playPop();
+              onOpenModal("expense");
+            }}
+          >
             <i className="fa-solid fa-minus" style={{ marginRight: 6 }}></i>
-            Add Expense
+            Add Spend
           </button>
-          <span style={S.divider} />
-          <button style={S.addCategory} className="btn-glow" onClick={() => onOpenModal("category")}>
+          <button
+            style={S.addCategoryBtn}
+            className="btn-glow"
+            onClick={() => {
+              sound.playPop();
+              onOpenModal("category");
+            }}
+          >
             <i className="fa-solid fa-tags" style={{ marginRight: 6 }}></i>
             Categories
           </button>
-          <button style={S.refreshBtn} className="btn-glow" onClick={loadDashboard} title="Refresh Data">
+          <button
+            style={S.celebrateBtn}
+            className="btn-glow"
+            onClick={handleCelebrate}
+            title="Launch Celebration Confetti!"
+          >
+            <i className="fa-solid fa-wand-magic-sparkles"></i>
+          </button>
+          <button
+            style={S.refreshBtn}
+            className="btn-glow"
+            onClick={() => {
+              sound.playPop();
+              loadDashboard();
+            }}
+            title="Refresh Data"
+          >
             <i className="fa-solid fa-rotate-right"></i>
           </button>
         </div>
@@ -179,7 +275,7 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
 
       {error && (
         <div style={S.errorBanner}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <i className="fa-solid fa-triangle-exclamation"></i>
             <span>{error}</span>
           </div>
@@ -187,173 +283,264 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
         </div>
       )}
 
-      {/* Main Balance Card */}
-      <section style={S.balanceCard} className="card-hover">
-        <div style={{ flex: 1, minWidth: 260 }}>
-          <span style={S.balanceLabel}>
-            <i className="fa-solid fa-wallet" style={{ marginRight: 6 }}></i>
-            Available Balance
-          </span>
-          <div style={S.balanceAmount}>{formatRupees(summary.balance || 0)}</div>
-          <span style={S.balanceHint}>Total recorded income minus expenses</span>
+      {/* ─── Hero Row: Holographic Virtual Student Debit Card + Gamified Health Score ─── */}
+      <div style={S.cardRow}>
+        {/* Holographic Virtual Student Card */}
+        <div
+          className="holo-card card-hover"
+          style={S.virtualCard}
+          onClick={handleCardClick}
+          title="Click to celebrate and interact with your virtual campus card!"
+        >
+          <div style={S.cardTopRow}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={S.chipIcon}>
+                <i className="fa-solid fa-microchip"></i>
+              </span>
+              <i className="fa-solid fa-wifi" style={{ fontSize: 18, color: "rgba(255,255,255,0.75)" }}></i>
+            </div>
+            <span style={S.cardBadgeLabel}>
+              <i className="fa-solid fa-shield-halved" style={{ marginRight: 5, color: "#34d399" }}></i>
+              CAMPUS COIN PLATINUM
+            </span>
+          </div>
 
-          {/* KPI badges */}
-          <div style={S.kpiRow}>
-            <KpiBadge
-              label="This Month"
-              value={formatRupees(Math.abs(kpi.thisNet))}
-              icon={kpi.thisNet >= 0 ? "fa-arrow-trend-up" : "fa-arrow-trend-down"}
-              positive={kpi.thisNet >= 0}
-            />
-            <KpiBadge
-              label="vs Last Month"
-              value={`${kpi.netDiff >= 0 ? "+" : ""}${kpi.netDiff.toFixed(1)}%`}
-              icon={kpi.trending === "up" ? "fa-arrow-trend-up" : "fa-arrow-trend-down"}
-              positive={kpi.trending === "up"}
-            />
-            <KpiBadge
-              label="Monthly Income"
-              value={formatRupees(kpi.thisInc)}
-              icon="fa-arrow-up"
-              positive={true}
-              neutral
-            />
-            <KpiBadge
-              label="Monthly Spend"
-              value={formatRupees(kpi.thisExp)}
-              icon="fa-arrow-down"
-              positive={false}
-              neutral
-            />
+          <div style={S.cardBalanceBlock}>
+            <span style={S.cardBalanceCaption}>AVAILABLE BALANCE</span>
+            <div style={S.cardBalanceValue}>
+              {formatRupees(summary.balance || 0)}
+            </div>
+            <span style={S.cardCurrencyNote}>
+              Active in {activeCur.name} ({activeCur.code})
+            </span>
+          </div>
+
+          <div style={S.cardBottomRow}>
+            <div>
+              <span style={S.cardSubCaption}>CARD HOLDER</span>
+              <div style={S.cardStudentName}>{name.toUpperCase()}</div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <span style={S.cardSubCaption}>STUDENT ID</span>
+              <div style={S.cardDigits}>•••• {String(student?.user_id || "2026").slice(-4)}</div>
+            </div>
           </div>
         </div>
 
-        {/* Sparkline chart */}
-        <div style={S.sparkWrap}>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
-            <i className="fa-solid fa-chart-line"></i>
-            7-day balance trend
+        {/* Gamified Health Score & Streak Widget */}
+        <div style={S.healthWidget} className="card-hover">
+          <div style={S.healthHeader}>
+            <div>
+              <span style={S.healthEyebrow}>FINANCIAL HEALTH SCORE</span>
+              <h3 style={S.healthTitle}>{studentRank.title}</h3>
+            </div>
+            <div style={S.scoreCircle}>
+              <span style={{ fontSize: 24, fontWeight: 900, color: studentRank.color }}>
+                {healthScore}
+              </span>
+              <span style={{ fontSize: 10, color: "#94a3b8" }}>/100</span>
+            </div>
           </div>
-          <ResponsiveContainer width="100%" height={75}>
-            <LineChart data={kpi.spark}>
-              <Line
-                type="monotone"
-                dataKey="bal"
-                stroke="#34d399"
-                strokeWidth={2.5}
-                dot={false}
-                activeDot={{ r: 4, fill: "#34d399" }}
-              />
-              <Tooltip
-                contentStyle={{ background: "#0f172a", border: "none", borderRadius: 8, fontSize: 11, color: "#fff" }}
-                formatter={(v) => [formatRupees(v), "Balance"]}
-                labelFormatter={(l) => `Date: ${l}`}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
 
-      {/* Savings Goal Banner */}
+          {/* Gamified Badges */}
+          <div style={S.streakRow}>
+            <div style={S.streakBadge}>
+              <i className="fa-solid fa-fire" style={{ color: "#f59e0b", fontSize: 14 }}></i>
+              <span>7-Day Active Streak</span>
+            </div>
+            <div style={S.streakBadge}>
+              <i className="fa-solid fa-trophy" style={{ color: "#fbbf24", fontSize: 14 }}></i>
+              <span>Budget Master</span>
+            </div>
+          </div>
+
+          {/* 7-Day Running Balance Trend */}
+          <div style={S.sparklineWrap}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6, fontSize: 11, color: "#94a3b8" }}>
+              <span><i className="fa-solid fa-chart-line" style={{ marginRight: 5, color: "#34d399" }}></i>7-day trend</span>
+              <span style={{ color: kpi.trending === "up" ? "#34d399" : "#f43f5e", fontWeight: 700 }}>
+                {kpi.netDiff >= 0 ? "+" : ""}{kpi.netDiff.toFixed(1)}% vs last month
+              </span>
+            </div>
+            <ResponsiveContainer width="100%" height={70}>
+              <LineChart data={kpi.spark}>
+                <Line
+                  type="monotone"
+                  dataKey="bal"
+                  stroke="#34d399"
+                  strokeWidth={2.8}
+                  dot={false}
+                  activeDot={{ r: 5, fill: "#34d399", stroke: "#080c14", strokeWidth: 2 }}
+                />
+                <Tooltip
+                  contentStyle={{ background: "#0c121e", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, fontSize: 12, color: "#fff" }}
+                  formatter={(v) => [formatRupees(v), "Balance"]}
+                  labelFormatter={(l) => `Date: ${l}`}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── Savings Goal Progress Banner ─── */}
       {savingsGoal > 0 && (
         <div style={S.savingsBanner} className="card-hover">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 8 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", display: "flex", alignItems: "center", gap: 6 }}>
-              <i className="fa-solid fa-bullseye" style={{ color: "#6366f1" }}></i>
-              Monthly Savings Goal: {formatRupees(savingsGoal)}
-            </span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: savingsProgress >= 100 ? "#07845e" : "#6366f1", display: "flex", alignItems: "center", gap: 5 }}>
-              <i className={`fa-solid ${savingsProgress >= 100 ? "fa-circle-check" : "fa-chart-pie"}`}></i>
-              {savingsProgress >= 100 ? "Goal reached!" : `${savingsProgress.toFixed(0)}% saved`}
+          <div style={S.savingsHeaderRow}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={S.goalIconWrap}>
+                <i className="fa-solid fa-bullseye"></i>
+              </span>
+              <div>
+                <strong style={{ fontSize: 14, color: "#ffffff" }}>
+                  Monthly Savings Target: {formatRupees(savingsGoal)}
+                </strong>
+                <div style={{ fontSize: 12, color: "#94a3b8" }}>
+                  Saved: <strong style={{ color: "#34d399" }}>{formatRupees(Math.max(0, kpi.thisNet))}</strong> ·
+                  Remaining: <strong style={{ color: "#fbbf24" }}>{formatRupees(Math.max(0, savingsGoal - kpi.thisNet))}</strong>
+                </div>
+              </div>
+            </div>
+
+            <span style={{
+              ...S.savingsGoalPill,
+              background: savingsProgress >= 100 ? "rgba(16, 185, 129, 0.2)" : "rgba(99, 102, 241, 0.2)",
+              color: savingsProgress >= 100 ? "#34d399" : "#818cf8",
+            }}>
+              <i className={`fa-solid ${savingsProgress >= 100 ? "fa-circle-check" : "fa-chart-pie"}`} style={{ marginRight: 6 }}></i>
+              {savingsProgress >= 100 ? "Goal Crushed! 🎉" : `${savingsProgress.toFixed(0)}% Saved`}
             </span>
           </div>
+
           <div style={S.goalTrack}>
-            <div style={{ ...S.goalFill, width: `${Math.min(100, savingsProgress)}%`, background: savingsProgress >= 100 ? "#07845e" : "#6366f1" }} />
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 12, color: "#64748b" }}>
-            <span>Saved: {formatRupees(Math.max(0, kpi.thisNet))}</span>
-            <span>Remaining: {formatRupees(Math.max(0, savingsGoal - kpi.thisNet))}</span>
+            <div
+              style={{
+                ...S.goalFill,
+                width: `${Math.min(100, savingsProgress)}%`,
+                background: savingsProgress >= 100
+                  ? "linear-gradient(90deg, #10b981 0%, #34d399 100%)"
+                  : "linear-gradient(90deg, #6366f1 0%, #06b6d4 100%)",
+              }}
+            />
           </div>
         </div>
       )}
 
-      {/* Stats Cards */}
-      <section style={S.stats}>
-        <StatCard title="Total Income"   amount={formatRupees(summary.totalIncome || 0)}  color="#07845e" iconClass="fa-solid fa-arrow-trend-up" />
-        <StatCard title="Total Expenses" amount={formatRupees(summary.totalExpense || 0)} color="#ef4444" iconClass="fa-solid fa-arrow-trend-down" />
-        <StatCard title="Transactions"   amount={String(txnCount)}                         color="#3b82f6" iconClass="fa-solid fa-receipt" />
-        <StatCard
+      {/* ─── 4 Quick KPI Glass Cards ─── */}
+      <div style={S.kpiGrid}>
+        <MetricCard
+          title="Total Inflow"
+          amount={formatRupees(summary.totalIncome || 0)}
+          color="#10b981"
+          icon="fa-solid fa-arrow-trend-up"
+          sub="All logged allowances & income"
+        />
+        <MetricCard
+          title="Total Outflow"
+          amount={formatRupees(summary.totalExpense || 0)}
+          color="#f43f5e"
+          icon="fa-solid fa-arrow-trend-down"
+          sub="Campus food, transit & bills"
+        />
+        <MetricCard
+          title="Total Records"
+          amount={String(txnCount)}
+          color="#38bdf8"
+          icon="fa-solid fa-receipt"
+          sub="Synced with database"
+        />
+        <MetricCard
           title="Savings Rate"
           amount={summary.totalIncome > 0 ? `${(((summary.totalIncome - summary.totalExpense) / summary.totalIncome) * 100).toFixed(1)}%` : "—"}
-          color="#8b5cf6"
-          iconClass="fa-solid fa-piggy-bank"
+          color="#a855f7"
+          icon="fa-solid fa-piggy-bank"
+          sub="Income retained as savings"
         />
-      </section>
+      </div>
 
-      {/* Columns: Recent Transactions + Spending by Category */}
-      <section style={S.columns}>
-        {/* Recent Transactions */}
-        <div style={S.panel} className="card-hover">
+      {/* ─── Two Column Layout: Recent Transactions + Spending Breakdown ─── */}
+      <div style={S.columns}>
+        {/* Recent Transactions Panel */}
+        <div style={S.glassPanel} className="card-hover">
           <div style={S.panelHeader}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <i className="fa-solid fa-clock-rotate-left" style={{ color: "#64748b" }}></i>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={S.panelIconWrap}>
+                <i className="fa-solid fa-clock-rotate-left"></i>
+              </span>
               <div>
-                <h2 style={S.panelTitle}>Recent Transactions</h2>
-                <p style={S.panelSub}>Latest financial entries</p>
+                <h3 style={S.panelTitle}>Recent Activity</h3>
+                <p style={S.panelSubtitle}>Your latest financial records</p>
               </div>
             </div>
-            <button style={S.textBtn} onClick={() => onOpenModal("income")}>
+            <button
+              style={S.quickAddBtn}
+              className="btn-glow"
+              onClick={() => {
+                sound.playPop();
+                onOpenModal("income");
+              }}
+            >
               <i className="fa-solid fa-plus" style={{ marginRight: 4 }}></i>
-              Add Record
+              New
             </button>
           </div>
 
           {recent.length === 0 ? (
-            <div style={S.empty}>
+            <div style={S.emptyState}>
               <div style={S.emptyIcon}>
                 <i className="fa-solid fa-receipt"></i>
               </div>
-              <strong>No transactions recorded yet</strong>
-              <p style={{ fontSize: 13, color: "#64748b", margin: "6px 0 16px" }}>
-                Begin by logging your first income or expense transaction.
+              <strong style={{ color: "#ffffff", fontSize: 14 }}>No transactions logged yet</strong>
+              <p style={{ fontSize: 12, color: "#94a3b8", margin: "6px 0 16px" }}>
+                Begin by logging your first campus allowance or expense.
               </p>
-              <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-                <button style={S.addIncome} onClick={() => onOpenModal("income")}>Add Income</button>
-                <button style={S.addExpense} onClick={() => onOpenModal("expense")}>Add Expense</button>
-              </div>
+              <button
+                style={S.addIncomeBtn}
+                className="btn-glow"
+                onClick={() => onOpenModal("income")}
+              >
+                Log First Transaction
+              </button>
             </div>
           ) : (
-            <>
+            <div style={S.txnList}>
               {recent.map((item) => (
-                <div key={item.id} style={S.txnRow}>
+                <div key={item.id} style={S.txnItem}>
                   <div style={S.txnLeft}>
                     <span style={{
-                      ...S.txnIcon,
-                      background: item.type === "income" ? "#ecfdf5" : "#fef2f2",
-                      color:      item.type === "income" ? "#07845e" : "#ef4444",
+                      ...S.txnIconBadge,
+                      background: item.type === "income" ? "rgba(16, 185, 129, 0.16)" : "rgba(244, 63, 94, 0.16)",
+                      color: item.type === "income" ? "#34d399" : "#f43f5e",
                     }}>
                       <i className={`fa-solid ${item.type === "income" ? "fa-arrow-up" : "fa-arrow-down"}`}></i>
                     </span>
                     <div style={{ minWidth: 0 }}>
                       <strong style={S.txnName}>{item.description || item.category}</strong>
-                      <span style={S.txnMeta}>{item.category} · {item.date}</span>
+                      <span style={S.txnCategory}>{item.category} · {item.date}</span>
                     </div>
                   </div>
+
                   <div style={S.txnRight}>
-                    <strong style={{ color: item.type === "income" ? "#07845e" : "#ef4444", fontSize: 13, whiteSpace: "nowrap" }}>
+                    <strong style={{
+                      color: item.type === "income" ? "#34d399" : "#f43f5e",
+                      fontSize: 14,
+                      fontFamily: "var(--font-heading)",
+                    }}>
                       {item.type === "income" ? "+" : "−"} {formatRupees(item.amount)}
                     </strong>
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       <button
                         onClick={() => onOpenModal && onOpenModal("edit", item)}
-                        style={S.iconEditBtn}
+                        style={S.editBtn}
+                        className="btn-glow"
                         title="Edit transaction"
                       >
                         <i className="fa-solid fa-pen-to-square"></i>
                       </button>
                       <button
                         onClick={() => handleDelete(item)}
-                        style={S.iconDeleteBtn}
+                        style={S.deleteBtn}
+                        className="btn-glow"
                         title="Delete transaction"
                       >
                         <i className="fa-solid fa-trash-can"></i>
@@ -362,132 +549,665 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
                   </div>
                 </div>
               ))}
-              <div style={{ paddingTop: 14, textAlign: "center" }}>
-                <button style={S.viewAllBtn} onClick={onViewAll}>
-                  View all transactions
-                  <i className="fa-solid fa-arrow-right" style={{ marginLeft: 6 }}></i>
-                </button>
-              </div>
-            </>
+
+              <button style={S.viewAllHistoryBtn} className="btn-glow" onClick={onViewAll}>
+                View all transactions
+                <i className="fa-solid fa-arrow-right" style={{ marginLeft: 8 }}></i>
+              </button>
+            </div>
           )}
         </div>
 
-        {/* Spending by Category */}
-        <div style={S.panel} className="card-hover">
+        {/* Spending Categories Breakdown */}
+        <div style={S.glassPanel} className="card-hover">
           <div style={S.panelHeader}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <i className="fa-solid fa-chart-pie" style={{ color: "#64748b" }}></i>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ ...S.panelIconWrap, background: "rgba(245, 158, 11, 0.14)", color: "#f59e0b" }}>
+                <i className="fa-solid fa-chart-pie"></i>
+              </span>
               <div>
-                <h2 style={S.panelTitle}>Spending Categories</h2>
-                <p style={S.panelSub}>Expense distribution by category</p>
+                <h3 style={S.panelTitle}>Spending Distribution</h3>
+                <p style={S.panelSubtitle}>Expense breakdown by category</p>
               </div>
             </div>
             {spendingCats.length > 0 && (
-              <span style={{ fontSize: 12, color: "#8b5cf6", fontWeight: 700 }}>
+              <span style={S.topCategoryBadge}>
                 Top: {spendingCats[0]?.name}
               </span>
             )}
           </div>
 
           {spendingCats.length === 0 ? (
-            <p style={{ color: "#94a3b8", fontSize: 13, lineHeight: 1.7, padding: "18px 0" }}>
-              Add an expense to view your category spending breakdown.
+            <p style={{ color: "#94a3b8", fontSize: 13, textAlign: "center", padding: "30px 10px" }}>
+              No expense categories recorded yet. Log your campus meals or transit to see insights!
             </p>
           ) : (
-            spendingCats.map((item, i) => {
-              const pct = (item.amount / maxCat) * 100;
-              const colors = ["#07845e","#6366f1","#f59e0b","#ec4899","#14b8a6","#8b5cf6","#ef4444"];
-              return (
-                <div key={item.name} style={{ margin: "16px 0" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginBottom: 6 }}>
-                    <span style={{ fontSize: 13, color: "#334155", fontWeight: 600 }}>{item.name}</span>
-                    <strong style={{ fontSize: 13, color: "#0f172a" }}>{formatRupees(item.amount)}</strong>
+            <div style={S.categoryList}>
+              {spendingCats.map((item, i) => {
+                const pct = (item.amount / maxCat) * 100;
+                const colors = ["#10b981", "#38bdf8", "#8b5cf6", "#f59e0b", "#ec4899", "#06b6d4"];
+                const color = colors[i % colors.length];
+
+                return (
+                  <div key={item.name} style={S.catRow}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                      <span style={{ fontSize: 13, color: "#e2e8f0", fontWeight: 600 }}>{item.name}</span>
+                      <strong style={{ fontSize: 13, color: "#ffffff" }}>{formatRupees(item.amount)}</strong>
+                    </div>
+                    <div style={S.catBarTrack}>
+                      <div style={{ ...S.catBarFill, width: `${pct}%`, background: color }} />
+                    </div>
                   </div>
-                  <div style={{ height: 7, background: "#f1f5f9", borderRadius: 20, overflow: "hidden" }}>
-                    <div style={{ height: "100%", width: `${pct}%`, background: colors[i % colors.length], borderRadius: 20, transition: "width 0.6s ease" }} />
-                  </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
         </div>
-      </section>
+      </div>
     </div>
   );
 }
 
-function KpiBadge({ label, value, icon, positive, neutral }) {
-  const color = neutral ? "rgba(255,255,255,0.8)" : positive ? "#34d399" : "#f87171";
-  const bg    = neutral ? "rgba(255,255,255,0.08)" : positive ? "rgba(52,211,153,0.15)" : "rgba(248,113,113,0.15)";
+function MetricCard({ title, amount, color, icon, sub }) {
   return (
-    <div style={{ background: bg, borderRadius: 9, padding: "6px 11px", display: "flex", flexDirection: "column", gap: 2 }}>
-      <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", fontWeight: 700, letterSpacing: 0.4 }}>{label.toUpperCase()}</span>
-      <span style={{ fontSize: 12, fontWeight: 700, color, display: "flex", alignItems: "center", gap: 5 }}>
-        {icon && <i className={`fa-solid ${icon}`} style={{ fontSize: 10 }}></i>}
-        {value}
-      </span>
-    </div>
-  );
-}
-
-function StatCard({ title, amount, color, iconClass }) {
-  return (
-    <div style={S.statCard} className="card-hover">
-      <span style={{ width: 36, height: 36, display: "grid", placeItems: "center", borderRadius: 10, fontSize: 15, color, background: `${color}15` }}>
-        <i className={iconClass}></i>
-      </span>
-      <span style={{ color: "#64748b", fontSize: 12, fontWeight: 600 }}>{title}</span>
-      <strong style={{ color: "#0f172a", fontSize: 20, fontWeight: 800 }}>{amount}</strong>
+    <div style={S.metricCard} className="card-hover">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span style={S.metricTitle}>{title}</span>
+        <span style={{ ...S.metricIconWrap, color, background: `${color}18` }}>
+          <i className={icon}></i>
+        </span>
+      </div>
+      <strong style={{ ...S.metricAmount, color: "#ffffff" }}>{amount}</strong>
+      <span style={S.metricSub}>{sub}</span>
     </div>
   );
 }
 
 const S = {
-  center:  { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", fontFamily: "'Inter', sans-serif" },
-  spinner: { width: 40, height: 40, border: "4px solid #e2e8f0", borderTop: "4px solid #07845e", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
-  page:    { maxWidth: 1140, margin: "0 auto", padding: "36px 20px 60px", fontFamily: "'Inter', Arial, sans-serif" },
-  heading: { display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 18, marginBottom: 24 },
-  eyebrow: { display: "inline-flex", alignItems: "center", color: "#07845e", fontSize: 11, fontWeight: 800, letterSpacing: 1.2, marginBottom: 6 },
-  title:   { margin: "0 0 6px", fontSize: "clamp(24px, 3.5vw, 34px)", color: "#0f172a", letterSpacing: "-0.8px", fontWeight: 800 },
-  subtitle:{ margin: 0, color: "#64748b", fontSize: 14 },
-  actions: { display: "flex", alignItems: "center", flexWrap: "wrap", gap: 10 },
-  addIncome:   { border: "none", cursor: "pointer", background: "#07845e", color: "#fff", padding: "10px 14px", borderRadius: 8, fontSize: 13, fontWeight: 700, fontFamily: "inherit", display: "inline-flex", alignItems: "center" },
-  addExpense:  { cursor: "pointer", background: "#fff", color: "#b91c1c", border: "1px solid #fecaca", padding: "10px 14px", borderRadius: 8, fontSize: 13, fontWeight: 700, fontFamily: "inherit", display: "inline-flex", alignItems: "center" },
-  divider:     { display: "inline-block", width: "1px", height: 24, background: "#cbd5e1", margin: "0 2px" },
-  addCategory: { cursor: "pointer", background: "#f0fdf4", color: "#15803d", border: "1px solid #bbf7d0", padding: "10px 14px", borderRadius: 8, fontSize: 13, fontWeight: 700, fontFamily: "inherit", display: "inline-flex", alignItems: "center" },
-  refreshBtn:  { cursor: "pointer", background: "#f8fafc", color: "#475569", border: "1px solid #e2e8f0", width: 38, height: 38, borderRadius: 8, fontSize: 14, fontFamily: "inherit", display: "grid", placeItems: "center" },
-  errorBanner: { background: "#fef2f2", border: "1px solid #fecaca", color: "#b91c1c", padding: "12px 16px", borderRadius: 10, marginBottom: 16, fontSize: 13, fontWeight: 600, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 },
-  retryBtn:    { background: "#fee2e2", border: "none", color: "#991b1b", borderRadius: 6, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" },
+  page: {
+    maxWidth: 1220,
+    margin: "0 auto",
+    padding: "32px clamp(16px, 3.5vw, 36px) 70px",
+    fontFamily: "var(--font-heading)",
+  },
+  center: {
+    minHeight: "65vh",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  spinner: {
+    width: 44,
+    height: 44,
+    border: "4px solid rgba(255, 255, 255, 0.1)",
+    borderTop: "4px solid #10b981",
+    borderRadius: "50%",
+    animation: "spinSlow 0.9s linear infinite",
+  },
+  headerTop: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    flexWrap: "wrap",
+    gap: 18,
+    marginBottom: 26,
+  },
+  badgeRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 8,
+  },
+  livePill: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    background: "rgba(16, 185, 129, 0.12)",
+    border: "1px solid rgba(16, 185, 129, 0.3)",
+    color: "#34d399",
+    padding: "3px 9px",
+    borderRadius: 20,
+    fontSize: 10,
+    fontWeight: 800,
+    letterSpacing: 0.6,
+  },
+  liveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: "50%",
+    background: "#34d399",
+    boxShadow: "0 0 8px #34d399",
+  },
+  rankPill: {
+    border: "1px solid",
+    background: "rgba(255, 255, 255, 0.04)",
+    padding: "3px 9px",
+    borderRadius: 20,
+    fontSize: 10,
+    fontWeight: 800,
+  },
+  welcomeTitle: {
+    margin: "0 0 4px",
+    fontSize: "clamp(26px, 4vw, 36px)",
+    fontWeight: 900,
+    color: "#ffffff",
+    letterSpacing: "-0.8px",
+  },
+  welcomeSub: {
+    margin: 0,
+    color: "#94a3b8",
+    fontSize: 14,
+  },
+  speedActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    flexWrap: "wrap",
+  },
+  addIncomeBtn: {
+    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: 12,
+    padding: "10px 16px",
+    fontWeight: 700,
+    fontSize: 13,
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    boxShadow: "0 4px 18px rgba(16, 185, 129, 0.35)",
+  },
+  addExpenseBtn: {
+    background: "rgba(244, 63, 94, 0.14)",
+    color: "#fca5a5",
+    border: "1px solid rgba(244, 63, 94, 0.3)",
+    borderRadius: 12,
+    padding: "10px 16px",
+    fontWeight: 700,
+    fontSize: 13,
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+  },
+  addCategoryBtn: {
+    background: "rgba(99, 102, 241, 0.14)",
+    color: "#c7d2fe",
+    border: "1px solid rgba(99, 102, 241, 0.3)",
+    borderRadius: 12,
+    padding: "10px 16px",
+    fontWeight: 700,
+    fontSize: 13,
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+  },
+  celebrateBtn: {
+    background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+    color: "#0f172a",
+    border: "none",
+    borderRadius: 12,
+    width: 40,
+    height: 40,
+    fontSize: 15,
+    cursor: "pointer",
+    display: "grid",
+    placeItems: "center",
+    boxShadow: "0 4px 15px rgba(245, 158, 11, 0.35)",
+  },
+  refreshBtn: {
+    background: "rgba(255, 255, 255, 0.06)",
+    border: "1px solid rgba(255, 255, 255, 0.12)",
+    color: "#cbd5e1",
+    borderRadius: 12,
+    width: 40,
+    height: 40,
+    fontSize: 14,
+    cursor: "pointer",
+    display: "grid",
+    placeItems: "center",
+  },
+  errorBanner: {
+    background: "rgba(244, 63, 94, 0.15)",
+    border: "1px solid rgba(244, 63, 94, 0.3)",
+    color: "#fca5a5",
+    padding: "12px 18px",
+    borderRadius: 12,
+    marginBottom: 20,
+    fontSize: 13,
+    fontWeight: 600,
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  retryBtn: {
+    background: "#f43f5e",
+    border: "none",
+    color: "#fff",
+    borderRadius: 8,
+    padding: "6px 12px",
+    fontSize: 12,
+    fontWeight: 700,
+    cursor: "pointer",
+  },
 
-  balanceCard: { display: "flex", alignItems: "flex-start", gap: 24, padding: "26px 28px", background: "linear-gradient(135deg, #0f172a, #134e4a)", borderRadius: 18, color: "#fff", marginBottom: 16, boxShadow: "0 10px 30px rgba(15, 23, 42, 0.12)", flexWrap: "wrap" },
-  balanceLabel: { color: "#a7f3d0", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center" },
-  balanceAmount:{ display: "block", fontSize: "clamp(30px, 4vw, 40px)", fontWeight: 900, margin: "6px 0 4px", letterSpacing: "-1px" },
-  balanceHint:  { color: "#94a3b8", fontSize: 12 },
-  kpiRow:       { display: "flex", flexWrap: "wrap", gap: 8, marginTop: 18 },
-  sparkWrap:    { flexShrink: 0, width: 220, minWidth: 160 },
+  /* Virtual Card Row */
+  cardRow: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 460px), 1fr))",
+    gap: 20,
+    marginBottom: 22,
+  },
+  virtualCard: {
+    padding: "26px 28px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    minHeight: 240,
+  },
+  cardTopRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  chipIcon: {
+    color: "#fbbf24",
+    fontSize: 28,
+  },
+  cardBadgeLabel: {
+    fontSize: 11,
+    fontWeight: 800,
+    letterSpacing: 1,
+    color: "rgba(255, 255, 255, 0.85)",
+    background: "rgba(0, 0, 0, 0.3)",
+    padding: "4px 10px",
+    borderRadius: 20,
+  },
+  cardBalanceBlock: {
+    margin: "18px 0 14px",
+  },
+  cardBalanceCaption: {
+    fontSize: 10,
+    fontWeight: 800,
+    letterSpacing: 1.2,
+    color: "#a7f3d0",
+    display: "block",
+    marginBottom: 4,
+  },
+  cardBalanceValue: {
+    fontSize: "clamp(32px, 4.5vw, 44px)",
+    fontWeight: 900,
+    letterSpacing: "-1px",
+    color: "#ffffff",
+    textShadow: "0 2px 12px rgba(0, 0, 0, 0.5)",
+  },
+  cardCurrencyNote: {
+    fontSize: 11,
+    color: "rgba(255, 255, 255, 0.7)",
+  },
+  cardBottomRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    borderTop: "1px solid rgba(255, 255, 255, 0.12)",
+    paddingTop: 12,
+  },
+  cardSubCaption: {
+    fontSize: 9,
+    fontWeight: 800,
+    color: "rgba(255, 255, 255, 0.5)",
+    letterSpacing: 1,
+    display: "block",
+  },
+  cardStudentName: {
+    fontSize: 13,
+    fontWeight: 800,
+    color: "#ffffff",
+    letterSpacing: 0.5,
+  },
+  cardDigits: {
+    fontSize: 13,
+    fontFamily: "var(--font-mono)",
+    fontWeight: 700,
+    color: "rgba(255, 255, 255, 0.85)",
+  },
 
-  savingsBanner: { background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 14, padding: "16px 20px", marginBottom: 16, boxShadow: "0 4px 16px rgba(0,0,0,0.03)" },
-  goalTrack:     { height: 8, background: "#f1f5f9", borderRadius: 20, overflow: "hidden" },
-  goalFill:      { height: "100%", borderRadius: 20, transition: "width 0.6s ease" },
+  /* Health Widget */
+  healthWidget: {
+    background: "rgba(16, 24, 40, 0.75)",
+    backdropFilter: "blur(18px)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    borderRadius: 20,
+    padding: "24px 26px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    boxShadow: "0 20px 45px -12px rgba(0, 0, 0, 0.65)",
+  },
+  healthHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  healthEyebrow: {
+    fontSize: 10,
+    fontWeight: 800,
+    letterSpacing: 1.2,
+    color: "#38bdf8",
+    display: "block",
+    marginBottom: 4,
+  },
+  healthTitle: {
+    margin: 0,
+    fontSize: 20,
+    fontWeight: 800,
+    color: "#ffffff",
+  },
+  scoreCircle: {
+    display: "flex",
+    alignItems: "baseline",
+    background: "rgba(255, 255, 255, 0.05)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    padding: "6px 14px",
+    borderRadius: 14,
+  },
+  streakRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    margin: "14px 0",
+    flexWrap: "wrap",
+  },
+  streakBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    background: "rgba(255, 255, 255, 0.04)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    padding: "6px 12px",
+    borderRadius: 10,
+    fontSize: 12,
+    fontWeight: 700,
+    color: "#e2e8f0",
+  },
+  sparklineWrap: {
+    background: "rgba(0, 0, 0, 0.2)",
+    borderRadius: 12,
+    padding: "10px 14px",
+    border: "1px solid rgba(255, 255, 255, 0.05)",
+  },
 
-  stats:   { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 14, marginBottom: 18 },
-  statCard:{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 14, padding: 18, display: "flex", flexDirection: "column", gap: 6, boxShadow: "0 2px 10px rgba(0,0,0,0.02)" },
+  /* Savings Banner */
+  savingsBanner: {
+    background: "rgba(16, 24, 40, 0.75)",
+    backdropFilter: "blur(18px)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    borderRadius: 18,
+    padding: "18px 24px",
+    marginBottom: 22,
+    boxShadow: "0 15px 35px -10px rgba(0, 0, 0, 0.5)",
+  },
+  savingsHeaderRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 12,
+    marginBottom: 12,
+  },
+  goalIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    background: "rgba(99, 102, 241, 0.16)",
+    color: "#818cf8",
+    display: "grid",
+    placeItems: "center",
+    fontSize: 16,
+  },
+  savingsGoalPill: {
+    fontSize: 12,
+    fontWeight: 800,
+    padding: "5px 12px",
+    borderRadius: 20,
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+  },
+  goalTrack: {
+    height: 10,
+    background: "rgba(255, 255, 255, 0.06)",
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  goalFill: {
+    height: "100%",
+    borderRadius: 20,
+    transition: "width 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
+  },
 
-  columns: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))", gap: 18 },
-  panel:   { background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 16, padding: 22, minWidth: 0, boxShadow: "0 4px 20px rgba(0,0,0,0.03)" },
-  panelHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, marginBottom: 14 },
-  panelTitle:  { margin: 0, fontSize: 16, fontWeight: 800, color: "#0f172a" },
-  panelSub:    { margin: "2px 0 0", color: "#64748b", fontSize: 12 },
-  textBtn:     { background: "none", border: "none", color: "#07845e", fontWeight: 700, fontSize: 12, cursor: "pointer", padding: 0, fontFamily: "inherit", display: "inline-flex", alignItems: "center" },
-  empty:       { textAlign: "center", padding: "30px 10px", color: "#64748b" },
-  emptyIcon:   { display: "grid", placeItems: "center", width: 44, height: 44, margin: "0 auto 12px", borderRadius: 12, background: "#f1f5f9", color: "#64748b", fontSize: 18 },
-  txnRow:      { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: "1px solid #f1f5f9" },
-  txnLeft:     { display: "flex", alignItems: "center", gap: 11, minWidth: 0 },
-  txnRight:    { display: "flex", alignItems: "center", gap: 10, flexShrink: 0 },
-  txnIcon:     { flex: "0 0 34px", width: 34, height: 34, display: "grid", placeItems: "center", borderRadius: 8, fontSize: 13 },
-  txnName:     { display: "block", color: "#1e293b", fontSize: 13, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-  txnMeta:     { display: "block", color: "#94a3b8", fontSize: 11 },
-  iconEditBtn:  { background: "#eff6ff", border: "1px solid #bfdbfe", color: "#2563eb", borderRadius: 6, width: 28, height: 28, fontSize: 11, display: "grid", placeItems: "center", cursor: "pointer", padding: 0 },
-  iconDeleteBtn:{ background: "#fef2f2", border: "1px solid #fecaca", color: "#ef4444", borderRadius: 6, width: 28, height: 28, fontSize: 11, display: "grid", placeItems: "center", cursor: "pointer", padding: 0 },
-  viewAllBtn:  { background: "#f8fafc", border: "1px solid #e2e8f0", color: "#2563eb", borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", width: "100%", fontFamily: "inherit", display: "inline-flex", alignItems: "center", justifyContent: "center" },
+  /* KPI Grid */
+  kpiGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+    gap: 16,
+    marginBottom: 22,
+  },
+  metricCard: {
+    background: "rgba(16, 24, 40, 0.75)",
+    backdropFilter: "blur(18px)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    borderRadius: 16,
+    padding: "18px 20px",
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+  },
+  metricTitle: {
+    fontSize: 11,
+    fontWeight: 700,
+    color: "#94a3b8",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+  metricIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    display: "grid",
+    placeItems: "center",
+    fontSize: 14,
+  },
+  metricAmount: {
+    fontSize: 22,
+    fontWeight: 900,
+    letterSpacing: "-0.5px",
+  },
+  metricSub: {
+    fontSize: 11,
+    color: "#64748b",
+  },
+
+  /* Two Columns Layout */
+  columns: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 460px), 1fr))",
+    gap: 20,
+  },
+  glassPanel: {
+    background: "rgba(16, 24, 40, 0.75)",
+    backdropFilter: "blur(18px)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    borderRadius: 20,
+    padding: "24px",
+    boxShadow: "0 20px 45px -12px rgba(0, 0, 0, 0.65)",
+  },
+  panelHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 18,
+  },
+  panelIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    background: "rgba(56, 189, 248, 0.14)",
+    color: "#38bdf8",
+    display: "grid",
+    placeItems: "center",
+    fontSize: 16,
+  },
+  panelTitle: {
+    margin: 0,
+    fontSize: 17,
+    fontWeight: 800,
+    color: "#ffffff",
+  },
+  panelSubtitle: {
+    margin: "2px 0 0",
+    fontSize: 12,
+    color: "#94a3b8",
+  },
+  quickAddBtn: {
+    background: "rgba(255, 255, 255, 0.06)",
+    border: "1px solid rgba(255, 255, 255, 0.12)",
+    color: "#e2e8f0",
+    padding: "6px 12px",
+    borderRadius: 8,
+    fontSize: 12,
+    fontWeight: 700,
+    cursor: "pointer",
+  },
+  emptyState: {
+    textAlign: "center",
+    padding: "36px 16px",
+  },
+  emptyIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 14,
+    background: "rgba(255, 255, 255, 0.04)",
+    color: "#94a3b8",
+    fontSize: 22,
+    display: "grid",
+    placeItems: "center",
+    margin: "0 auto 12px",
+  },
+  txnList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+  },
+  txnItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+    padding: "12px 14px",
+    background: "rgba(255, 255, 255, 0.02)",
+    border: "1px solid rgba(255, 255, 255, 0.05)",
+    borderRadius: 12,
+    transition: "background 0.2s ease",
+  },
+  txnLeft: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    minWidth: 0,
+  },
+  txnIconBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    display: "grid",
+    placeItems: "center",
+    fontSize: 13,
+    flexShrink: 0,
+  },
+  txnName: {
+    display: "block",
+    fontSize: 13,
+    fontWeight: 700,
+    color: "#ffffff",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+  txnCategory: {
+    display: "block",
+    fontSize: 11,
+    color: "#94a3b8",
+  },
+  txnRight: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    flexShrink: 0,
+  },
+  editBtn: {
+    background: "rgba(56, 189, 248, 0.12)",
+    border: "1px solid rgba(56, 189, 248, 0.25)",
+    color: "#38bdf8",
+    borderRadius: 8,
+    width: 28,
+    height: 28,
+    fontSize: 11,
+    cursor: "pointer",
+    display: "grid",
+    placeItems: "center",
+  },
+  deleteBtn: {
+    background: "rgba(244, 63, 94, 0.12)",
+    border: "1px solid rgba(244, 63, 94, 0.25)",
+    color: "#f43f5e",
+    borderRadius: 8,
+    width: 28,
+    height: 28,
+    fontSize: 11,
+    cursor: "pointer",
+    display: "grid",
+    placeItems: "center",
+  },
+  viewAllHistoryBtn: {
+    background: "rgba(255, 255, 255, 0.04)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    color: "#34d399",
+    borderRadius: 12,
+    padding: "12px",
+    fontSize: 13,
+    fontWeight: 700,
+    cursor: "pointer",
+    marginTop: 6,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  topCategoryBadge: {
+    fontSize: 11,
+    fontWeight: 800,
+    color: "#f59e0b",
+    background: "rgba(245, 158, 11, 0.12)",
+    border: "1px solid rgba(245, 158, 11, 0.25)",
+    padding: "3px 10px",
+    borderRadius: 12,
+  },
+  categoryList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 14,
+  },
+  catRow: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  catBarTrack: {
+    height: 7,
+    background: "rgba(255, 255, 255, 0.06)",
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  catBarFill: {
+    height: "100%",
+    borderRadius: 20,
+    transition: "width 0.6s ease",
+  },
 };

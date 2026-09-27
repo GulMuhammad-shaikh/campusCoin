@@ -284,10 +284,9 @@ const styles = {
     minHeight: "100vh",
     display: "flex",
     flexDirection: "column",
-    background:
-      "radial-gradient(circle at 90% 10%, rgba(16, 185, 129, 0.04) 0%, transparent 40%), radial-gradient(circle at 10% 90%, rgba(6, 182, 212, 0.04) 0%, transparent 40%), #f8fafc",
-    color: "#0f172a",
-    fontFamily: "var(--font-sans)",
+    background: "transparent",
+    color: "#ffffff",
+    fontFamily: "var(--font-heading)",
   },
   main: {
     flex: 1,

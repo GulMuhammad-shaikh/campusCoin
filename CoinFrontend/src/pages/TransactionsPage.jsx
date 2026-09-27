@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { transactionAPI, categoryAPI } from "../utils/api";
 import { getTransactions, formatRupees } from "../utils/transactions";
 import TransactionModal from "../components/TransactionModal";
+import sound from "../utils/audio";
 
 /**
  * TransactionsPage
@@ -241,16 +242,17 @@ export default function TransactionsPage({ student, onClose }) {
                 <button
                   key={t}
                   type="button"
-                  onClick={() => setFilterType(t)}
+                  onClick={() => { sound.playPop(); setFilterType(t); }}
                   style={{
                     ...styles.typeBtn,
                     background:
                       filterType === t
-                        ? t === "income"   ? "#07845e"
-                        : t === "expense"  ? "#c84e4e"
-                        : "#2563eb"
-                        : "#f1f5f9",
-                    color: filterType === t ? "#ffffff" : "#475569",
+                        ? t === "income"   ? "#10b981"
+                        : t === "expense"  ? "#ef4444"
+                        : "#6366f1"
+                        : "rgba(255, 255, 255, 0.05)",
+                    border: `1px solid ${filterType === t ? "transparent" : "rgba(255, 255, 255, 0.08)"}`,
+                    color: filterType === t ? "#ffffff" : "#94a3b8",
                   }}
                 >
                   {t === "all" ? (
@@ -277,7 +279,7 @@ export default function TransactionsPage({ student, onClose }) {
             <select
               style={styles.select}
               value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
+              onChange={(e) => { sound.playPop(); setFilterCategory(e.target.value); }}
             >
               <option value="all">All categories</option>
               {categoryOptions.map((c) => (
@@ -306,22 +308,37 @@ export default function TransactionsPage({ student, onClose }) {
             <div style={styles.typeGroup}>
               <button
                 type="button"
-                onClick={() => setDateMode("previous")}
-                style={{ ...styles.typeBtn, background: dateMode === "previous" ? "#475569" : "#f1f5f9", color: dateMode === "previous" ? "#fff" : "#475569" }}
+                onClick={() => { sound.playPop(); setDateMode("previous"); }}
+                style={{
+                  ...styles.typeBtn,
+                  background: dateMode === "previous" ? "#64748b" : "rgba(255, 255, 255, 0.05)",
+                  border: `1px solid ${dateMode === "previous" ? "transparent" : "rgba(255, 255, 255, 0.08)"}`,
+                  color: dateMode === "previous" ? "#fff" : "#94a3b8",
+                }}
               >
                 {monthLabel(prevMonthStr)}
               </button>
               <button
                 type="button"
-                onClick={() => setDateMode("current")}
-                style={{ ...styles.typeBtn, background: dateMode === "current" ? "#2563eb" : "#f1f5f9", color: dateMode === "current" ? "#fff" : "#475569" }}
+                onClick={() => { sound.playPop(); setDateMode("current"); }}
+                style={{
+                  ...styles.typeBtn,
+                  background: dateMode === "current" ? "#6366f1" : "rgba(255, 255, 255, 0.05)",
+                  border: `1px solid ${dateMode === "current" ? "transparent" : "rgba(255, 255, 255, 0.08)"}`,
+                  color: dateMode === "current" ? "#fff" : "#94a3b8",
+                }}
               >
                 {monthLabel(currentMonthStr)} (Current)
               </button>
               <button
                 type="button"
-                onClick={() => setDateMode("range")}
-                style={{ ...styles.typeBtn, background: dateMode === "range" ? "#7c3aed" : "#f1f5f9", color: dateMode === "range" ? "#fff" : "#475569" }}
+                onClick={() => { sound.playPop(); setDateMode("range"); }}
+                style={{
+                  ...styles.typeBtn,
+                  background: dateMode === "range" ? "#06b6d4" : "rgba(255, 255, 255, 0.05)",
+                  border: `1px solid ${dateMode === "range" ? "transparent" : "rgba(255, 255, 255, 0.08)"}`,
+                  color: dateMode === "range" ? "#fff" : "#94a3b8",
+                }}
               >
                 <i className="fa-solid fa-calendar-days" style={{ marginRight: 6 }}></i>
                 Date Range
@@ -475,7 +492,8 @@ const styles = {
     maxWidth: 1120,
     margin: "0 auto",
     padding: "36px 22px 60px",
-    fontFamily: "Inter, Arial, sans-serif",
+    fontFamily: "'Plus Jakarta Sans', sans-serif",
+    color: "#f8fafc",
   },
   topBar: {
     display: "flex",
@@ -485,12 +503,12 @@ const styles = {
     gap: 16,
     marginBottom: 22,
   },
-  eyebrow: { display: "block", color: "#2563eb", fontSize: 11, fontWeight: 900, letterSpacing: 1.4, marginBottom: 6 },
-  title: { margin: "0 0 6px", fontSize: "clamp(24px, 3.5vw, 34px)", color: "#142238", letterSpacing: "-0.8px" },
-  subtitle: { margin: 0, color: "#718096", fontSize: 13 },
+  eyebrow: { display: "block", color: "#10b981", fontSize: 11, fontWeight: 900, letterSpacing: 1.4, marginBottom: 6 },
+  title: { margin: "0 0 6px", fontSize: "clamp(24px, 3.5vw, 34px)", color: "#ffffff", letterSpacing: "-0.8px", fontWeight: 800 },
+  subtitle: { margin: 0, color: "#94a3b8", fontSize: 13 },
   backBtn: {
-    background: "#ffffff", border: "1px solid #e2e8f0", color: "#2563eb",
-    borderRadius: 9, padding: "10px 18px", fontSize: 13, fontWeight: 800,
+    background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "#60a5fa",
+    borderRadius: 10, padding: "10px 18px", fontSize: 13, fontWeight: 800,
     cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap",
   },
   summaryRow: {
@@ -500,16 +518,16 @@ const styles = {
     marginBottom: 18,
   },
   sumCard: {
-    background: "#ffffff", border: "1px solid #e3e9ef", borderRadius: 12,
-    padding: "14px 16px", display: "flex", flexDirection: "column", gap: 6,
-    boxShadow: "0 4px 12px rgba(15,23,42,0.04)",
+    background: "rgba(16, 24, 40, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", backdropFilter: "blur(16px)", borderRadius: 14,
+    padding: "16px 18px", display: "flex", flexDirection: "column", gap: 6,
+    boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
   },
-  sumLabel:  { fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.8 },
-  sumAmount: { fontSize: 19, fontWeight: 900 },
+  sumLabel:  { fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8 },
+  sumAmount: { fontSize: 20, fontWeight: 900 },
   filterCard: {
-    background: "#ffffff", border: "1px solid #e3e9ef", borderRadius: 14,
-    padding: "18px 20px", marginBottom: 18, display: "flex",
-    flexDirection: "column", gap: 14, boxShadow: "0 4px 12px rgba(15,23,42,0.035)",
+    background: "rgba(16, 24, 40, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", backdropFilter: "blur(18px)", borderRadius: 16,
+    padding: "20px 22px", marginBottom: 18, display: "flex",
+    flexDirection: "column", gap: 14, boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
   },
   filterRow: {
     display: "flex",
@@ -517,58 +535,58 @@ const styles = {
     gap: 14,
     alignItems: "flex-end",
   },
-  filterGroup: { display: "flex", flexDirection: "column", gap: 5, flex: 1, minWidth: 140 },
-  filterLabel: { fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.8 },
+  filterGroup: { display: "flex", flexDirection: "column", gap: 6, flex: 1, minWidth: 140 },
+  filterLabel: { fontSize: 11, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8 },
   typeGroup: { display: "flex", gap: 6, flexWrap: "wrap" },
   typeBtn: {
-    border: "none", borderRadius: 7, padding: "7px 12px",
+    border: "none", borderRadius: 8, padding: "8px 14px",
     fontSize: 12, fontWeight: 800, cursor: "pointer", fontFamily: "inherit",
     transition: "all 0.15s ease",
   },
   select: {
-    width: "100%", boxSizing: "border-box", border: "1px solid #dce4eb",
-    background: "#f8fafc", borderRadius: 8, padding: "9px 12px",
-    fontSize: 13, color: "#1e293b", fontFamily: "inherit", outlineColor: "#2563eb",
+    width: "100%", boxSizing: "border-box", border: "1px solid rgba(255, 255, 255, 0.12)",
+    background: "#141d30", borderRadius: 10, padding: "10px 12px",
+    fontSize: 13, color: "#ffffff", fontFamily: "inherit", outline: "none",
   },
   searchInput: {
-    width: "100%", boxSizing: "border-box", border: "1px solid #dce4eb",
-    background: "#f8fafc", borderRadius: 8, padding: "9px 12px",
-    fontSize: 13, color: "#1e293b", fontFamily: "inherit", outlineColor: "#2563eb",
+    width: "100%", boxSizing: "border-box", border: "1px solid rgba(255, 255, 255, 0.12)",
+    background: "rgba(255, 255, 255, 0.05)", borderRadius: 10, padding: "10px 12px",
+    fontSize: 13, color: "#ffffff", fontFamily: "inherit", outline: "none",
   },
   dateInput: {
-    width: "100%", boxSizing: "border-box", border: "1px solid #dce4eb",
-    background: "#f8fafc", borderRadius: 8, padding: "9px 12px",
-    fontSize: 13, color: "#1e293b", fontFamily: "inherit", outlineColor: "#7c3aed",
+    width: "100%", boxSizing: "border-box", border: "1px solid rgba(255, 255, 255, 0.12)",
+    background: "rgba(255, 255, 255, 0.05)", borderRadius: 10, padding: "10px 12px",
+    fontSize: 13, color: "#ffffff", fontFamily: "inherit", outline: "none",
   },
   tableCard: {
-    background: "#ffffff", border: "1px solid #e3e9ef", borderRadius: 14,
-    padding: "6px 0", boxShadow: "0 8px 25px rgba(15,23,42,0.05)", overflow: "hidden",
+    background: "rgba(16, 24, 40, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", backdropFilter: "blur(18px)", borderRadius: 16,
+    padding: "6px 0", boxShadow: "0 10px 30px rgba(0,0,0,0.3)", overflow: "hidden",
   },
   errorBox: {
-    background: "#fffbeb", border: "1px solid #fcd34d", color: "#92400e",
-    padding: "10px 16px", margin: "10px 16px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+    background: "rgba(245, 158, 11, 0.15)", border: "1px solid rgba(245, 158, 11, 0.3)", color: "#fbbf24",
+    padding: "10px 16px", margin: "10px 16px", borderRadius: 10, fontSize: 12, fontWeight: 600,
   },
   loadingWrap: { textAlign: "center", padding: "50px 20px" },
   spinner: {
-    width: 36, height: 36, border: "4px solid #e2e8f0",
-    borderTop: "4px solid #2563eb", borderRadius: "50%",
+    width: 36, height: 36, border: "4px solid rgba(255, 255, 255, 0.1)",
+    borderTop: "4px solid #10b981", borderRadius: "50%",
     margin: "0 auto",
     animation: "spin 0.8s linear infinite",
   },
-  emptyWrap: { textAlign: "center", padding: "50px 20px", color: "#64748b" },
+  emptyWrap: { textAlign: "center", padding: "50px 20px", color: "#94a3b8" },
   emptyIcon: { fontSize: 36, marginBottom: 12 },
   table: {
     width: "100%", minWidth: 640, borderCollapse: "collapse",
     fontSize: 13, textAlign: "left",
   },
   th: {
-    color: "#718096", fontSize: 10, letterSpacing: 0.8, textTransform: "uppercase",
-    padding: "12px 14px", borderBottom: "2px solid #e9eef3", fontWeight: 800,
-    background: "#f8fafc",
+    color: "#94a3b8", fontSize: 10, letterSpacing: 0.8, textTransform: "uppercase",
+    padding: "13px 16px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", fontWeight: 800,
+    background: "rgba(255, 255, 255, 0.02)",
   },
-  td: { padding: "13px 14px", borderBottom: "1px solid #edf1f5", verticalAlign: "middle", color: "#536477" },
+  td: { padding: "14px 16px", borderBottom: "1px solid rgba(255, 255, 255, 0.05)", verticalAlign: "middle", color: "#cbd5e1" },
   catBadge: {
-    display: "inline-block", padding: "3px 9px", borderRadius: 20,
+    display: "inline-block", padding: "4px 10px", borderRadius: 20,
     fontSize: 11, fontWeight: 700, whiteSpace: "nowrap",
   },
   typeBadge: {
@@ -576,12 +594,12 @@ const styles = {
     fontSize: 11, fontWeight: 800, whiteSpace: "nowrap",
   },
   iconEditBtn: {
-    background: "#eff6ff",
-    border: "1px solid #bfdbfe",
-    color: "#2563eb",
-    borderRadius: 6,
-    width: 28,
-    height: 28,
+    background: "rgba(99, 102, 241, 0.15)",
+    border: "1px solid rgba(99, 102, 241, 0.3)",
+    color: "#818cf8",
+    borderRadius: 8,
+    width: 30,
+    height: 30,
     fontSize: 11,
     display: "grid",
     placeItems: "center",
@@ -590,12 +608,12 @@ const styles = {
     transition: "all 0.15s ease",
   },
   iconDeleteBtn: {
-    background: "#fef2f2",
-    border: "1px solid #fecaca",
-    color: "#ef4444",
-    borderRadius: 6,
-    width: 28,
-    height: 28,
+    background: "rgba(239, 68, 68, 0.15)",
+    border: "1px solid rgba(239, 68, 68, 0.3)",
+    color: "#f87171",
+    borderRadius: 8,
+    width: 30,
+    height: 30,
     fontSize: 11,
     display: "grid",
     placeItems: "center",

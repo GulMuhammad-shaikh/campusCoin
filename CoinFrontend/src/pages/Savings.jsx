@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { authAPI, transactionAPI } from "../utils/api";
 import { formatRupees, getCurrency } from "../utils/transactions";
+import { fireConfetti, fireCelebration } from "../utils/confetti";
+import sound from "../utils/audio";
 
 export default function Savings({ student }) {
   const userId        = student?.user_id || student?._id || student?.id;
@@ -106,8 +108,10 @@ export default function Savings({ student }) {
       const stored = JSON.parse(localStorage.getItem("campusCoinCurrentStudent") || "{}");
       stored.monthly_savings_goal = val;
       localStorage.setItem("campusCoinCurrentStudent", JSON.stringify(stored));
-      setSaveMsg("Goal saved successfully.");
-      setTimeout(() => setSaveMsg(""), 3000);
+      sound.playChime();
+      fireConfetti();
+      setSaveMsg("Goal saved successfully!");
+      setTimeout(() => setSaveMsg(""), 3500);
     } catch (err) {
       setSaveMsg("Could not save goal. Please try again.");
     } finally {
@@ -313,10 +317,10 @@ export default function Savings({ student }) {
             { iconClass: "fa-solid fa-calendar-check", tip: "Conduct a 5-minute weekend review to ensure all receipts are accounted for." },
           ].map(({ iconClass, tip }, i) => (
             <div key={i} style={S.tipCard}>
-              <span style={{ width: 34, height: 34, borderRadius: 8, background: "#f1f5f9", display: "grid", placeItems: "center", color: "#334155", fontSize: 14 }}>
+              <span style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255, 255, 255, 0.06)", display: "grid", placeItems: "center", color: "#60a5fa", fontSize: 14, border: "1px solid rgba(255, 255, 255, 0.08)" }}>
                 <i className={iconClass}></i>
               </span>
-              <p style={{ margin: 0, fontSize: 13, color: "#475569", lineHeight: 1.6 }}>{tip}</p>
+              <p style={{ margin: 0, fontSize: 13, color: "#cbd5e1", lineHeight: 1.6 }}>{tip}</p>
             </div>
           ))}
         </div>
@@ -327,47 +331,57 @@ export default function Savings({ student }) {
 
 function KpiCard({ label, value, color, iconClass }) {
   return (
-    <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 14, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 6, boxShadow: "0 2px 10px rgba(0,0,0,0.02)" }} className="card-hover">
-      <span style={{ width: 32, height: 32, display: "grid", placeItems: "center", borderRadius: 8, fontSize: 14, color, background: `${color}16` }}>
+    <div style={{
+      background: "rgba(16, 24, 40, 0.75)",
+      border: "1px solid rgba(255, 255, 255, 0.08)",
+      backdropFilter: "blur(16px)",
+      borderRadius: 14,
+      padding: "16px 18px",
+      display: "flex",
+      flexDirection: "column",
+      gap: 6,
+      boxShadow: "0 8px 30px rgba(0,0,0,0.25)"
+    }} className="card-hover">
+      <span style={{ width: 34, height: 34, display: "grid", placeItems: "center", borderRadius: 10, fontSize: 14, color, background: `${color}20`, border: `1px solid ${color}35` }}>
         <i className={iconClass}></i>
       </span>
-      <span style={{ color: "#64748b", fontSize: 11, fontWeight: 700, letterSpacing: 0.3 }}>{label.toUpperCase()}</span>
-      <strong style={{ color, fontSize: 17, letterSpacing: "-0.4px" }}>{value}</strong>
+      <span style={{ color: "#94a3b8", fontSize: 11, fontWeight: 700, letterSpacing: 0.5 }}>{label.toUpperCase()}</span>
+      <strong style={{ color, fontSize: 18, letterSpacing: "-0.4px" }}>{value}</strong>
     </div>
   );
 }
 
 const S = {
-  center:  { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", fontFamily: "'Inter', sans-serif" },
-  spinner: { width: 38, height: 38, border: "4px solid #e2e8f0", borderTop: "4px solid #07845e", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
-  page:    { maxWidth: 1000, margin: "0 auto", padding: "36px 20px 70px", fontFamily: "'Inter', Arial, sans-serif" },
+  center:  { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", fontFamily: "'Plus Jakarta Sans', sans-serif" },
+  spinner: { width: 38, height: 38, border: "4px solid rgba(255,255,255,0.1)", borderTop: "4px solid #10b981", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
+  page:    { maxWidth: 1000, margin: "0 auto", padding: "36px 20px 70px", fontFamily: "'Plus Jakarta Sans', sans-serif", color: "#f8fafc" },
   headerWrap: { marginBottom: 24 },
-  eyebrow: { display: "inline-flex", alignItems: "center", color: "#07845e", fontSize: 11, fontWeight: 800, letterSpacing: 1.2, marginBottom: 6 },
-  title:   { color: "#0f172a", fontSize: "clamp(24px, 3.5vw, 32px)", margin: "0 0 6px", letterSpacing: "-0.8px", fontWeight: 800 },
-  subtitle:{ color: "#64748b", fontSize: 14, lineHeight: 1.5 },
+  eyebrow: { display: "inline-flex", alignItems: "center", color: "#10b981", fontSize: 11, fontWeight: 800, letterSpacing: 1.2, marginBottom: 6 },
+  title:   { color: "#ffffff", fontSize: "clamp(24px, 3.5vw, 32px)", margin: "0 0 6px", letterSpacing: "-0.8px", fontWeight: 800 },
+  subtitle:{ color: "#94a3b8", fontSize: 14, lineHeight: 1.5 },
 
   kpiGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 14, marginBottom: 20 },
 
-  card:    { background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 16, padding: "24px", marginBottom: 20, boxShadow: "0 4px 20px rgba(0,0,0,0.02)" },
-  cardTitle:{ color: "#0f172a", fontSize: 17, fontWeight: 800, margin: 0 },
-  cardSub: { color: "#64748b", fontSize: 13, margin: "4px 0 18px" },
+  card:    { background: "rgba(16, 24, 40, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", backdropFilter: "blur(18px)", borderRadius: 16, padding: "24px", marginBottom: 20, boxShadow: "0 10px 32px rgba(0,0,0,0.3)" },
+  cardTitle:{ color: "#ffffff", fontSize: 17, fontWeight: 800, margin: 0 },
+  cardSub: { color: "#94a3b8", fontSize: 13, margin: "4px 0 18px" },
 
   goalForm:     { display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" },
-  goalInputWrap:{ display: "flex", alignItems: "center", border: "1.5px solid #e2e8f0", borderRadius: 10, overflow: "hidden", background: "#ffffff", flexGrow: 1, maxWidth: 280 },
-  rsSign:       { padding: "11px 14px", background: "#f8fafc", color: "#475569", fontSize: 13, fontWeight: 700, borderRight: "1px solid #e2e8f0" },
-  goalInput:    { border: "none", background: "transparent", padding: "11px 14px", fontSize: 15, fontWeight: 700, outline: "none", width: "100%", boxSizing: "border-box" },
-  saveBtn:      { border: "none", borderRadius: 10, padding: "11px 20px", background: "linear-gradient(135deg, #07845e, #10b981)", color: "#fff", fontWeight: 700, cursor: "pointer", fontFamily: "inherit", fontSize: 13, display: "inline-flex", alignItems: "center" },
+  goalInputWrap:{ display: "flex", alignItems: "center", border: "1.5px solid rgba(255, 255, 255, 0.12)", borderRadius: 12, overflow: "hidden", background: "rgba(255, 255, 255, 0.05)", flexGrow: 1, maxWidth: 300 },
+  rsSign:       { padding: "12px 16px", background: "rgba(255, 255, 255, 0.08)", color: "#10b981", fontSize: 14, fontWeight: 800, borderRight: "1px solid rgba(255, 255, 255, 0.1)" },
+  goalInput:    { border: "none", background: "transparent", padding: "12px 14px", fontSize: 15, fontWeight: 700, outline: "none", width: "100%", boxSizing: "border-box", color: "#ffffff" },
+  saveBtn:      { border: "none", borderRadius: 12, padding: "12px 22px", background: "linear-gradient(135deg, #10b981, #059669)", color: "#fff", fontWeight: 800, cursor: "pointer", fontFamily: "inherit", fontSize: 13, display: "inline-flex", alignItems: "center", boxShadow: "0 4px 16px rgba(16,185,129,0.3)" },
 
-  progressTrack:{ height: 12, background: "#f1f5f9", borderRadius: 20, overflow: "hidden", marginBottom: 12 },
+  progressTrack:{ height: 14, background: "rgba(255, 255, 255, 0.07)", borderRadius: 20, overflow: "hidden", marginBottom: 12, border: "1px solid rgba(255, 255, 255, 0.05)" },
   progressFill: { height: "100%", borderRadius: 20, transition: "width 0.7s ease" },
-  progressMeta: { display: "flex", justifyContent: "space-between", fontSize: 13, color: "#64748b" },
-  successBanner:{ background: "#ecfdf5", border: "1px solid #a7f3d0", color: "#065f46", borderRadius: 10, padding: "12px 16px", marginTop: 16, fontSize: 13, display: "flex", alignItems: "center" },
-  infoBanner:   { background: "#eff6ff", border: "1px solid #bfdbfe", color: "#1e40af", borderRadius: 10, padding: "12px 16px", marginTop: 16, fontSize: 13, display: "flex", alignItems: "center" },
-  warnBanner:   { background: "#fff7ed", border: "1px solid #fed7aa", color: "#9a3412", borderRadius: 10, padding: "12px 16px", marginTop: 16, fontSize: 13, display: "flex", alignItems: "center" },
+  progressMeta: { display: "flex", justifyContent: "space-between", fontSize: 13, color: "#94a3b8" },
+  successBanner:{ background: "rgba(16, 185, 129, 0.15)", border: "1px solid rgba(16, 185, 129, 0.35)", color: "#34d399", borderRadius: 12, padding: "12px 16px", marginTop: 16, fontSize: 13, display: "flex", alignItems: "center" },
+  infoBanner:   { background: "rgba(59, 130, 246, 0.15)", border: "1px solid rgba(59, 130, 246, 0.35)", color: "#60a5fa", borderRadius: 12, padding: "12px 16px", marginTop: 16, fontSize: 13, display: "flex", alignItems: "center" },
+  warnBanner:   { background: "rgba(245, 158, 11, 0.15)", border: "1px solid rgba(245, 158, 11, 0.35)", color: "#fbbf24", borderRadius: 12, padding: "12px 16px", marginTop: 16, fontSize: 13, display: "flex", alignItems: "center" },
 
   historyGrid:  { display: "flex", gap: 10, alignItems: "flex-end", height: 160, paddingTop: 16 },
   histCol:      { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, height: "100%" },
 
   tipsGrid:     { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: 14 },
-  tipCard:      { background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 12, padding: "16px", display: "flex", flexDirection: "column", gap: 10 },
+  tipCard:      { background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.06)", borderRadius: 12, padding: "16px", display: "flex", flexDirection: "column", gap: 10 },
 };

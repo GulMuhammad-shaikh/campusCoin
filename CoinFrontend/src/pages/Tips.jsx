@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { transactionAPI } from "../utils/api";
 import { formatRupees, getCurrency } from "../utils/transactions";
+import { fireConfetti } from "../utils/confetti";
+import sound from "../utils/audio";
 
 const GEMINI_KEY = import.meta.env.VITE_GEMINI_KEY || "";
 const GEMINI_URL =
@@ -124,6 +126,8 @@ export default function AiTips({ student }) {
       const parsed = JSON.parse(match[0]);
       setAiTips(parsed);
       setLastGenerated(new Date().toLocaleTimeString());
+      sound.playChime();
+      fireConfetti();
     } catch (err) {
       setError("AI generation failed: " + err.message);
     } finally {
@@ -136,6 +140,7 @@ export default function AiTips({ student }) {
   }, [loadFinancialData]);
 
   function togglePin(title) {
+    sound.playPop();
     setPinned((prev) => {
       const next = prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title];
       localStorage.setItem("campusCoinPinnedTips", JSON.stringify(next));
@@ -303,8 +308,9 @@ function TipCard({ iconClass, title, body, pinned, onPin, ai }) {
       <div style={S.cardTop}>
         <span style={{
           ...S.iconWrap,
-          background: ai ? "#ede9fe" : "#f1f5f9",
-          color:      ai ? "#6366f1" : "#334155",
+          background: ai ? "rgba(139, 92, 246, 0.2)" : "rgba(255, 255, 255, 0.06)",
+          color:      ai ? "#c084fc" : "#60a5fa",
+          border:     ai ? "1px solid rgba(139, 92, 246, 0.4)" : "1px solid rgba(255, 255, 255, 0.08)",
         }}>
           <i className={iconClass}></i>
         </span>
@@ -316,7 +322,7 @@ function TipCard({ iconClass, title, body, pinned, onPin, ai }) {
         )}
         <button
           onClick={onPin}
-          style={{ ...S.pinBtn, color: pinned ? "#6366f1" : "#94a3b8" }}
+          style={{ ...S.pinBtn, color: pinned ? "#818cf8" : "#64748b" }}
           title={pinned ? "Unpin tip" : "Pin tip"}
         >
           <i className="fa-solid fa-thumbtack"></i>
@@ -332,50 +338,50 @@ function SumCard({ label, value, color, icon }) {
   return (
     <div style={{ ...S.sumCard, borderTop: `3px solid ${color}` }} className="card-hover">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: "#64748b", letterSpacing: 0.5 }}>{label.toUpperCase()}</span>
-        <i className={icon} style={{ color, fontSize: 12 }}></i>
+        <span style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", letterSpacing: 0.5 }}>{label.toUpperCase()}</span>
+        <i className={icon} style={{ color, fontSize: 13 }}></i>
       </div>
-      <strong style={{ fontSize: 18, color, marginTop: 4 }}>{value}</strong>
+      <strong style={{ fontSize: 19, color, marginTop: 4 }}>{value}</strong>
     </div>
   );
 }
 
 const S = {
-  page: { maxWidth: 1100, margin: "0 auto", padding: "36px 20px 70px", fontFamily: "'Inter', Arial, sans-serif" },
+  page: { maxWidth: 1100, margin: "0 auto", padding: "36px 20px 70px", fontFamily: "'Plus Jakarta Sans', sans-serif", color: "#f8fafc" },
   header: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 18, marginBottom: 26 },
-  eyebrow: { display: "inline-flex", alignItems: "center", color: "#07845e", fontSize: 11, fontWeight: 800, letterSpacing: 1.2, marginBottom: 6 },
-  title: { margin: "0 0 6px", fontSize: "clamp(24px, 3.5vw, 32px)", color: "#0f172a", letterSpacing: "-0.8px", fontWeight: 800 },
-  subtitle: { margin: 0, color: "#64748b", fontSize: 14, lineHeight: 1.5 },
+  eyebrow: { display: "inline-flex", alignItems: "center", color: "#10b981", fontSize: 11, fontWeight: 800, letterSpacing: 1.2, marginBottom: 6 },
+  title: { margin: "0 0 6px", fontSize: "clamp(24px, 3.5vw, 32px)", color: "#ffffff", letterSpacing: "-0.8px", fontWeight: 800 },
+  subtitle: { margin: 0, color: "#94a3b8", fontSize: 14, lineHeight: 1.5 },
   genBtn: {
     background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
-    color: "#fff", border: "none", borderRadius: 10,
-    padding: "12px 20px", fontSize: 13, fontWeight: 700,
+    color: "#fff", border: "none", borderRadius: 12,
+    padding: "12px 22px", fontSize: 13, fontWeight: 800,
     cursor: "pointer", flexShrink: 0, fontFamily: "inherit",
-    boxShadow: "0 4px 14px rgba(79, 70, 229, 0.25)",
+    boxShadow: "0 4px 18px rgba(79, 70, 229, 0.35)",
     display: "inline-flex", alignItems: "center",
   },
   summaryBar: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 24 },
-  sumCard: { background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 12, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 4, boxShadow: "0 2px 10px rgba(0,0,0,0.02)" },
-  errorBox: { background: "#fef2f2", border: "1px solid #fecaca", color: "#b91c1c", padding: "12px 16px", borderRadius: 10, marginBottom: 20, fontSize: 13, display: "flex", alignItems: "center" },
+  sumCard: { background: "rgba(16, 24, 40, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", backdropFilter: "blur(16px)", borderRadius: 14, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 4, boxShadow: "0 8px 30px rgba(0,0,0,0.25)" },
+  errorBox: { background: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239, 68, 68, 0.35)", color: "#fca5a5", padding: "12px 16px", borderRadius: 12, marginBottom: 20, fontSize: 13, display: "flex", alignItems: "center" },
   section: { marginBottom: 32 },
   sectionHead: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 10 },
-  sectionTitle: { margin: 0, fontSize: 17, fontWeight: 800, color: "#0f172a" },
-  sectionSub: { margin: "3px 0 0", fontSize: 12, color: "#64748b" },
+  sectionTitle: { margin: 0, fontSize: 18, fontWeight: 800, color: "#ffffff" },
+  sectionSub: { margin: "3px 0 0", fontSize: 12, color: "#94a3b8" },
   grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 },
-  card: { background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 14, padding: 22, boxShadow: "0 2px 12px rgba(0,0,0,0.02)", transition: "all 0.15s ease" },
-  cardPinned: { border: "1.5px solid #6366f1", boxShadow: "0 4px 20px rgba(99, 102, 241, 0.1)" },
-  cardAi: { background: "linear-gradient(135deg, #faf5ff, #f8fafc)", border: "1.5px solid #ddd6fe" },
+  card: { background: "rgba(16, 24, 40, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", backdropFilter: "blur(18px)", borderRadius: 16, padding: 22, boxShadow: "0 10px 30px rgba(0,0,0,0.3)", transition: "all 0.15s ease" },
+  cardPinned: { border: "1.5px solid #6366f1", boxShadow: "0 0 25px rgba(99, 102, 241, 0.25)" },
+  cardAi: { background: "linear-gradient(135deg, rgba(30, 27, 75, 0.6), rgba(17, 24, 39, 0.8))", border: "1.5px solid rgba(139, 92, 246, 0.3)" },
   cardTop: { display: "flex", alignItems: "center", gap: 8, marginBottom: 14 },
-  iconWrap: { width: 34, height: 34, borderRadius: 8, display: "grid", placeItems: "center", fontSize: 14 },
-  aiBadge: { background: "#ede9fe", color: "#6d28d9", fontSize: 10, fontWeight: 800, padding: "3px 8px", borderRadius: 20, letterSpacing: 0.5, display: "inline-flex", alignItems: "center" },
-  pinBtn: { marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: 14, padding: 4 },
-  cardTitle: { margin: "0 0 8px", fontSize: 15, fontWeight: 700, color: "#0f172a" },
-  cardBody: { margin: 0, color: "#475569", fontSize: 13, lineHeight: 1.6 },
+  iconWrap: { width: 36, height: 36, borderRadius: 10, display: "grid", placeItems: "center", fontSize: 14 },
+  aiBadge: { background: "rgba(139, 92, 246, 0.2)", color: "#c084fc", border: "1px solid rgba(139, 92, 246, 0.4)", fontSize: 10, fontWeight: 800, padding: "3px 8px", borderRadius: 20, letterSpacing: 0.5, display: "inline-flex", alignItems: "center" },
+  pinBtn: { marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: 15, padding: 4 },
+  cardTitle: { margin: "0 0 8px", fontSize: 16, fontWeight: 700, color: "#ffffff" },
+  cardBody: { margin: 0, color: "#cbd5e1", fontSize: 13, lineHeight: 1.6 },
   loadingBox: { display: "flex", flexDirection: "column", alignItems: "center", padding: "50px 20px" },
-  spinner: { width: 36, height: 36, border: "3px solid #e2e8f0", borderTop: "3px solid #6366f1", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
-  setupBox: { background: "#f8fafc", border: "1px dashed #cbd5e1", borderRadius: 16, padding: "36px 24px", textAlign: "center", marginBottom: 32 },
-  setupIcon: { width: 44, height: 44, borderRadius: 12, background: "#ede9fe", color: "#6366f1", display: "grid", placeItems: "center", fontSize: 18, margin: "0 auto 12px" },
-  clearBtn: { background: "none", border: "1px solid #e2e8f0", color: "#64748b", borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer", display: "inline-flex", alignItems: "center" },
-  pinnedTag: { background: "#ede9fe", color: "#5b21b6", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 7 },
-  removePin: { background: "none", border: "none", color: "#6d28d9", cursor: "pointer", fontSize: 12, padding: 0, marginLeft: 2 },
+  spinner: { width: 36, height: 36, border: "3px solid rgba(255,255,255,0.1)", borderTop: "3px solid #6366f1", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
+  setupBox: { background: "rgba(255, 255, 255, 0.03)", border: "1px dashed rgba(255, 255, 255, 0.15)", borderRadius: 16, padding: "36px 24px", textAlign: "center", marginBottom: 32 },
+  setupIcon: { width: 44, height: 44, borderRadius: 12, background: "rgba(99, 102, 241, 0.2)", color: "#818cf8", display: "grid", placeItems: "center", fontSize: 18, margin: "0 auto 12px" },
+  clearBtn: { background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "#94a3b8", borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer", display: "inline-flex", alignItems: "center" },
+  pinnedTag: { background: "rgba(99, 102, 241, 0.2)", color: "#a5b4fc", border: "1px solid rgba(99, 102, 241, 0.3)", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 7 },
+  removePin: { background: "none", border: "none", color: "#c084fc", cursor: "pointer", fontSize: 12, padding: 0, marginLeft: 2 },
 };

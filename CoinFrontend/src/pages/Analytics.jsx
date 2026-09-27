@@ -50,12 +50,13 @@ function DayTooltip({ active, payload, label }) {
 
 const tt = {
   box: {
-    background: "#fff",
-    border: "1px solid #e2e8f0",
+    background: "#0c121e",
+    border: "1px solid rgba(255, 255, 255, 0.12)",
     borderRadius: 10,
     padding: "10px 14px",
-    boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
-    fontFamily: "Inter, sans-serif",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5)",
+    fontFamily: "var(--font-heading)",
+    color: "#ffffff",
   },
 };
 
@@ -353,8 +354,8 @@ export default function Analytics({ student }) {
                     <div key={entry.name} style={S.pieLegendRow}>
                       <span style={{ ...S.pieDot, background: entry.color }} />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: "#17283e" }}>{entry.name}</div>
-                        <div style={{ fontSize: 12, color: "#718096" }}>{formatRupees(entry.value)} · {pct}%</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#ffffff" }}>{entry.name}</div>
+                        <div style={{ fontSize: 12, color: "#94a3b8" }}>{formatRupees(entry.value)} · {pct}%</div>
                       </div>
                     </div>
                   );
@@ -423,12 +424,12 @@ export default function Analytics({ student }) {
                     <div key={entry.name} style={S.pieLegendRow}>
                       <span style={{ ...S.pieDot, background: entry.color }} />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: "#17283e" }}>{entry.name}</div>
-                        <div style={{ fontSize: 12, color: "#718096" }}>{formatRupees(entry.value)} · {pct}%</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#ffffff" }}>{entry.name}</div>
+                        <div style={{ fontSize: 12, color: "#94a3b8" }}>{formatRupees(entry.value)} · {pct}%</div>
                       </div>
                       {/* mini bar */}
                       <div style={{ width: 70 }}>
-                        <div style={{ height: 6, background: "#f0f4f8", borderRadius: 20, overflow: "hidden" }}>
+                        <div style={{ height: 6, background: "rgba(255, 255, 255, 0.08)", borderRadius: 20, overflow: "hidden" }}>
                           <div style={{ height: "100%", width: `${pct}%`, background: entry.color, borderRadius: 20 }} />
                         </div>
                       </div>
@@ -525,26 +526,26 @@ const S = {
     marginBottom: 22,
   },
   page: {
-    maxWidth: 1100,
+    maxWidth: 1220,
     margin: "0 auto",
-    padding: "42px 22px 70px",
-    fontFamily: "Inter, Arial, sans-serif",
+    padding: "36px clamp(16px, 3.5vw, 36px) 70px",
+    fontFamily: "var(--font-heading)",
   },
   center: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    minHeight: "60vh",
-    fontFamily: "Inter, Arial, sans-serif",
+    minHeight: "65vh",
+    fontFamily: "var(--font-heading)",
   },
   spinner: {
-    width: 40,
-    height: 40,
-    border: "4px solid #e2e8f0",
-    borderTop: "4px solid #07845e",
+    width: 44,
+    height: 44,
+    border: "4px solid rgba(255, 255, 255, 0.1)",
+    borderTop: "4px solid #10b981",
     borderRadius: "50%",
-    animation: "spin 0.8s linear infinite",
+    animation: "spinSlow 0.9s linear infinite",
   },
   header: {
     display: "flex",
@@ -555,50 +556,52 @@ const S = {
     marginBottom: 26,
   },
   eyebrow: {
-    display: "block",
-    color: "#07845e",
+    display: "inline-flex",
+    alignItems: "center",
+    color: "#34d399",
     fontSize: 11,
-    fontWeight: 900,
-    letterSpacing: 1.4,
+    fontWeight: 800,
+    letterSpacing: 1.2,
     marginBottom: 6,
   },
   title: {
     margin: "0 0 6px",
-    fontSize: "clamp(26px, 4vw, 34px)",
-    color: "#142238",
-    letterSpacing: "-1px",
+    fontSize: "clamp(26px, 4vw, 36px)",
+    color: "#ffffff",
+    letterSpacing: "-0.8px",
+    fontWeight: 900,
   },
-  sub: { margin: 0, color: "#718096", fontSize: 14 },
+  sub: { margin: 0, color: "#94a3b8", fontSize: 14 },
   selectors: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" },
   select: {
-    border: "1px solid #dce4eb",
-    borderRadius: 9,
-    padding: "9px 12px",
+    border: "1px solid rgba(255, 255, 255, 0.12)",
+    borderRadius: 10,
+    padding: "9px 14px",
     fontSize: 13,
-    fontFamily: "Inter, sans-serif",
-    background: "#fff",
-    color: "#17283e",
+    fontFamily: "inherit",
+    background: "rgba(16, 24, 40, 0.8)",
+    color: "#ffffff",
     cursor: "pointer",
   },
   refreshBtn: {
-    background: "#f1f5f9",
-    color: "#475569",
-    border: "1px solid #e2e8f0",
-    width: 36,
-    height: 36,
-    borderRadius: 9,
-    fontSize: 18,
+    background: "rgba(255, 255, 255, 0.06)",
+    color: "#ffffff",
+    border: "1px solid rgba(255, 255, 255, 0.12)",
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    fontSize: 15,
     display: "grid",
     placeItems: "center",
     cursor: "pointer",
   },
   errorBanner: {
-    background: "#fef3cd",
-    border: "1px solid #fcd34d",
-    color: "#92400e",
-    padding: "11px 16px",
-    borderRadius: 10,
-    marginBottom: 16,
+    background: "rgba(244, 63, 94, 0.15)",
+    border: "1px solid rgba(244, 63, 94, 0.3)",
+    color: "#fca5a5",
+    padding: "12px 18px",
+    borderRadius: 12,
+    marginBottom: 20,
     fontSize: 13,
     fontWeight: 600,
     display: "flex",
@@ -607,10 +610,10 @@ const S = {
     gap: 12,
   },
   retryBtn: {
-    background: "#fbbf24",
+    background: "#f43f5e",
     border: "none",
-    color: "#78350f",
-    borderRadius: 7,
+    color: "#ffffff",
+    borderRadius: 8,
     padding: "6px 12px",
     fontSize: 12,
     fontWeight: 800,
@@ -623,25 +626,28 @@ const S = {
     marginBottom: 28,
   },
   pill: {
-    borderRadius: 14,
+    borderRadius: 16,
     padding: "16px 20px",
     display: "flex",
     flexDirection: "column",
     gap: 6,
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.4)",
   },
   card: {
-    background: "#fff",
-    border: "1px solid #e3e9ef",
-    borderRadius: 18,
+    background: "rgba(16, 24, 40, 0.75)",
+    backdropFilter: "blur(18px)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    borderRadius: 20,
     padding: "26px 28px",
     marginBottom: 22,
-    boxShadow: "0 8px 32px rgba(16,35,55,0.04)",
+    boxShadow: "0 20px 45px -12px rgba(0, 0, 0, 0.65)",
   },
   cardTitle: {
     margin: 0,
     fontSize: 18,
     fontWeight: 800,
-    color: "#17283e",
+    color: "#ffffff",
   },
   cardSub: {
     margin: "6px 0 0",
@@ -654,7 +660,7 @@ const S = {
     alignItems: "center",
     gap: 12,
     padding: "9px 0",
-    borderBottom: "1px solid #f1f5f9",
+    borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
   },
   pieDot: {
     width: 12,
