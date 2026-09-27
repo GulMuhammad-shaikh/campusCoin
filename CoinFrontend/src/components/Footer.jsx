@@ -146,7 +146,7 @@ export default function Footer() {
   );
 }
 
-const getStyles = (isDark) => ({
+function getStyles(isDark) { return {
   footer: {
     position: "relative",
     background: isDark
@@ -348,4 +348,4 @@ const getStyles = (isDark) => ({
     placeItems: "center",
     transition: "all 0.2s ease",
   },
-});
+}; }

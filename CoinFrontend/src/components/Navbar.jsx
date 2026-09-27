@@ -343,7 +343,8 @@ export default function Navbar({ student, onLogout }) {
   );
 }
 
-const getStyles = (isDark) => ({
+function getStyles(isDark) {
+  return {
   header: {
     position: "sticky",
     top: 0,
@@ -604,4 +605,5 @@ const getStyles = (isDark) => ({
     alignItems: "center",
     justifyContent: "center",
   },
-});
+  }  
+}

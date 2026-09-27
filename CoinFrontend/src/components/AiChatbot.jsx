@@ -31,7 +31,7 @@ const SUGGESTIONS = [
 
 export default function AiChatbot({ student }) {
   const { isDark } = useTheme();
-  const styles = getStyles(isDark);
+  
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState("");
