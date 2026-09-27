@@ -1,10 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Footer() {
+  const { theme, toggleTheme, isDark } = useTheme();
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  const styles = getStyles(isDark);
 
   return (
     <footer style={styles.footer}>
@@ -19,7 +24,7 @@ export default function Footer() {
               <i className="fa-solid fa-coins"></i>
             </span>
             <div style={styles.brandText}>
-              Campus<span style={{ color: "#34d399" }}>Coin</span>
+              Campus<span style={{ color: "#10b981" }}>Coin</span>
             </div>
           </div>
           <p style={styles.mission}>
@@ -27,7 +32,7 @@ export default function Footer() {
           </p>
           <div style={styles.badgeRow}>
             <span style={styles.securityBadge}>
-              <i className="fa-solid fa-shield-halved" style={{ marginRight: 6, color: "#34d399" }}></i>
+              <i className="fa-solid fa-shield-halved" style={{ marginRight: 6, color: "#10b981" }}></i>
               Student-Safe & Private
             </span>
             <span style={styles.securityBadge}>
@@ -79,7 +84,7 @@ export default function Footer() {
           <h4 style={styles.colTitle}>Key Highlights</h4>
           <div style={styles.highlightCard}>
             <div style={styles.highlightTitle}>
-              <i className="fa-solid fa-chart-pie" style={{ color: "#38bdf8", marginRight: 8 }}></i>
+              <i className="fa-solid fa-chart-pie" style={{ color: "#0284c7", marginRight: 8 }}></i>
               Dual Donut Charts
             </div>
             <p style={styles.highlightText}>
@@ -106,6 +111,21 @@ export default function Footer() {
           </span>
 
           <div style={styles.bottomRight}>
+            {/* Quick theme selector button in footer */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              style={styles.themeToggleBtn}
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              aria-label="Toggle dark or light mode"
+            >
+              <i
+                className={isDark ? "fa-solid fa-moon" : "fa-solid fa-sun"}
+                style={{ color: isDark ? "#38bdf8" : "#f59e0b", marginRight: 6 }}
+              />
+              <span>{isDark ? "Dark Mode" : "Light Mode"}</span>
+            </button>
+
             <span style={styles.statusIndicator}>
               <span style={styles.statusDot} />
               API Systems Active
@@ -115,6 +135,7 @@ export default function Footer() {
               onClick={scrollToTop}
               style={styles.backToTopBtn}
               title="Back to top"
+              aria-label="Back to top"
             >
               <i className="fa-solid fa-arrow-up"></i>
             </button>
@@ -125,14 +146,17 @@ export default function Footer() {
   );
 }
 
-const styles = {
+const getStyles = (isDark) => ({
   footer: {
     position: "relative",
-    background: "linear-gradient(180deg, #0b132b 0%, #070d19 100%)",
-    color: "#cbd5e1",
+    background: isDark
+      ? "linear-gradient(180deg, #0b132b 0%, #070d19 100%)"
+      : "linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%)",
+    color: isDark ? "#cbd5e1" : "#64748b",
     marginTop: "auto",
-    fontFamily: "var(--font-sans)",
-    borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+    fontFamily: "var(--font-heading)",
+    borderTop: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid rgba(0, 0, 0, 0.08)",
+    transition: "background 0.25s ease, border-color 0.25s ease, color 0.25s ease",
   },
   glowLine: {
     height: 1,
@@ -157,7 +181,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: 10,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     fontWeight: 800,
     fontSize: 22,
     letterSpacing: "-0.5px",
@@ -179,7 +203,7 @@ const styles = {
   mission: {
     margin: 0,
     fontSize: 13,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#64748b",
     lineHeight: 1.6,
   },
   badgeRow: {
@@ -193,9 +217,9 @@ const styles = {
     alignItems: "center",
     fontSize: 11,
     fontWeight: 600,
-    color: "#e2e8f0",
-    background: "rgba(255, 255, 255, 0.05)",
-    border: "1px solid rgba(255, 255, 255, 0.1)",
+    color: isDark ? "#e2e8f0" : "#334155",
+    background: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.04)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(0, 0, 0, 0.08)",
     padding: "4px 10px",
     borderRadius: 20,
   },
@@ -208,7 +232,7 @@ const styles = {
     margin: 0,
     fontSize: 14,
     fontWeight: 800,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     letterSpacing: "0.5px",
     textTransform: "uppercase",
   },
@@ -222,7 +246,7 @@ const styles = {
   },
   link: {
     textDecoration: "none",
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#64748b",
     fontSize: 13,
     fontWeight: 500,
     display: "inline-flex",
@@ -232,19 +256,20 @@ const styles = {
   },
   linkArrow: {
     fontSize: 10,
-    color: "#34d399",
-    opacity: 0.7,
+    color: "#10b981",
+    opacity: 0.8,
   },
   highlightCard: {
-    background: "rgba(255, 255, 255, 0.03)",
-    border: "1px solid rgba(255, 255, 255, 0.07)",
+    background: isDark ? "rgba(255, 255, 255, 0.03)" : "#ffffff",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.07)" : "1px solid rgba(0, 0, 0, 0.07)",
     borderRadius: 12,
     padding: "12px 14px",
+    boxShadow: isDark ? "none" : "0 2px 8px rgba(15, 23, 42, 0.04)",
   },
   highlightTitle: {
     fontSize: 13,
     fontWeight: 700,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     marginBottom: 4,
     display: "flex",
     alignItems: "center",
@@ -252,12 +277,12 @@ const styles = {
   highlightText: {
     margin: 0,
     fontSize: 12,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#64748b",
     lineHeight: 1.5,
   },
   bottomBar: {
-    borderTop: "1px solid rgba(255, 255, 255, 0.06)",
-    background: "rgba(0, 0, 0, 0.2)",
+    borderTop: isDark ? "1px solid rgba(255, 255, 255, 0.06)" : "1px solid rgba(0, 0, 0, 0.06)",
+    background: isDark ? "rgba(0, 0, 0, 0.2)" : "rgba(0, 0, 0, 0.02)",
     padding: "16px clamp(18px, 4vw, 36px)",
   },
   bottomInner: {
@@ -271,12 +296,25 @@ const styles = {
   },
   copy: {
     fontSize: 12,
-    color: "#64748b",
+    color: isDark ? "#64748b" : "#94a3b8",
   },
   bottomRight: {
     display: "flex",
     alignItems: "center",
-    gap: 16,
+    gap: 12,
+  },
+  themeToggleBtn: {
+    display: "inline-flex",
+    alignItems: "center",
+    background: isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.08)",
+    borderRadius: 8,
+    padding: "4px 10px",
+    fontSize: 12,
+    fontWeight: 700,
+    color: isDark ? "#e2e8f0" : "#334155",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
   },
   statusIndicator: {
     display: "inline-flex",
@@ -284,9 +322,9 @@ const styles = {
     gap: 6,
     fontSize: 11,
     fontWeight: 600,
-    color: "#34d399",
-    background: "rgba(52, 211, 153, 0.1)",
-    border: "1px solid rgba(52, 211, 153, 0.2)",
+    color: "#10b981",
+    background: "rgba(16, 185, 129, 0.1)",
+    border: "1px solid rgba(16, 185, 129, 0.2)",
     padding: "3px 9px",
     borderRadius: 12,
   },
@@ -294,20 +332,20 @@ const styles = {
     width: 6,
     height: 6,
     borderRadius: "50%",
-    background: "#34d399",
-    boxShadow: "0 0 8px #34d399",
+    background: "#10b981",
+    boxShadow: "0 0 8px #10b981",
   },
   backToTopBtn: {
     width: 32,
     height: 32,
     borderRadius: 8,
-    background: "rgba(255, 255, 255, 0.08)",
-    border: "1px solid rgba(255, 255, 255, 0.12)",
-    color: "#e2e8f0",
+    background: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.08)",
+    color: isDark ? "#e2e8f0" : "#334155",
     fontSize: 12,
     cursor: "pointer",
     display: "grid",
     placeItems: "center",
     transition: "all 0.2s ease",
   },
-};
+});

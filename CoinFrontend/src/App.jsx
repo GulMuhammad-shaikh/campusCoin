@@ -289,7 +289,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     background: "transparent",
-    color: "#ffffff",
+    color: "var(--text-pure)",
     fontFamily: "var(--font-heading)",
   },
   main: {

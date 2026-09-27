@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { getCurrency, formatRupees } from "../utils/transactions";
 import { transactionAPI } from "../utils/api";
 import sound from "../utils/audio";
+import { useTheme } from "../context/ThemeContext";
 
 const DEFAULT_GEMINI_B64 = "QVEuQWI4Uk42SkFaLTNFNnJJclpEd2JIa1ZkYVpQV1RhNnhmeTBpSXlxc1BVZkpBMW5hcGc=";
 const GEMINI_KEY = (
@@ -29,6 +30,8 @@ const SUGGESTIONS = [
 ];
 
 export default function AiChatbot({ student }) {
+  const { isDark } = useTheme();
+  const styles = getStyles(isDark);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState("");

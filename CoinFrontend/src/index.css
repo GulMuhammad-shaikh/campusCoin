@@ -1,11 +1,63 @@
 /* ═════════════════════════════════════════════════════════════════════════════
    CAMPUS COIN — NEXT-GEN IMMERSIVE FINTECH DESIGN SYSTEM
    Ultra-attractive, modern, interactive, and gamified experience
+   Supporting Dual Dark & Light Themes (Light Mode Default on Open)
+   Full Mobile Responsiveness — All Breakpoints Covered
    ═════════════════════════════════════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
 
-:root {
+/* ─── DEFAULT & LIGHT THEME VARIABLES ─── */
+:root,
+[data-theme="light"] {
+  --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Vibrant Neon FinTech Colors */
+  --neon-emerald: #059669;
+  --neon-mint:    #10b981;
+  --neon-cyan:    #0891b2;
+  --neon-sky:     #0284c7;
+  --neon-indigo:  #4f46e5;
+  --neon-purple:  #7c3aed;
+  --neon-pink:    #db2777;
+  --neon-amber:   #d97706;
+  --neon-rose:    #e11d48;
+
+  /* Crisp Light Theme Layers */
+  --bg-darkest:   #f6f8fb;
+  --bg-dark:      #ffffff;
+  --bg-card:      #ffffff;
+  --bg-card-hover:#ffffff;
+  --border-glass: rgba(0, 0, 0, 0.08);
+  --border-glow:  rgba(16, 185, 129, 0.3);
+
+  --text-pure:    #0f172a;
+  --text-dim:     #334155;
+  --text-muted:   #64748b;
+
+  /* Specular Glow & Soft Shadows */
+  --shadow-neon:  0 0 20px rgba(16, 185, 129, 0.2);
+  --shadow-card:  0 8px 24px -4px rgba(15, 23, 42, 0.06), 0 0 1px 1px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 16px 36px -6px rgba(15, 23, 42, 0.1), 0 0 15px rgba(16, 185, 129, 0.15);
+  --shadow-holo:  0 15px 35px -10px rgba(6, 182, 212, 0.2);
+
+  /* Platform specific tokens */
+  --nav-bg:       rgba(255, 255, 255, 0.88);
+  --nav-border:   rgba(0, 0, 0, 0.08);
+  --footer-bg:    linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+  --footer-border:rgba(0, 0, 0, 0.08);
+  --input-bg:     #f8fafc;
+  --input-border: #cbd5e1;
+  --input-text:   #0f172a;
+  --tag-bg:       rgba(0, 0, 0, 0.05);
+  --scrollbar-track: #f1f5f9;
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-thumb-hover: #94a3b8;
+}
+
+/* ─── DARK THEME VARIABLES ─── */
+[data-theme="dark"] {
   --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
@@ -21,22 +73,35 @@
   --neon-rose:    #f43f5e;
 
   /* Rich Dark Theme Layers */
-  --bg-darkest:  #080c14;
-  --bg-dark:     #0c121e;
-  --bg-card:     rgba(16, 24, 40, 0.75);
-  --bg-card-hover: rgba(22, 33, 56, 0.88);
+  --bg-darkest:   #080c14;
+  --bg-dark:      #0c121e;
+  --bg-card:      rgba(16, 24, 40, 0.75);
+  --bg-card-hover:rgba(22, 33, 56, 0.88);
   --border-glass: rgba(255, 255, 255, 0.09);
   --border-glow:  rgba(52, 211, 153, 0.35);
 
-  --text-pure:   #ffffff;
-  --text-dim:    #cbd5e1;
-  --text-muted:  #94a3b8;
+  --text-pure:    #ffffff;
+  --text-dim:     #cbd5e1;
+  --text-muted:   #94a3b8;
 
   /* Specular Glow Shadows */
-  --shadow-neon: 0 0 25px rgba(16, 185, 129, 0.25);
-  --shadow-card: 0 20px 45px -12px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.08);
+  --shadow-neon:  0 0 25px rgba(16, 185, 129, 0.25);
+  --shadow-card:  0 20px 45px -12px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.08);
   --shadow-hover: 0 30px 60px -15px rgba(0, 0, 0, 0.8), 0 0 20px rgba(52, 211, 153, 0.25);
-  --shadow-holo: 0 20px 40px -10px rgba(6, 182, 212, 0.35);
+  --shadow-holo:  0 20px 40px -10px rgba(6, 182, 212, 0.35);
+
+  /* Platform specific tokens */
+  --nav-bg:       rgba(11, 19, 43, 0.92);
+  --nav-border:   rgba(255, 255, 255, 0.08);
+  --footer-bg:    linear-gradient(180deg, #0b132b 0%, #070d19 100%);
+  --footer-border:rgba(255, 255, 255, 0.08);
+  --input-bg:     rgba(255, 255, 255, 0.05);
+  --input-border: rgba(255, 255, 255, 0.12);
+  --input-text:   #ffffff;
+  --tag-bg:       rgba(255, 255, 255, 0.06);
+  --scrollbar-track: #080c14;
+  --scrollbar-thumb: #1e293b;
+  --scrollbar-thumb-hover: #334155;
 }
 
 *, *::before, *::after {
@@ -45,6 +110,11 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: light;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+html[data-theme="dark"] {
   color-scheme: dark;
 }
 
@@ -58,12 +128,28 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
   overflow-x: hidden;
+  background-attachment: fixed;
+  background-size: cover;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Light Mode Background Gradients */
+html:not([data-theme="dark"]) body,
+html[data-theme="light"] body {
+  background-color: #f6f8fb;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.09) 0px, transparent 48%),
+    radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+    radial-gradient(at 50% 20%, rgba(6, 182, 212, 0.05) 0px, transparent 45%);
+}
+
+/* Dark Mode Background Gradients */
+html[data-theme="dark"] body {
+  background-color: #080c14;
   background-image: 
     radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
     radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.14) 0px, transparent 55%),
     radial-gradient(at 50% 20%, rgba(6, 182, 212, 0.08) 0px, transparent 50%);
-  background-attachment: fixed;
-  background-size: cover;
 }
 
 #root {
@@ -73,22 +159,22 @@ body {
   flex-direction: column;
 }
 
-/* ── Custom Futuristic Scrollbar ── */
+/* ── Custom Scrollbar ── */
 ::-webkit-scrollbar {
   width: 7px;
   height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #080c14;
+  background: var(--scrollbar-track);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: var(--scrollbar-thumb);
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-glass);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
-  box-shadow: 0 0 8px rgba(52, 211, 153, 0.4);
+  background: var(--scrollbar-thumb-hover);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
 }
 
 /* ═════════════════════════════════════════════════════════════════════════════
@@ -172,6 +258,11 @@ body {
   }
 }
 
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* ═════════════════════════════════════════════════════════════════════════════
    ATTRACTIVE INTERACTIVE UTILITY CLASSES
    ═════════════════════════════════════════════════════════════════════════════ */
@@ -204,7 +295,7 @@ body {
 .card-hover:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-hover);
-  border-color: rgba(52, 211, 153, 0.35) !important;
+  border-color: var(--border-glow) !important;
 }
 
 /* Holographic Virtual Student Card */
@@ -240,12 +331,24 @@ body {
 
 /* Radiant Text Gradients */
 .gradient-text {
+  background: linear-gradient(135deg, #059669 0%, #0284c7 50%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+html[data-theme="dark"] .gradient-text {
   background: linear-gradient(135deg, #34d399 0%, #38bdf8 50%, #818cf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .gradient-text-gold {
+  background: linear-gradient(135deg, #d97706 0%, #ea580c 50%, #db2777 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+html[data-theme="dark"] .gradient-text-gold {
   background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #ec4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -260,7 +363,7 @@ body {
 
 .btn-glow:hover {
   transform: translateY(-2px);
-  filter: brightness(1.1);
+  filter: brightness(1.08);
   box-shadow: 0 8px 24px -2px rgba(16, 185, 129, 0.45);
 }
 
@@ -268,7 +371,198 @@ body {
   transform: translateY(0);
 }
 
-/* Responsive Navigation Styles */
+/* ═════════════════════════════════════════════════════════════════════════════
+   LIGHT THEME TARGETED COMPONENT STYLES
+   Ensures flawless contrast, readability, and modern aesthetics across all views
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+html:not([data-theme="dark"]) header,
+html[data-theme="light"] header {
+  background: var(--nav-bg) !important;
+  border-bottom: 1px solid var(--nav-border) !important;
+  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.05) !important;
+}
+
+html:not([data-theme="dark"]) footer,
+html[data-theme="light"] footer {
+  background: var(--footer-bg) !important;
+  border-top: 1px solid var(--footer-border) !important;
+  color: var(--text-muted) !important;
+}
+
+html:not([data-theme="dark"]) .glass-panel,
+html[data-theme="light"] .glass-panel {
+  background: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+/* ─── Light mode: page backgrounds & sections ─── */
+html:not([data-theme="dark"]) main,
+html[data-theme="light"] main {
+  background: transparent;
+}
+
+/* Light mode: glass card overrides (all dark rgba backgrounds → white) */
+html:not([data-theme="dark"]) aside,
+html[data-theme="light"] aside,
+html:not([data-theme="dark"]) section[class*="card"],
+html[data-theme="light"] section[class*="card"],
+html:not([data-theme="dark"]) div[style*="background: rgba(16, 24, 40"],
+html[data-theme="light"] div[style*="background: rgba(16, 24, 40"],
+html:not([data-theme="dark"]) div[style*="background:rgba(16, 24, 40"],
+html[data-theme="light"] div[style*="background:rgba(16, 24, 40"],
+html:not([data-theme="dark"]) section[style*="background: rgba(16, 24, 40"],
+html[data-theme="light"] section[style*="background: rgba(16, 24, 40"],
+html:not([data-theme="dark"]) aside[style*="background: rgba(16, 24, 40"],
+html[data-theme="light"] aside[style*="background: rgba(16, 24, 40"] {
+  background: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+/* Light mode typography overrides */
+html:not([data-theme="dark"]) h1[style*="color: #ffffff"],
+html[data-theme="light"] h1[style*="color: #ffffff"],
+html:not([data-theme="dark"]) h1[style*="color:#ffffff"],
+html[data-theme="light"] h1[style*="color:#ffffff"],
+html:not([data-theme="dark"]) h2[style*="color: #ffffff"],
+html[data-theme="light"] h2[style*="color: #ffffff"],
+html:not([data-theme="dark"]) h2[style*="color:#ffffff"],
+html[data-theme="light"] h2[style*="color:#ffffff"],
+html:not([data-theme="dark"]) h3[style*="color: #ffffff"],
+html[data-theme="light"] h3[style*="color: #ffffff"],
+html:not([data-theme="dark"]) h3[style*="color:#ffffff"],
+html[data-theme="light"] h3[style*="color:#ffffff"],
+html:not([data-theme="dark"]) strong[style*="color: #ffffff"],
+html[data-theme="light"] strong[style*="color: #ffffff"],
+html:not([data-theme="dark"]) strong[style*="color:#ffffff"],
+html[data-theme="light"] strong[style*="color:#ffffff"] {
+  color: #0f172a !important;
+}
+
+/* Light mode: text that's #e2e8f0, #cbd5e1, #94a3b8 — darken for readability */
+html:not([data-theme="dark"]) p[style*="color: #94a3b8"],
+html[data-theme="light"] p[style*="color: #94a3b8"],
+html:not([data-theme="dark"]) div[style*="color: #94a3b8"],
+html[data-theme="light"] div[style*="color: #94a3b8"],
+html:not([data-theme="dark"]) span[style*="color: #94a3b8"],
+html[data-theme="light"] span[style*="color: #94a3b8"] {
+  color: #64748b !important;
+}
+
+html:not([data-theme="dark"]) p[style*="color: #e2e8f0"],
+html[data-theme="light"] p[style*="color: #e2e8f0"],
+html:not([data-theme="dark"]) div[style*="color: #e2e8f0"],
+html[data-theme="light"] div[style*="color: #e2e8f0"],
+html:not([data-theme="dark"]) span[style*="color: #e2e8f0"],
+html[data-theme="light"] span[style*="color: #e2e8f0"] {
+  color: #334155 !important;
+}
+
+/* Light mode form controls */
+html:not([data-theme="dark"]) input:not([type="checkbox"]):not([type="radio"]),
+html[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]),
+html:not([data-theme="dark"]) select,
+html[data-theme="light"] select {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: var(--input-border) !important;
+}
+
+/* Light mode table headers and borders */
+html:not([data-theme="dark"]) th,
+html[data-theme="light"] th {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+html:not([data-theme="dark"]) td,
+html[data-theme="light"] td {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  color: #1e293b !important;
+}
+
+/* Light mode chatbot panel */
+html:not([data-theme="dark"]) .chatbot-panel,
+html[data-theme="light"] .chatbot-panel {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 25px 50px rgba(15, 23, 42, 0.15) !important;
+  color: #0f172a !important;
+}
+
+/* Light mode: analytics select/refresh button */
+html:not([data-theme="dark"]) select[style*="background: rgba(16, 24, 40"],
+html[data-theme="light"] select[style*="background: rgba(16, 24, 40"] {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Light mode spinner border */
+html:not([data-theme="dark"]) div[style*="border: 4px solid rgba(255"],
+html[data-theme="light"] div[style*="border: 4px solid rgba(255"] {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Light mode: quick action buttons with white bg */
+html:not([data-theme="dark"]) button[style*="background: rgba(255, 255, 255, 0.06"],
+html[data-theme="light"] button[style*="background: rgba(255, 255, 255, 0.06"] {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: #334155 !important;
+}
+
+/* Light mode: add expense btn */
+html:not([data-theme="dark"]) button[style*="color: #fca5a5"],
+html[data-theme="light"] button[style*="color: #fca5a5"] {
+  color: #dc2626 !important;
+  background: rgba(220, 38, 38, 0.08) !important;
+}
+
+/* Light mode: add category btn */
+html:not([data-theme="dark"]) button[style*="color: #c7d2fe"],
+html[data-theme="light"] button[style*="color: #c7d2fe"] {
+  color: #4f46e5 !important;
+  background: rgba(79, 70, 229, 0.08) !important;
+}
+
+/* Light mode: metric/stat title text */
+html:not([data-theme="dark"]) div[style*="color: #94a3b8"][style*="text-transform: uppercase"],
+html[data-theme="light"] div[style*="color: #94a3b8"][style*="text-transform: uppercase"] {
+  color: #64748b !important;
+}
+
+/* Light mode: Login & Register page backgrounds */
+html:not([data-theme="dark"]) main[style*="background: #f5f8f7"],
+html[data-theme="light"] main[style*="background: #f5f8f7"],
+html:not([data-theme="dark"]) main[style*="background:#f5f8f7"],
+html[data-theme="light"] main[style*="background:#f5f8f7"] {
+  background: var(--bg-darkest) !important;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   DARK MODE — ANALYTICS PAGE INLINE OVERRIDES
+   ═════════════════════════════════════════════════════════════════════════════ */
+html[data-theme="dark"] div[style*="color: #0f172a"],
+html[data-theme="dark"] div[style*="color:#0f172a"] {
+  color: #e2e8f0 !important;
+}
+html[data-theme="dark"] div[style*="background: #eff6ff"],
+html[data-theme="dark"] div[style*="background:#eff6ff"] {
+  background: rgba(59, 130, 246, 0.12) !important;
+  color: #93c5fd !important;
+}
+html[data-theme="dark"] div[style*="color: #1d4ed8"],
+html[data-theme="dark"] div[style*="color:#1d4ed8"] {
+  color: #93c5fd !important;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   RESPONSIVE NAVIGATION
+   ═════════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 960px) {
   header nav {
     display: none !important;
@@ -277,3 +571,256 @@ body {
     display: grid !important;
   }
 }
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   FULL MOBILE RESPONSIVENESS
+   All pages, all breakpoints — 320px to 960px
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Global page padding on small screens ─── */
+@media (max-width: 640px) {
+  /* All page wrappers — reduce side padding on mobile */
+  div[style*="maxWidth: 1220"],
+  div[style*="max-width: 1220"],
+  div[style*="maxWidth: 1120"],
+  div[style*="max-width: 1120"],
+  div[style*="maxWidth: 1000"],
+  div[style*="max-width: 1000"] {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  /* Transaction table — horizontal scroll */
+  div[style*="overflow-x: auto"],
+  div[style*="overflowX: auto"] {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ─── Login & Register form card ─── */
+@media (max-width: 500px) {
+  section[style*="maxWidth: 440"],
+  section[style*="max-width: 440"] {
+    padding: 24px 18px !important;
+    border-radius: 16px !important;
+    margin: 0 4px;
+  }
+}
+
+/* ─── Dashboard ─── */
+@media (max-width: 640px) {
+  /* Speed actions row — wrap buttons */
+  div[style*="display: flex"][style*="flexWrap: wrap"],
+  div[style*="display:flex"][style*="flexWrap:wrap"] {
+    flex-wrap: wrap !important;
+  }
+
+  /* KPI grid — 2 cols on mobile */
+  div[style*="gridTemplateColumns: repeat(auto-fit, minmax(180px"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Two-col layout (recent + categories) — stack on mobile */
+  div[style*="gridTemplateColumns: repeat(auto-fit, minmax(min(100%, 460px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Action buttons — smaller */
+  button[style*="borderRadius: 12"][style*="padding: 10px 16px"] {
+    padding: 9px 12px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* ─── Analytics ─── */
+@media (max-width: 700px) {
+  /* Two-col donut charts — stack vertically */
+  div[style*="gridTemplateColumns: repeat(auto-fit, minmax(min(100%, 460px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Selector row — wrap */
+  div[style*="display: flex"][style*="gap: 10"][style*="flexWrap"] {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+}
+
+/* ─── Analytics year/month selectors ─── */
+@media (max-width: 480px) {
+  select[style*="padding: 9px 14px"] {
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* ─── Transactions table — scrollable on mobile ─── */
+@media (max-width: 768px) {
+  /* Table overflow wrapper */
+  div[style*="borderRadius: 20"][style*="overflow: hidden"],
+  div[style*="border-radius: 20"][style*="overflow: hidden"] {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Make the table itself min-width so it scrolls properly */
+  table {
+    min-width: 560px;
+  }
+
+  /* Filter row — wrap filters */
+  div[style*="display: flex"][style*="flexWrap: wrap"][style*="gap: 10"] {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* Filter buttons — full width if needed */
+  button[style*="borderRadius: 10"][style*="padding: 8px"] {
+    font-size: 12px !important;
+  }
+}
+
+/* ─── Savings page ─── */
+@media (max-width: 640px) {
+  /* KPI grid 2-col on mobile */
+  div[style*="repeat(auto-fill, minmax(140px"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* ─── AI Chatbot floating button — adjust on very small screens ─── */
+@media (max-width: 400px) {
+  /* The floating AI button */
+  div[style*="position: fixed"][style*="bottom: 28px"][style*="right: 22px"],
+  div[style*="position:fixed"][style*="bottom:28px"] {
+    bottom: 16px !important;
+    right: 12px !important;
+  }
+}
+
+/* ─── Home page hero ─── */
+@media (max-width: 640px) {
+  /* Hero title font size */
+  h1[style*="clamp"] {
+    font-size: clamp(28px, 8vw, 40px) !important;
+  }
+
+  /* Feature card grid — 1 col */
+  div[style*="repeat(auto-fit, minmax(220px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  div[style*="repeat(auto-fit, minmax(260px"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── Profile page ─── */
+@media (max-width: 740px) {
+  /* Side + main layout — stack */
+  div[style*="display: flex"][style*="gap: 28"],
+  div[style*="display:flex"][style*="gap:28"] {
+    flex-direction: column !important;
+  }
+}
+
+/* ─── Tips page ─── */
+@media (max-width: 700px) {
+  /* Tips grid — 1 col */
+  div[style*="repeat(auto-fill, minmax(300px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  div[style*="repeat(auto-fill, minmax(280px"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── Modal responsiveness ─── */
+@media (max-width: 520px) {
+  /* Transaction modal card */
+  div[style*="maxWidth: 480"][style*="position: relative"],
+  div[style*="max-width: 480"][style*="position: relative"] {
+    width: calc(100vw - 24px) !important;
+    max-width: 100% !important;
+    padding: 20px 16px !important;
+    border-radius: 16px !important;
+    margin: 12px !important;
+  }
+
+  /* Category modal */
+  div[style*="maxWidth: 420"][style*="position: relative"] {
+    width: calc(100vw - 24px) !important;
+    max-width: 100% !important;
+    padding: 20px 16px !important;
+  }
+}
+
+/* ─── Footer responsiveness ─── */
+@media (max-width: 640px) {
+  footer div[style*="display: flex"][style*="justifyContent: space-between"] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+  }
+
+  footer div[style*="display: flex"][style*="gap: 28"] {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+}
+
+/* ─── Dashboard holographic card row ─── */
+@media (max-width: 500px) {
+  div[style*="minHeight: 240"] {
+    min-height: 200px !important;
+    padding: 20px 18px !important;
+  }
+}
+
+/* ─── General text / heading size reduction on very small screens ─── */
+@media (max-width: 380px) {
+  h1, h2 {
+    word-break: break-word;
+  }
+
+  body {
+    font-size: 14px;
+  }
+}
+
+/* ─── Chatbot panel mobile ─── */
+@media (max-width: 440px) {
+  /* Panel already uses min(390px, calc(100vw - 32px)) — good */
+  /* Just ensure it doesn't go off-screen */
+  div[style*="position: fixed"][style*="bottom"][style*="right"] > div {
+    max-height: calc(100vh - 120px) !important;
+  }
+}
+
+/* ─── Smooth transitions for theme change ─── */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+/* Disable transitions on media/images to avoid flash */
+img, video, canvas, svg {
+  transition: none !important;
+}
+
+/* Animation exceptions — don't override animation with transition */
+.animate-fade-in,
+.animate-slide-up,
+.animate-scale-in,
+.animate-float,
+.holo-card,
+.btn-glow {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease,
+              background-color 0.2s ease,
+              color 0.2s ease !important;
+}
+

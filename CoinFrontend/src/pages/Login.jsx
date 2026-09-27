@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authAPI } from "../utils/api";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Login({ onLogin }) {
   const navigate = useNavigate();
+  const { isDark } = useTheme();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,8 +59,8 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <main style={styles.page} className="animate-fade-in">
-      <section style={styles.card} className="card-hover">
+    <main style={getStyles(isDark).page} className="animate-fade-in">
+      <section style={getStyles(isDark).card} className="card-hover">
         <div style={styles.brandMark}>
           <i className="fa-solid fa-coins"></i>
         </div>
@@ -143,28 +145,34 @@ export default function Login({ onLogin }) {
   );
 }
 
+function getStyles(isDark) {
+  return {
+    page: {
+      minHeight: "calc(100vh - 80px)",
+      boxSizing: "border-box",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: "40px 18px",
+      background: "transparent",
+      fontFamily: "var(--font-heading)",
+      color: isDark ? "#e2e8f0" : "#172033",
+    },
+    card: {
+      width: "100%",
+      maxWidth: 440,
+      boxSizing: "border-box",
+      background: isDark ? "rgba(16, 24, 40, 0.88)" : "#ffffff",
+      border: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #e5ebe8",
+      borderRadius: 20,
+      padding: "34px 32px",
+      boxShadow: isDark ? "0 20px 45px rgba(0, 0, 0, 0.5)" : "0 18px 50px rgba(19, 42, 34, 0.08)",
+      backdropFilter: isDark ? "blur(18px)" : "none",
+    },
+  };
+}
+
 const styles = {
-  page: {
-    minHeight: "calc(100vh - 80px)",
-    boxSizing: "border-box",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "40px 18px",
-    background: "#f5f8f7",
-    fontFamily: "Inter, system-ui, Arial, sans-serif",
-    color: "#172033",
-  },
-  card: {
-    width: "100%",
-    maxWidth: 440,
-    boxSizing: "border-box",
-    background: "#ffffff",
-    border: "1px solid #e5ebe8",
-    borderRadius: 20,
-    padding: "34px 32px",
-    boxShadow: "0 18px 50px rgba(19, 42, 34, 0.08)",
-  },
   brandMark: {
     width: 46,
     height: 46,
@@ -281,4 +289,4 @@ const styles = {
     fontWeight: 800,
     textDecoration: "none",
   },
-};
+};

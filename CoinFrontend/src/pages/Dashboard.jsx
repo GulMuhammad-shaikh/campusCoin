@@ -4,8 +4,10 @@ import { transactionAPI } from "../utils/api";
 import { formatRupees, getCurrency } from "../utils/transactions";
 import { fireConfetti, fireCelebration } from "../utils/confetti";
 import { sound } from "../utils/audio";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Dashboard({ student, onOpenModal, onViewAll }) {
+  const { isDark } = useTheme();
   const [summary, setSummary]           = useState({ totalIncome: 0, totalExpense: 0, balance: 0 });
   const [recent, setRecent]             = useState([]);
   const [allTxns, setAllTxns]           = useState([]);
@@ -370,10 +372,17 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
                   stroke="#34d399"
                   strokeWidth={2.8}
                   dot={false}
-                  activeDot={{ r: 5, fill: "#34d399", stroke: "#080c14", strokeWidth: 2 }}
+                  activeDot={{ r: 5, fill: "#34d399", stroke: isDark ? "#080c14" : "#ffffff", strokeWidth: 2 }}
                 />
                 <Tooltip
-                  contentStyle={{ background: "#0c121e", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, fontSize: 12, color: "#fff" }}
+                  contentStyle={{
+                    background: isDark ? "#0c121e" : "#ffffff",
+                    border: isDark ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(0,0,0,0.1)",
+                    borderRadius: 10,
+                    fontSize: 12,
+                    color: isDark ? "#fff" : "#0f172a",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                  }}
                   formatter={(v) => [formatRupees(v), "Balance"]}
                   labelFormatter={(l) => `Date: ${l}`}
                 />

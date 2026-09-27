@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Navbar({ student, onLogout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState("Rs");
+  const { theme, toggleTheme, isDark } = useTheme();
 
   // Read current currency and listen for updates
   useEffect(() => {
@@ -35,13 +37,17 @@ export default function Navbar({ student, onLogout }) {
 
   const navLinkStyle = ({ isActive }) => ({
     textDecoration: "none",
-    color: isActive ? "#34d399" : "#e2e8f0",
+    color: isActive ? "#10b981" : (isDark ? "#e2e8f0" : "#475569"),
     fontSize: 13,
     fontWeight: isActive ? 700 : 500,
     padding: "8px 14px",
     borderRadius: 10,
-    background: isActive ? "rgba(52, 211, 153, 0.14)" : "transparent",
-    border: isActive ? "1px solid rgba(52, 211, 153, 0.3)" : "1px solid transparent",
+    background: isActive
+      ? (isDark ? "rgba(52, 211, 153, 0.14)" : "rgba(16, 185, 129, 0.12)")
+      : "transparent",
+    border: isActive
+      ? (isDark ? "1px solid rgba(52, 211, 153, 0.3)" : "1px solid rgba(16, 185, 129, 0.25)")
+      : "1px solid transparent",
     display: "inline-flex",
     alignItems: "center",
     gap: 8,
@@ -52,63 +58,89 @@ export default function Navbar({ student, onLogout }) {
   const studentName = student?.name || student?.username || "Student";
   const initial = studentName.charAt(0).toUpperCase();
 
+  const currentStyles = getStyles(isDark);
+
   return (
-    <header style={styles.header}>
-      <div style={styles.inner}>
+    <header style={currentStyles.header}>
+      <div style={currentStyles.inner}>
         {/* Brand / Logo */}
-        <Link to={student ? "/dashboard" : "/"} style={styles.brand} onClick={() => setMobileMenuOpen(false)}>
-          <span style={styles.logoIcon}>
+        <Link to={student ? "/dashboard" : "/"} style={currentStyles.brand} onClick={() => setMobileMenuOpen(false)}>
+          <span style={currentStyles.logoIcon}>
             <i className="fa-solid fa-coins"></i>
           </span>
-          <div style={styles.brandText}>
-            Campus<span style={{ color: "#34d399" }}>Coin</span>
+          <div style={currentStyles.brandText}>
+            Campus<span style={{ color: "#10b981" }}>Coin</span>
           </div>
-          <span style={styles.versionBadge}>HUB</span>
+          <span style={currentStyles.versionBadge}>HUB</span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav style={styles.desktopNav}>
+        <nav style={currentStyles.desktopNav}>
           {student ? (
             <>
               <NavLink to="/dashboard" style={navLinkStyle}>
-                <i className="fa-solid fa-chart-pie" style={styles.linkIcon}></i>
+                <i className="fa-solid fa-chart-pie" style={currentStyles.linkIcon}></i>
                 Dashboard
               </NavLink>
               <NavLink to="/analytics" style={navLinkStyle}>
-                <i className="fa-solid fa-chart-line" style={styles.linkIcon}></i>
+                <i className="fa-solid fa-chart-line" style={currentStyles.linkIcon}></i>
                 Analytics
               </NavLink>
               <NavLink to="/savings" style={navLinkStyle}>
-                <i className="fa-solid fa-piggy-bank" style={styles.linkIcon}></i>
+                <i className="fa-solid fa-piggy-bank" style={currentStyles.linkIcon}></i>
                 Savings
               </NavLink>
               <NavLink to="/tips" style={navLinkStyle}>
-                <i className="fa-solid fa-wand-magic-sparkles" style={styles.linkIcon}></i>
+                <i className="fa-solid fa-wand-magic-sparkles" style={currentStyles.linkIcon}></i>
                 AI Tips
               </NavLink>
               <NavLink to="/profile" style={navLinkStyle}>
-                <i className="fa-solid fa-user-gear" style={styles.linkIcon}></i>
+                <i className="fa-solid fa-user-gear" style={currentStyles.linkIcon}></i>
                 Profile
               </NavLink>
 
-              <div style={styles.userSection}>
+              <div style={currentStyles.userSection}>
                 {/* Currency Badge */}
-                <div style={styles.currencyBadge} title="Active Currency">
-                  <span style={styles.currencyDot} />
+                <div style={currentStyles.currencyBadge} title="Active Currency">
+                  <span style={currentStyles.currencyDot} />
                   <span>{currencySymbol}</span>
                 </div>
 
+                {/* Theme Mode Toggle Button */}
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  style={currentStyles.themeToggleBtn}
+                  className="btn-glow"
+                  title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                  aria-label="Toggle dark or light mode"
+                >
+                  <span style={currentStyles.themeIconCircle}>
+                    <i
+                      className={isDark ? "fa-solid fa-moon" : "fa-solid fa-sun"}
+                      style={{
+                        color: isDark ? "#38bdf8" : "#f59e0b",
+                        fontSize: 13,
+                        transition: "transform 0.3s ease",
+                      }}
+                    ></i>
+                  </span>
+                  <span style={currentStyles.themeToggleText}>
+                    {isDark ? "Dark" : "Light"}
+                  </span>
+                </button>
+
                 {/* User Pill */}
-                <Link to="/profile" style={styles.userPill} title="View Profile">
-                  <span style={styles.avatarCircle}>{initial}</span>
-                  <span style={styles.userName}>{studentName.split(" ")[0]}</span>
+                <Link to="/profile" style={currentStyles.userPill} title="View Profile">
+                  <span style={currentStyles.avatarCircle}>{initial}</span>
+                  <span style={currentStyles.userName}>{studentName.split(" ")[0]}</span>
                 </Link>
 
                 {/* Logout Button */}
                 <button
                   type="button"
                   onClick={onLogout}
-                  style={styles.logoutBtn}
+                  style={currentStyles.logoutBtn}
                   className="btn-glow"
                   title="Sign out of CampusCoin"
                 >
@@ -119,17 +151,40 @@ export default function Navbar({ student, onLogout }) {
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <NavLink to="/" end style={navLinkStyle}>
-                <i className="fa-solid fa-house" style={styles.linkIcon}></i>
+                <i className="fa-solid fa-house" style={currentStyles.linkIcon}></i>
                 Home
               </NavLink>
               <NavLink to="/login" style={navLinkStyle}>
-                <i className="fa-solid fa-arrow-right-to-bracket" style={styles.linkIcon}></i>
+                <i className="fa-solid fa-arrow-right-to-bracket" style={currentStyles.linkIcon}></i>
                 Login
               </NavLink>
-              <Link to="/register" style={styles.registerBtn} className="btn-glow">
+              <Link to="/register" style={currentStyles.registerBtn} className="btn-glow">
                 <i className="fa-solid fa-user-plus" style={{ marginRight: 6 }}></i>
                 Get Started Free
               </Link>
+
+              {/* Theme Mode Toggle Button for Guests */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                style={currentStyles.themeToggleBtn}
+                className="btn-glow"
+                title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                aria-label="Toggle dark or light mode"
+              >
+                <span style={currentStyles.themeIconCircle}>
+                  <i
+                    className={isDark ? "fa-solid fa-moon" : "fa-solid fa-sun"}
+                    style={{
+                      color: isDark ? "#38bdf8" : "#f59e0b",
+                      fontSize: 13,
+                    }}
+                  ></i>
+                </span>
+                <span style={currentStyles.themeToggleText}>
+                  {isDark ? "Dark" : "Light"}
+                </span>
+              </button>
             </div>
           )}
         </nav>
@@ -138,7 +193,7 @@ export default function Navbar({ student, onLogout }) {
         <button
           type="button"
           onClick={() => setMobileMenuOpen((prev) => !prev)}
-          style={styles.mobileToggleBtn}
+          style={currentStyles.mobileToggleBtn}
           aria-label="Toggle navigation menu"
         >
           <i className={`fa-solid ${mobileMenuOpen ? "fa-xmark" : "fa-bars"}`}></i>
@@ -147,37 +202,71 @@ export default function Navbar({ student, onLogout }) {
 
       {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (
-        <div style={styles.mobileDrawer} className="animate-slide-down">
+        <div style={currentStyles.mobileDrawer} className="animate-slide-down">
           {student ? (
-            <div style={styles.mobileLinks}>
-              <div style={styles.mobileUserHeader}>
-                <span style={styles.avatarCircle}>{initial}</span>
+            <div style={currentStyles.mobileLinks}>
+              <div style={currentStyles.mobileUserHeader}>
+                <span style={currentStyles.avatarCircle}>{initial}</span>
                 <div>
-                  <div style={{ fontWeight: 700, color: "#ffffff", fontSize: 14 }}>{studentName}</div>
-                  <div style={{ fontSize: 12, color: "#94a3b8" }}>
-                    Currency: <span style={{ color: "#34d399", fontWeight: 700 }}>{currencySymbol}</span>
+                  <div style={{ fontWeight: 700, color: isDark ? "#ffffff" : "#0f172a", fontSize: 14 }}>{studentName}</div>
+                  <div style={{ fontSize: 12, color: isDark ? "#94a3b8" : "#64748b" }}>
+                    Currency: <span style={{ color: "#10b981", fontWeight: 700 }}>{currencySymbol}</span>
                   </div>
                 </div>
               </div>
 
+              {/* Mobile Theme Toggle Row */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                style={currentStyles.mobileThemeToggleRow}
+                aria-label="Toggle dark or light mode"
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={currentStyles.mobileThemeIconWrap}>
+                    <i
+                      className={isDark ? "fa-solid fa-moon" : "fa-solid fa-sun"}
+                      style={{ color: isDark ? "#38bdf8" : "#f59e0b" }}
+                    />
+                  </span>
+                  <div style={{ textAlign: "left" }}>
+                    <div style={{ fontWeight: 700, fontSize: 13, color: isDark ? "#ffffff" : "#0f172a" }}>
+                      Theme: {isDark ? "Dark Mode" : "Light Mode"}
+                    </div>
+                    <div style={{ fontSize: 11, color: isDark ? "#94a3b8" : "#64748b" }}>
+                      Tap to switch to {isDark ? "Light Mode" : "Dark Mode"}
+                    </div>
+                  </div>
+                </div>
+                <div style={{
+                  ...currentStyles.themeSwitchPill,
+                  background: isDark ? "#6366f1" : "#10b981",
+                }}>
+                  <div style={{
+                    ...currentStyles.themeSwitchThumb,
+                    transform: isDark ? "translateX(16px)" : "translateX(0px)",
+                  }} />
+                </div>
+              </button>
+
               <NavLink to="/dashboard" style={navLinkStyle} onClick={() => setMobileMenuOpen(false)}>
-                <i className="fa-solid fa-chart-pie" style={styles.linkIcon}></i>
+                <i className="fa-solid fa-chart-pie" style={currentStyles.linkIcon}></i>
                 Dashboard
               </NavLink>
               <NavLink to="/analytics" style={navLinkStyle} onClick={() => setMobileMenuOpen(false)}>
-                <i className="fa-solid fa-chart-line" style={styles.linkIcon}></i>
+                <i className="fa-solid fa-chart-line" style={currentStyles.linkIcon}></i>
                 Analytics
               </NavLink>
               <NavLink to="/savings" style={navLinkStyle} onClick={() => setMobileMenuOpen(false)}>
-                <i className="fa-solid fa-piggy-bank" style={styles.linkIcon}></i>
+                <i className="fa-solid fa-piggy-bank" style={currentStyles.linkIcon}></i>
                 Savings
               </NavLink>
               <NavLink to="/tips" style={navLinkStyle} onClick={() => setMobileMenuOpen(false)}>
-                <i className="fa-solid fa-wand-magic-sparkles" style={styles.linkIcon}></i>
+                <i className="fa-solid fa-wand-magic-sparkles" style={currentStyles.linkIcon}></i>
                 AI Tips
               </NavLink>
               <NavLink to="/profile" style={navLinkStyle} onClick={() => setMobileMenuOpen(false)}>
-                <i className="fa-solid fa-user-gear" style={styles.linkIcon}></i>
+                <i className="fa-solid fa-user-gear" style={currentStyles.linkIcon}></i>
                 Profile Settings
               </NavLink>
 
@@ -187,25 +276,59 @@ export default function Navbar({ student, onLogout }) {
                   setMobileMenuOpen(false);
                   onLogout();
                 }}
-                style={styles.mobileLogoutBtn}
+                style={currentStyles.mobileLogoutBtn}
               >
                 <i className="fa-solid fa-arrow-right-from-bracket" style={{ marginRight: 8 }}></i>
                 Sign Out
               </button>
             </div>
           ) : (
-            <div style={styles.mobileLinks}>
+            <div style={currentStyles.mobileLinks}>
+              {/* Mobile Theme Toggle Row for Guests */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                style={currentStyles.mobileThemeToggleRow}
+                aria-label="Toggle dark or light mode"
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={currentStyles.mobileThemeIconWrap}>
+                    <i
+                      className={isDark ? "fa-solid fa-moon" : "fa-solid fa-sun"}
+                      style={{ color: isDark ? "#38bdf8" : "#f59e0b" }}
+                    />
+                  </span>
+                  <div style={{ textAlign: "left" }}>
+                    <div style={{ fontWeight: 700, fontSize: 13, color: isDark ? "#ffffff" : "#0f172a" }}>
+                      Theme: {isDark ? "Dark Mode" : "Light Mode"}
+                    </div>
+                    <div style={{ fontSize: 11, color: isDark ? "#94a3b8" : "#64748b" }}>
+                      Tap to switch to {isDark ? "Light Mode" : "Dark Mode"}
+                    </div>
+                  </div>
+                </div>
+                <div style={{
+                  ...currentStyles.themeSwitchPill,
+                  background: isDark ? "#6366f1" : "#10b981",
+                }}>
+                  <div style={{
+                    ...currentStyles.themeSwitchThumb,
+                    transform: isDark ? "translateX(16px)" : "translateX(0px)",
+                  }} />
+                </div>
+              </button>
+
               <NavLink to="/" end style={navLinkStyle} onClick={() => setMobileMenuOpen(false)}>
-                <i className="fa-solid fa-house" style={styles.linkIcon}></i>
+                <i className="fa-solid fa-house" style={currentStyles.linkIcon}></i>
                 Home
               </NavLink>
               <NavLink to="/login" style={navLinkStyle} onClick={() => setMobileMenuOpen(false)}>
-                <i className="fa-solid fa-arrow-right-to-bracket" style={styles.linkIcon}></i>
+                <i className="fa-solid fa-arrow-right-to-bracket" style={currentStyles.linkIcon}></i>
                 Login
               </NavLink>
               <Link
                 to="/register"
-                style={styles.registerBtn}
+                style={currentStyles.registerBtn}
                 onClick={() => setMobileMenuOpen(false)}
                 className="btn-glow"
               >
@@ -220,7 +343,7 @@ export default function Navbar({ student, onLogout }) {
   );
 }
 
-const styles = {
+const getStyles = (isDark) => ({
   header: {
     position: "sticky",
     top: 0,
@@ -228,10 +351,10 @@ const styles = {
     width: "100%",
     backdropFilter: "blur(20px)",
     WebkitBackdropFilter: "blur(20px)",
-    background: "rgba(11, 19, 43, 0.92)",
-    borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.22)",
-    transition: "all 0.3s ease",
+    background: isDark ? "rgba(11, 19, 43, 0.92)" : "rgba(255, 255, 255, 0.88)",
+    borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid rgba(0, 0, 0, 0.08)",
+    boxShadow: isDark ? "0 10px 30px rgba(0, 0, 0, 0.22)" : "0 8px 25px rgba(15, 23, 42, 0.05)",
+    transition: "background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease",
   },
   inner: {
     maxWidth: 1220,
@@ -248,11 +371,11 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: 8,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     fontWeight: 800,
     fontSize: 21,
     letterSpacing: "-0.5px",
-    transition: "transform 0.2s ease",
+    transition: "transform 0.2s ease, color 0.2s ease",
   },
   logoIcon: {
     width: 38,
@@ -274,9 +397,9 @@ const styles = {
     fontWeight: 800,
     padding: "2px 7px",
     borderRadius: 6,
-    background: "rgba(52, 211, 153, 0.14)",
-    color: "#34d399",
-    border: "1px solid rgba(52, 211, 153, 0.25)",
+    background: "rgba(16, 185, 129, 0.14)",
+    color: "#10b981",
+    border: "1px solid rgba(16, 185, 129, 0.25)",
     letterSpacing: 0.8,
   },
   desktopNav: {
@@ -293,39 +416,61 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: 8,
-    marginLeft: 10,
+    marginLeft: 8,
     paddingLeft: 12,
-    borderLeft: "1px solid rgba(255, 255, 255, 0.12)",
+    borderLeft: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.1)",
   },
   currencyBadge: {
     display: "inline-flex",
     alignItems: "center",
     gap: 6,
-    background: "rgba(255, 255, 255, 0.06)",
-    border: "1px solid rgba(255, 255, 255, 0.12)",
+    background: isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.08)",
     borderRadius: 8,
     padding: "5px 10px",
     fontSize: 12,
     fontWeight: 700,
-    color: "#e2e8f0",
+    color: isDark ? "#e2e8f0" : "#1e293b",
   },
   currencyDot: {
     width: 6,
     height: 6,
     borderRadius: "50%",
-    background: "#34d399",
-    boxShadow: "0 0 8px #34d399",
+    background: "#10b981",
+    boxShadow: "0 0 8px #10b981",
+  },
+  themeToggleBtn: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    background: isDark ? "rgba(255, 255, 255, 0.07)" : "rgba(0, 0, 0, 0.04)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.14)" : "1px solid rgba(0, 0, 0, 0.08)",
+    borderRadius: 10,
+    padding: "6px 12px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+  },
+  themeIconCircle: {
+    display: "grid",
+    placeItems: "center",
+    width: 20,
+    height: 20,
+  },
+  themeToggleText: {
+    fontSize: 12,
+    fontWeight: 700,
+    color: isDark ? "#e2e8f0" : "#334155",
   },
   userPill: {
     textDecoration: "none",
     display: "inline-flex",
     alignItems: "center",
     gap: 8,
-    background: "rgba(255, 255, 255, 0.06)",
-    border: "1px solid rgba(255, 255, 255, 0.12)",
+    background: isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.08)",
     borderRadius: 20,
     padding: "4px 12px 4px 4px",
-    color: "#f8fafc",
+    color: isDark ? "#f8fafc" : "#0f172a",
     fontSize: 13,
     fontWeight: 600,
     transition: "background 0.2s ease, border-color 0.2s ease",
@@ -350,7 +495,7 @@ const styles = {
   logoutBtn: {
     background: "rgba(239, 68, 68, 0.12)",
     border: "1px solid rgba(239, 68, 68, 0.25)",
-    color: "#fca5a5",
+    color: "#ef4444",
     width: 36,
     height: 36,
     borderRadius: 10,
@@ -375,9 +520,9 @@ const styles = {
   },
   mobileToggleBtn: {
     display: "none",
-    background: "rgba(255, 255, 255, 0.08)",
-    border: "1px solid rgba(255, 255, 255, 0.15)",
-    color: "#f8fafc",
+    background: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.05)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.15)" : "1px solid rgba(0, 0, 0, 0.1)",
+    color: isDark ? "#f8fafc" : "#0f172a",
     width: 40,
     height: 40,
     borderRadius: 10,
@@ -386,10 +531,10 @@ const styles = {
     placeItems: "center",
   },
   mobileDrawer: {
-    background: "rgba(11, 19, 43, 0.98)",
-    borderBottom: "1px solid rgba(255, 255, 255, 0.12)",
+    background: isDark ? "rgba(11, 19, 43, 0.98)" : "rgba(255, 255, 255, 0.98)",
+    borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.1)",
     padding: "16px 20px 24px",
-    boxShadow: "0 20px 40px rgba(0, 0, 0, 0.4)",
+    boxShadow: isDark ? "0 20px 40px rgba(0, 0, 0, 0.4)" : "0 20px 40px rgba(15, 23, 42, 0.12)",
   },
   mobileLinks: {
     display: "flex",
@@ -401,15 +546,55 @@ const styles = {
     alignItems: "center",
     gap: 12,
     padding: "10px 14px",
-    background: "rgba(255, 255, 255, 0.05)",
+    background: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.04)",
     borderRadius: 12,
     marginBottom: 6,
+  },
+  mobileThemeToggleRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    padding: "10px 14px",
+    borderRadius: 12,
+    background: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.04)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(0, 0, 0, 0.08)",
+    cursor: "pointer",
+    fontFamily: "inherit",
+    margin: "4px 0 8px",
+    transition: "all 0.2s ease",
+  },
+  mobileThemeIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    display: "grid",
+    placeItems: "center",
+    background: isDark ? "rgba(56, 189, 248, 0.15)" : "rgba(245, 158, 11, 0.15)",
+    fontSize: 14,
+  },
+  themeSwitchPill: {
+    width: 38,
+    height: 22,
+    borderRadius: 12,
+    padding: 2,
+    display: "flex",
+    alignItems: "center",
+    transition: "background 0.3s ease",
+  },
+  themeSwitchThumb: {
+    width: 18,
+    height: 18,
+    borderRadius: "50%",
+    background: "#ffffff",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+    transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
   },
   mobileLogoutBtn: {
     marginTop: 8,
     background: "rgba(239, 68, 68, 0.12)",
     border: "1px solid rgba(239, 68, 68, 0.25)",
-    color: "#fca5a5",
+    color: "#ef4444",
     padding: "11px 16px",
     borderRadius: 10,
     fontSize: 13,
@@ -419,4 +604,4 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
   },
-};
+});

@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { transactionAPI } from "../utils/api";
 import { formatRupees } from "../utils/transactions";
+import { useTheme } from "../context/ThemeContext";
 
 // ─── Color palette for categories ────────────────────────────────────────────
 const CAT_COLORS = [
@@ -38,7 +39,7 @@ function DayTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
     <div style={tt.box}>
-      <strong style={{ fontSize: 13 }}>Day {label}</strong>
+      <strong style={{ fontSize: 13, color: "var(--text-pure)" }}>Day {label}</strong>
       {payload.map((p) => (
         <div key={p.name} style={{ color: p.fill, fontSize: 12, marginTop: 4 }}>
           {p.name}: {formatRupees(p.value)}
@@ -50,13 +51,13 @@ function DayTooltip({ active, payload, label }) {
 
 const tt = {
   box: {
-    background: "#0c121e",
-    border: "1px solid rgba(255, 255, 255, 0.12)",
+    background: "var(--bg-card)",
+    border: "1px solid var(--border-glass)",
     borderRadius: 10,
     padding: "10px 14px",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5)",
+    boxShadow: "var(--shadow-card)",
     fontFamily: "var(--font-heading)",
-    color: "#ffffff",
+    color: "var(--text-pure)",
   },
 };
 
@@ -76,7 +77,17 @@ function renderPieLabel({ cx, cy, midAngle, innerRadius, outerRadius, name, perc
 
 // ─── Main Analytics Page ──────────────────────────────────────────────────────
 export default function Analytics({ student }) {
+  const { isDark } = useTheme();
   const userId = student?.user_id || student?._id || student?.id;
+
+  const tooltipStyle = {
+    background: isDark ? "#0c121e" : "#ffffff",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.1)",
+    borderRadius: 10,
+    fontSize: 12,
+    color: isDark ? "#ffffff" : "#0f172a",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
+  };
 
   const now = new Date();
   const [selectedYear, setSelectedYear]   = useState(now.getFullYear());
@@ -340,7 +351,7 @@ export default function Analytics({ student }) {
                         <Cell key={entry.name} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v) => formatRupees(v)} />
+                    <Tooltip contentStyle={tooltipStyle} formatter={(v) => formatRupees(v)} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -410,7 +421,7 @@ export default function Analytics({ student }) {
                         <Cell key={entry.name} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v, n) => [formatRupees(v), n]} />
+                    <Tooltip contentStyle={tooltipStyle} formatter={(v, n) => [formatRupees(v), n]} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -471,7 +482,7 @@ export default function Analytics({ student }) {
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f4f8" />
               <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#64748b" }} />
               <YAxis tickFormatter={shortRs} tick={{ fontSize: 11, fill: "#64748b" }} width={70} />
-              <Tooltip formatter={(v, n) => [formatRupees(v), n]} />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v, n) => [formatRupees(v), n]} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
               <Bar dataKey="Income"   name="Income"   fill="#10b981" radius={[4,4,0,0]} maxBarSize={36} />
               <Bar dataKey="Expenses" name="Expenses" fill="#ef4444" radius={[4,4,0,0]} maxBarSize={36} />

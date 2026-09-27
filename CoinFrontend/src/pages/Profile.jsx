@@ -3,9 +3,11 @@ import { authAPI } from "../utils/api";
 import { CURRENCIES, getCurrencyCode, setCurrencyCode, getCurrency } from "../utils/transactions";
 import { fireConfetti } from "../utils/confetti";
 import sound from "../utils/audio";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Profile({ student }) {
   const userId = student?.user_id || student?._id || student?.id;
+  const { theme, setTheme, isDark } = useTheme();
 
   // Editable profile fields
   const [name,         setName]         = useState(student?.name || "");
@@ -235,10 +237,71 @@ export default function Profile({ student }) {
                 Registered Email Address
               </label>
               <input
-                style={{ ...S.input, background: "rgba(255, 255, 255, 0.03)", color: "#94a3b8", cursor: "not-allowed", border: "1.5px solid rgba(255, 255, 255, 0.06)" }}
+                style={{ ...S.input, background: isDark ? "rgba(255, 255, 255, 0.03)" : "#f1f5f9", color: isDark ? "#94a3b8" : "#64748b", cursor: "not-allowed", border: "1.5px solid var(--border-glass)" }}
                 value={student?.email || ""}
                 readOnly
               />
+            </div>
+
+            {/* Appearance Theme Selector */}
+            <div style={{ ...S.field, gridColumn: "1 / -1", marginTop: 4 }}>
+              <label style={S.label}>
+                <i className="fa-solid fa-circle-half-stroke" style={{ marginRight: 6, color: "#10b981" }}></i>
+                Theme Appearance
+              </label>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginTop: 4 }}>
+                <button
+                  type="button"
+                  onClick={() => setTheme("light")}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "12px 16px",
+                    borderRadius: 12,
+                    cursor: "pointer",
+                    background: !isDark ? (isDark ? "rgba(16, 185, 129, 0.2)" : "#ecfdf5") : (isDark ? "rgba(255, 255, 255, 0.04)" : "#f8fafc"),
+                    border: !isDark ? "2px solid #10b981" : "1px solid var(--border-glass)",
+                    color: !isDark ? (isDark ? "#ffffff" : "#047857") : (isDark ? "#94a3b8" : "#64748b"),
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <i className="fa-solid fa-sun" style={{ fontSize: 20, color: "#f59e0b" }}></i>
+                  <div style={{ textAlign: "left" }}>
+                    <div style={{ fontWeight: 800, fontSize: 13, color: !isDark ? "#0f172a" : (isDark ? "#cbd5e1" : "#64748b") }}>
+                      Light Mode
+                    </div>
+                    <div style={{ fontSize: 11, color: "#10b981", fontWeight: 600 }}>Default on website open</div>
+                  </div>
+                  {!isDark && <i className="fa-solid fa-circle-check" style={{ marginLeft: "auto", color: "#10b981" }}></i>}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setTheme("dark")}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "12px 16px",
+                    borderRadius: 12,
+                    cursor: "pointer",
+                    background: isDark ? "rgba(99, 102, 241, 0.2)" : (isDark ? "rgba(255, 255, 255, 0.04)" : "#f8fafc"),
+                    border: isDark ? "2px solid #6366f1" : "1px solid var(--border-glass)",
+                    color: isDark ? "#ffffff" : "#64748b",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <i className="fa-solid fa-moon" style={{ fontSize: 20, color: "#38bdf8" }}></i>
+                  <div style={{ textAlign: "left" }}>
+                    <div style={{ fontWeight: 800, fontSize: 13, color: isDark ? "#ffffff" : "#0f172a" }}>
+                      Dark Mode
+                    </div>
+                    <div style={{ fontSize: 11, color: isDark ? "#a5b4fc" : "#64748b" }}>Fintech dark theme</div>
+                  </div>
+                  {isDark && <i className="fa-solid fa-circle-check" style={{ marginLeft: "auto", color: "#6366f1" }}></i>}
+                </button>
+              </div>
             </div>
 
             {/* Submit & Messages */}
