@@ -11,6 +11,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import TransactionModal from "./components/TransactionModal";
 import CategoryModal from "./components/CategoryModal";
+import AiChatbot from "./components/AiChatbot";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -267,6 +268,9 @@ function AppLayout() {
       {modalType === "category" && (
         <CategoryModal onClose={closeModal} />
       )}
+
+      {/* Floating AI Chatbot Assistant */}
+      <AiChatbot student={student} />
     </div>
   );
 }
