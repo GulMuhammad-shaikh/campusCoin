@@ -135,7 +135,7 @@ export default function Savings({ student }) {
   );
 
   return (
-    <div style={S.page} className="animate-fade-in">
+    <div style={S.page} className="animate-fade-in cc-page">
       <div style={S.headerWrap}>
         <span style={S.eyebrow}>
           <i className="fa-solid fa-piggy-bank" style={{ marginRight: 6 }}></i>
@@ -146,7 +146,7 @@ export default function Savings({ student }) {
       </div>
 
       {/* KPI row */}
-      <div style={S.kpiGrid}>
+      <div style={S.kpiGrid} className="cc-kpi-grid">
         <KpiCard label="Total Balance"    value={formatRupees(totalBal)}      color="#07845e" iconClass="fa-solid fa-wallet" />
         <KpiCard label="This Month Net"   value={formatRupees(monthlyNet)}     color={monthlyNet >= 0 ? "#07845e" : "#ef4444"} iconClass={monthlyNet >= 0 ? "fa-solid fa-arrow-trend-up" : "fa-solid fa-arrow-trend-down"} />
         <KpiCard label="Monthly Income"   value={formatRupees(monthlyInc)}     color="#6366f1" iconClass="fa-solid fa-arrow-up" />

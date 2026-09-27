@@ -561,7 +561,7 @@ html[data-theme="dark"] div[style*="color:#1d4ed8"] {
 }
 
 /* ═════════════════════════════════════════════════════════════════════════════
-   RESPONSIVE NAVIGATION
+   RESPONSIVE NAVIGATION — Hamburger at ≤960px
    ═════════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 960px) {
   header nav {
@@ -571,6 +571,404 @@ html[data-theme="dark"] div[style*="color:#1d4ed8"] {
     display: grid !important;
   }
 }
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   FULL MOBILE RESPONSIVENESS — Class-based (cc-* classes added to JSX)
+   Breakpoints: 960 → tablet, 768 → small tablet, 640 → mobile, 480 → small mobile
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Page wrapper — reduce side padding on all screen sizes ─── */
+.cc-page {
+  padding-left: clamp(12px, 4vw, 36px) !important;
+  padding-right: clamp(12px, 4vw, 36px) !important;
+}
+
+/* ─── Dashboard: header top row (title + speed actions) ─── */
+.cc-header-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+/* ─── Dashboard: speed action buttons row ─── */
+.cc-speed-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center;
+}
+
+/* ─── Dashboard / Analytics: hero card row (holo card + health widget) ─── */
+.cc-card-row {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)) !important;
+  gap: 20px !important;
+  margin-bottom: 22px !important;
+}
+
+/* ─── Dashboard / Savings: KPI grid ─── */
+.cc-kpi-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
+  gap: 14px !important;
+  margin-bottom: 20px !important;
+}
+
+/* ─── Dashboard / Analytics: two-column layout ─── */
+.cc-two-col {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)) !important;
+  gap: 20px !important;
+  margin-bottom: 22px !important;
+}
+
+/* ─── Analytics: header row ─── */
+.cc-header {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+  margin-bottom: 26px !important;
+}
+
+/* ─── Analytics: selectors row ─── */
+.cc-selectors {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+/* ─── Analytics: summary pills ─── */
+.cc-pills {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+  gap: 12px !important;
+  margin-bottom: 24px !important;
+}
+
+/* ─── Transactions: topbar ─── */
+.cc-topbar {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 14px !important;
+  margin-bottom: 22px !important;
+}
+
+/* ─── Transactions: summary card row ─── */
+.cc-summary-row {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+  gap: 12px !important;
+  margin-bottom: 20px !important;
+}
+
+/* ─── Transactions: filter card ─── */
+.cc-filter-card {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+}
+
+/* ─── Transactions: filter rows ─── */
+.cc-filter-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  align-items: flex-end !important;
+}
+
+/* ─── Transactions: table scroll wrapper ─── */
+.cc-table-wrap {
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.cc-table-wrap table {
+  min-width: 580px;
+}
+
+/* ─── Profile: side + main layout ─── */
+.cc-profile-layout {
+  display: flex !important;
+  gap: 24px !important;
+  align-items: flex-start !important;
+}
+
+/* ═══════════════════════════════════════════════════
+   TABLET — ≤ 768px
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Profile layout stacks */
+  .cc-profile-layout {
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+
+  /* Profile sidebar becomes full width */
+  .cc-profile-layout > aside {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* KPI grid — 2 cols */
+  .cc-kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Analytics header wraps */
+  .cc-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  /* Analytics selectors stack */
+  .cc-selectors {
+    flex-wrap: wrap !important;
+    width: 100% !important;
+  }
+
+  .cc-selectors select {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  /* Filter row wraps */
+  .cc-filter-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .cc-filter-row > div {
+    width: 100% !important;
+  }
+
+  .cc-filter-row select,
+  .cc-filter-row input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   MOBILE — ≤ 640px
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* Page padding */
+  .cc-page {
+    padding-top: 20px !important;
+    padding-bottom: 60px !important;
+  }
+
+  /* Dashboard header — stack title and buttons */
+  .cc-header-top {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  /* Speed actions — wrap on 2 lines */
+  .cc-speed-actions {
+    width: 100% !important;
+  }
+
+  .cc-speed-actions button {
+    flex: 1 !important;
+    min-width: 80px !important;
+    justify-content: center !important;
+    font-size: 12px !important;
+    padding: 9px 10px !important;
+  }
+
+  /* KPI grid — 2 cols on mobile */
+  .cc-kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* Two-col — single column */
+  .cc-two-col {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Summary row — 2 cols */
+  .cc-summary-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* Pills — 2 cols */
+  .cc-pills {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Topbar — stack */
+  .cc-topbar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  /* Topbar back button — full width */
+  .cc-topbar button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Profile layout */
+  .cc-profile-layout {
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+
+  /* Card row — single col */
+  .cc-card-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Holographic card height on mobile */
+  .holo-card {
+    min-height: 200px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   SMALL MOBILE — ≤ 480px
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  /* KPI grid — 2 cols (keep) */
+  .cc-kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  /* Summary row — 1 col */
+  .cc-summary-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Pills — 2 cols */
+  .cc-pills {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Login/Register card padding */
+  section.card-hover {
+    padding: 22px 16px !important;
+    border-radius: 16px !important;
+  }
+
+  /* Speed actions — 2 per row */
+  .cc-speed-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  .cc-speed-actions button {
+    width: 100% !important;
+    flex: unset !important;
+  }
+
+  /* Analytics selectors */
+  .cc-selectors select {
+    font-size: 12px !important;
+    padding: 7px 10px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   GENERAL RESPONSIVE FIXES (no class needed)
+   ═══════════════════════════════════════════════════ */
+
+/* Prevent horizontal overflow globally */
+body {
+  overflow-x: hidden;
+}
+
+#root {
+  overflow-x: hidden;
+}
+
+/* Tables always scrollable */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* Inputs and selects — full width on small screens */
+@media (max-width: 640px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+}
+
+/* Modal overlay — ensure it covers full screen on mobile */
+@media (max-width: 520px) {
+  div[style*="position: fixed"][style*="inset: 0"] {
+    padding: 12px !important;
+    align-items: flex-end !important;
+  }
+
+  div[style*="position: fixed"][style*="inset: 0"] > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0 !important;
+    margin: 0 !important;
+    max-height: 92vh !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* Heading word break */
+@media (max-width: 400px) {
+  h1, h2, h3 {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  body {
+    font-size: 14px;
+  }
+}
+
+/* ─── Smooth transitions for theme change ─── */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+/* Disable transitions on media/images to avoid flash */
+img, video, canvas, svg {
+  transition: none !important;
+}
+
+/* Animation exceptions — don't override animation with transition */
+.animate-fade-in,
+.animate-slide-up,
+.animate-scale-in,
+.animate-float,
+.holo-card,
+.btn-glow {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease,
+              background-color 0.2s ease,
+              color 0.2s ease !important;
+}
+
 
 /* ═════════════════════════════════════════════════════════════════════════════
    FULL MOBILE RESPONSIVENESS

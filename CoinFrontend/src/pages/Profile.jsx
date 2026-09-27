@@ -72,7 +72,7 @@ export default function Profile({ student }) {
   const YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year", "Graduate", "Postgraduate", "Other"];
 
   return (
-    <div style={S.page} className="animate-fade-in">
+    <div style={S.page} className="animate-fade-in cc-page">
       <div style={S.headerWrap}>
         <span style={S.eyebrow}>
           <i className="fa-solid fa-id-badge" style={{ marginRight: 6 }}></i>
@@ -84,7 +84,7 @@ export default function Profile({ student }) {
         </p>
       </div>
 
-      <div style={S.layout}>
+      <div style={S.layout} className="cc-profile-layout">
         {/* Left Column: Account Card */}
         <aside style={S.sideCard} className="card-hover">
           <div style={S.avatar}>

@@ -177,9 +177,9 @@ export default function TransactionsPage({ student, onClose }) {
   };
 
   return (
-    <div style={styles.page} className="animate-fade-in">
+    <div style={styles.page} className="animate-fade-in cc-page">
       {/* ── Top Header ── */}
-      <div style={styles.topBar}>
+      <div style={styles.topBar} className="cc-topbar">
         <div>
           <span style={styles.eyebrow}>
             <i className="fa-solid fa-receipt" style={{ marginRight: 6 }}></i>
@@ -197,7 +197,7 @@ export default function TransactionsPage({ student, onClose }) {
       </div>
 
       {/* ── Summary Totals ── */}
-      <div style={styles.summaryRow}>
+      <div style={styles.summaryRow} className="cc-summary-row">
         <div style={{ ...styles.sumCard, borderTop: "3px solid #07845e" }} className="card-hover">
           <span style={styles.sumLabel}>
             <i className="fa-solid fa-arrow-up" style={{ color: "#07845e", marginRight: 5 }}></i>
@@ -231,9 +231,9 @@ export default function TransactionsPage({ student, onClose }) {
       </div>
 
       {/* ── Filters ── */}
-      <div style={styles.filterCard}>
+      <div style={styles.filterCard} className="cc-filter-card">
         {/* Row 1: Type + Category + Search */}
-        <div style={styles.filterRow}>
+        <div style={styles.filterRow} className="cc-filter-row">
           {/* Type Filter */}
           <div style={styles.filterGroup}>
             <label style={styles.filterLabel}>Type</label>
@@ -394,7 +394,7 @@ export default function TransactionsPage({ student, onClose }) {
             </p>
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
+          <div style={{ overflowX: "auto" }} className="cc-table-wrap">
             <table style={styles.table}>
               <thead>
                 <tr>

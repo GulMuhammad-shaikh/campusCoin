@@ -237,9 +237,9 @@ export default function Analytics({ student }) {
   );
 
   return (
-    <div style={S.page} className="animate-fade-in">
+    <div style={S.page} className="animate-fade-in cc-page">
       {/* ── Header ── */}
-      <div style={S.header}>
+      <div style={S.header} className="cc-header">
         <div>
           <span style={S.eyebrow}>
             <i className="fa-solid fa-chart-pie" style={{ marginRight: 6 }}></i>
@@ -250,7 +250,7 @@ export default function Analytics({ student }) {
         </div>
 
         {/* Month/Year selector */}
-        <div style={S.selectors}>
+        <div style={S.selectors} className="cc-selectors">
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(Number(e.target.value))}
@@ -282,7 +282,7 @@ export default function Analytics({ student }) {
       )}
 
       {/* ── Summary Pills ── */}
-      <div style={S.pills}>
+      <div style={S.pills} className="cc-pills">
         <Pill label="Income" value={formatRupees(totalIncome)} color="#10b981" bg="#d1fae5" />
         <Pill label="Expenses" value={formatRupees(totalExpense)} color="#ef4444" bg="#fee2e2" />
         <Pill label="Balance" value={formatRupees(balance)} color={balance >= 0 ? "#6366f1" : "#ef4444"} bg="#ede9fe" />
@@ -317,7 +317,7 @@ export default function Analytics({ student }) {
       </ChartCard>
 
       {/* ── 2 Donut Charts in 1 Horizontal Row ── */}
-      <div style={S.twoColChartsRow}>
+      <div style={S.twoColChartsRow} className="cc-two-col">
         {/* ── Chart 2: Donut – Income / Expenses / Savings ── */}
         <ChartCard
           style={{ marginBottom: 0 }}

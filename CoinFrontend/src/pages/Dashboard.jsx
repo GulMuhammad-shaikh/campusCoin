@@ -197,9 +197,9 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
   }
 
   return (
-    <div style={S.page} className="animate-fade-in">
+    <div style={S.page} className="animate-fade-in cc-page">
       {/* ─── Hero Header & Speed Bar ─── */}
-      <div style={S.headerTop}>
+      <div style={S.headerTop} className="cc-header-top">
         <div>
           <div style={S.badgeRow}>
             <span style={S.livePill}>
@@ -219,7 +219,7 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
         </div>
 
         {/* Speed Actions */}
-        <div style={S.speedActions}>
+        <div style={S.speedActions} className="cc-speed-actions">
           <button
             style={S.addIncomeBtn}
             className="btn-glow"
@@ -286,7 +286,7 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
       )}
 
       {/* ─── Hero Row: Holographic Virtual Student Debit Card + Gamified Health Score ─── */}
-      <div style={S.cardRow}>
+      <div style={S.cardRow} className="cc-card-row">
         {/* Holographic Virtual Student Card */}
         <div
           className="holo-card card-hover"
@@ -436,7 +436,7 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
       )}
 
       {/* ─── 4 Quick KPI Glass Cards ─── */}
-      <div style={S.kpiGrid}>
+      <div style={S.kpiGrid} className="cc-kpi-grid">
         <MetricCard
           title="Total Inflow"
           amount={formatRupees(summary.totalIncome || 0)}
@@ -468,7 +468,7 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
       </div>
 
       {/* ─── Two Column Layout: Recent Transactions + Spending Breakdown ─── */}
-      <div style={S.columns}>
+      <div style={S.columns} className="cc-two-col">
         {/* Recent Transactions Panel */}
         <div style={S.glassPanel} className="card-hover">
           <div style={S.panelHeader}>
