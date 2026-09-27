@@ -176,39 +176,55 @@ export default function TransactionsPage({ student, onClose }) {
   };
 
   return (
-    <div style={styles.page}>
+    <div style={styles.page} className="animate-fade-in">
       {/* ── Top Header ── */}
       <div style={styles.topBar}>
         <div>
-          <span style={styles.eyebrow}>TRANSACTION HISTORY</span>
+          <span style={styles.eyebrow}>
+            <i className="fa-solid fa-receipt" style={{ marginRight: 6 }}></i>
+            TRANSACTION HISTORY
+          </span>
           <h1 style={styles.title}>All Transactions</h1>
           <p style={styles.subtitle}>Filter, search, and review every income and expense record.</p>
         </div>
         {onClose && (
-          <button style={styles.backBtn} onClick={onClose} title="Back to Dashboard">
-            ← Back to Dashboard
+          <button style={styles.backBtn} className="btn-glow" onClick={onClose} title="Back to Dashboard">
+            <i className="fa-solid fa-arrow-left" style={{ marginRight: 6 }}></i>
+            Back to Dashboard
           </button>
         )}
       </div>
 
       {/* ── Summary Totals ── */}
       <div style={styles.summaryRow}>
-        <div style={{ ...styles.sumCard, borderTop: "3px solid #07845e" }}>
-          <span style={styles.sumLabel}>↗ Income</span>
+        <div style={{ ...styles.sumCard, borderTop: "3px solid #07845e" }} className="card-hover">
+          <span style={styles.sumLabel}>
+            <i className="fa-solid fa-arrow-up" style={{ color: "#07845e", marginRight: 5 }}></i>
+            Income
+          </span>
           <strong style={{ ...styles.sumAmount, color: "#07845e" }}>{formatRupees(totals.income)}</strong>
         </div>
-        <div style={{ ...styles.sumCard, borderTop: "3px solid #c84e4e" }}>
-          <span style={styles.sumLabel}>↘ Expenses</span>
+        <div style={{ ...styles.sumCard, borderTop: "3px solid #c84e4e" }} className="card-hover">
+          <span style={styles.sumLabel}>
+            <i className="fa-solid fa-arrow-down" style={{ color: "#c84e4e", marginRight: 5 }}></i>
+            Expenses
+          </span>
           <strong style={{ ...styles.sumAmount, color: "#c84e4e" }}>{formatRupees(totals.expenses)}</strong>
         </div>
-        <div style={{ ...styles.sumCard, borderTop: "3px solid #2563eb" }}>
-          <span style={styles.sumLabel}>Balance</span>
+        <div style={{ ...styles.sumCard, borderTop: "3px solid #2563eb" }} className="card-hover">
+          <span style={styles.sumLabel}>
+            <i className="fa-solid fa-scale-balanced" style={{ color: "#2563eb", marginRight: 5 }}></i>
+            Balance
+          </span>
           <strong style={{ ...styles.sumAmount, color: totals.balance >= 0 ? "#07845e" : "#c84e4e" }}>
             {formatRupees(totals.balance)}
           </strong>
         </div>
-        <div style={{ ...styles.sumCard, borderTop: "3px solid #7c3aed" }}>
-          <span style={styles.sumLabel}>Records shown</span>
+        <div style={{ ...styles.sumCard, borderTop: "3px solid #7c3aed" }} className="card-hover">
+          <span style={styles.sumLabel}>
+            <i className="fa-solid fa-list-check" style={{ color: "#7c3aed", marginRight: 5 }}></i>
+            Records shown
+          </span>
           <strong style={{ ...styles.sumAmount, color: "#7c3aed" }}>{displayTxns.length}</strong>
         </div>
       </div>
@@ -307,7 +323,8 @@ export default function TransactionsPage({ student, onClose }) {
                 onClick={() => setDateMode("range")}
                 style={{ ...styles.typeBtn, background: dateMode === "range" ? "#7c3aed" : "#f1f5f9", color: dateMode === "range" ? "#fff" : "#475569" }}
               >
-                📅 Date Range
+                <i className="fa-solid fa-calendar-days" style={{ marginRight: 6 }}></i>
+                Date Range
               </button>
             </div>
           </div>
@@ -339,7 +356,7 @@ export default function TransactionsPage({ student, onClose }) {
       </div>
 
       {/* ── Transactions Table ── */}
-      <div style={styles.tableCard}>
+      <div style={styles.tableCard} className="card-hover">
         {error && (
           <div style={styles.errorBox}>{error}</div>
         )}
@@ -351,7 +368,9 @@ export default function TransactionsPage({ student, onClose }) {
           </div>
         ) : displayTxns.length === 0 ? (
           <div style={styles.emptyWrap}>
-            <div style={styles.emptyIcon}>📭</div>
+            <div style={styles.emptyIcon}>
+              <i className="fa-solid fa-inbox"></i>
+            </div>
             <strong>No transactions found</strong>
             <p style={{ color: "#8a98a9", fontSize: 13, marginTop: 6 }}>
               Try changing the filters or add your first transaction.

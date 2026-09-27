@@ -131,7 +131,7 @@ export default function Savings({ student }) {
   );
 
   return (
-    <div style={S.page}>
+    <div style={S.page} className="animate-fade-in">
       <div style={S.headerWrap}>
         <span style={S.eyebrow}>
           <i className="fa-solid fa-piggy-bank" style={{ marginRight: 6 }}></i>
@@ -159,7 +159,7 @@ export default function Savings({ student }) {
       </div>
 
       {/* Set / Update Goal */}
-      <section style={S.card}>
+      <section style={S.card} className="card-hover">
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
           <i className="fa-solid fa-bullseye" style={{ color: "#6366f1", fontSize: 18 }}></i>
           <h2 style={S.cardTitle}>Monthly Savings Goal</h2>
@@ -180,7 +180,7 @@ export default function Savings({ student }) {
               required
             />
           </div>
-          <button style={S.saveBtn} type="submit" disabled={saving}>
+          <button style={S.saveBtn} className="btn-glow" type="submit" disabled={saving}>
             <i className="fa-solid fa-check" style={{ marginRight: 6 }}></i>
             {saving ? "Saving…" : goalAmount > 0 ? "Update Target" : "Set Target"}
           </button>
@@ -204,7 +204,7 @@ export default function Savings({ student }) {
 
       {/* Progress Card */}
       {goalAmount > 0 && (
-        <section style={S.card}>
+        <section style={S.card} className="card-hover">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -254,7 +254,7 @@ export default function Savings({ student }) {
       )}
 
       {/* 6-Month History */}
-      <section style={S.card}>
+      <section style={S.card} className="card-hover">
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
           <i className="fa-solid fa-calendar-days" style={{ color: "#64748b" }}></i>
           <h2 style={S.cardTitle}>6-Month Savings History</h2>
@@ -300,7 +300,7 @@ export default function Savings({ student }) {
       </section>
 
       {/* Financial Habits */}
-      <section style={S.card}>
+      <section style={S.card} className="card-hover">
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
           <i className="fa-solid fa-lightbulb" style={{ color: "#f59e0b" }}></i>
           <h2 style={S.cardTitle}>Core Financial Principles</h2>
@@ -327,7 +327,7 @@ export default function Savings({ student }) {
 
 function KpiCard({ label, value, color, iconClass }) {
   return (
-    <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 14, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 6, boxShadow: "0 2px 10px rgba(0,0,0,0.02)" }}>
+    <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 14, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 6, boxShadow: "0 2px 10px rgba(0,0,0,0.02)" }} className="card-hover">
       <span style={{ width: 32, height: 32, display: "grid", placeItems: "center", borderRadius: 8, fontSize: 14, color, background: `${color}16` }}>
         <i className={iconClass}></i>
       </span>

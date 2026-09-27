@@ -138,7 +138,7 @@ export default function TransactionModal({
 
   return (
     <div style={styles.backdrop} onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div style={styles.panel}>
+      <div style={styles.panel} className="animate-scale-in">
 
         {/* Header */}
         <div style={{ ...styles.header, borderBottom: `2px solid ${lightBg}` }}>
@@ -227,6 +227,7 @@ export default function TransactionModal({
               <button
                 type="submit"
                 disabled={saving}
+                className="btn-glow"
                 style={{ ...styles.saveBtn, background: saving ? "#aaa" : accentColor }}
               >
                 {saving

@@ -1,16 +1,125 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function Footer() {
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <footer style={styles.footer}>
+      {/* Top Ambient Glow Line */}
+      <div style={styles.glowLine} />
+
       <div style={styles.inner}>
-        <div style={styles.brand}>
-          Campus<span style={{ color: "#34d399" }}>Coin</span>
+        {/* Brand & Mission Column */}
+        <div style={styles.brandCol}>
+          <div style={styles.brand}>
+            <span style={styles.logoIcon}>
+              <i className="fa-solid fa-coins"></i>
+            </span>
+            <div style={styles.brandText}>
+              Campus<span style={{ color: "#34d399" }}>Coin</span>
+            </div>
+          </div>
+          <p style={styles.mission}>
+            The smart financial companion built exclusively for university and college students. Master budgeting, track spending, and crush your savings goals.
+          </p>
+          <div style={styles.badgeRow}>
+            <span style={styles.securityBadge}>
+              <i className="fa-solid fa-shield-halved" style={{ marginRight: 6, color: "#34d399" }}></i>
+              Student-Safe & Private
+            </span>
+            <span style={styles.securityBadge}>
+              <i className="fa-solid fa-bolt" style={{ marginRight: 6, color: "#f59e0b" }}></i>
+              AI-Powered Insights
+            </span>
+          </div>
         </div>
-        <p style={styles.copy}>
-          A simple way for students to manage money and build better habits.
-        </p>
-        <span style={styles.year}>© {new Date().getFullYear()} CampusCoin</span>
+
+        {/* Quick Links Column */}
+        <div style={styles.col}>
+          <h4 style={styles.colTitle}>Platform</h4>
+          <ul style={styles.linkList}>
+            <li>
+              <Link to="/dashboard" style={styles.link}>
+                <i className="fa-solid fa-angle-right" style={styles.linkArrow}></i>
+                Dashboard
+              </Link>
+            </li>
+            <li>
+              <Link to="/analytics" style={styles.link}>
+                <i className="fa-solid fa-angle-right" style={styles.linkArrow}></i>
+                Visual Analytics
+              </Link>
+            </li>
+            <li>
+              <Link to="/savings" style={styles.link}>
+                <i className="fa-solid fa-angle-right" style={styles.linkArrow}></i>
+                Savings Targets
+              </Link>
+            </li>
+            <li>
+              <Link to="/tips" style={styles.link}>
+                <i className="fa-solid fa-angle-right" style={styles.linkArrow}></i>
+                Smart AI Tips
+              </Link>
+            </li>
+            <li>
+              <Link to="/profile" style={styles.link}>
+                <i className="fa-solid fa-angle-right" style={styles.linkArrow}></i>
+                Multi-Currency Profile
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Highlights / Values Column */}
+        <div style={styles.col}>
+          <h4 style={styles.colTitle}>Key Highlights</h4>
+          <div style={styles.highlightCard}>
+            <div style={styles.highlightTitle}>
+              <i className="fa-solid fa-chart-pie" style={{ color: "#38bdf8", marginRight: 8 }}></i>
+              Dual Donut Charts
+            </div>
+            <p style={styles.highlightText}>
+              Categorized insights and real-time income vs. expense breakdowns.
+            </p>
+          </div>
+          <div style={styles.highlightCard}>
+            <div style={styles.highlightTitle}>
+              <i className="fa-solid fa-robot" style={{ color: "#a855f7", marginRight: 8 }}></i>
+              Gemini AI Integration
+            </div>
+            <p style={styles.highlightText}>
+              Personalized budget coaching generated directly from your live spending data.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Sub-Bar */}
+      <div style={styles.bottomBar}>
+        <div style={styles.bottomInner}>
+          <span style={styles.copy}>
+            © {new Date().getFullYear()} CampusCoin. All rights reserved. Built for students worldwide.
+          </span>
+
+          <div style={styles.bottomRight}>
+            <span style={styles.statusIndicator}>
+              <span style={styles.statusDot} />
+              API Systems Active
+            </span>
+            <button
+              type="button"
+              onClick={scrollToTop}
+              style={styles.backToTopBtn}
+              title="Back to top"
+            >
+              <i className="fa-solid fa-arrow-up"></i>
+            </button>
+          </div>
+        </div>
       </div>
     </footer>
   );
@@ -18,13 +127,141 @@ export default function Footer() {
 
 const styles = {
   footer: {
-    background: "#101b2e",
-    color: "#d4dce7",
-    padding: "25px clamp(18px, 5vw, 70px)",
-    marginTop: 35,
+    position: "relative",
+    background: "linear-gradient(180deg, #0b132b 0%, #070d19 100%)",
+    color: "#cbd5e1",
+    marginTop: "auto",
+    fontFamily: "var(--font-sans)",
+    borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+  },
+  glowLine: {
+    height: 1,
+    width: "100%",
+    background: "linear-gradient(90deg, transparent 0%, rgba(16, 185, 129, 0.6) 50%, transparent 100%)",
   },
   inner: {
-    maxWidth: 1200,
+    maxWidth: 1220,
+    margin: "0 auto",
+    padding: "50px clamp(18px, 4vw, 36px) 40px",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
+    gap: "clamp(30px, 4vw, 50px)",
+  },
+  brandCol: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 14,
+    maxWidth: 420,
+  },
+  brand: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    color: "#ffffff",
+    fontWeight: 800,
+    fontSize: 22,
+    letterSpacing: "-0.5px",
+  },
+  logoIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    background: "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)",
+    display: "grid",
+    placeItems: "center",
+    color: "#ffffff",
+    fontSize: 16,
+    boxShadow: "0 0 15px rgba(16, 185, 129, 0.35)",
+  },
+  brandText: {
+    fontFamily: "var(--font-heading)",
+  },
+  mission: {
+    margin: 0,
+    fontSize: 13,
+    color: "#94a3b8",
+    lineHeight: 1.6,
+  },
+  badgeRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 4,
+  },
+  securityBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    fontSize: 11,
+    fontWeight: 600,
+    color: "#e2e8f0",
+    background: "rgba(255, 255, 255, 0.05)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    padding: "4px 10px",
+    borderRadius: 20,
+  },
+  col: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 14,
+  },
+  colTitle: {
+    margin: 0,
+    fontSize: 14,
+    fontWeight: 800,
+    color: "#ffffff",
+    letterSpacing: "0.5px",
+    textTransform: "uppercase",
+  },
+  linkList: {
+    listStyle: "none",
+    margin: 0,
+    padding: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+  },
+  link: {
+    textDecoration: "none",
+    color: "#94a3b8",
+    fontSize: 13,
+    fontWeight: 500,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    transition: "color 0.2s ease, transform 0.2s ease",
+  },
+  linkArrow: {
+    fontSize: 10,
+    color: "#34d399",
+    opacity: 0.7,
+  },
+  highlightCard: {
+    background: "rgba(255, 255, 255, 0.03)",
+    border: "1px solid rgba(255, 255, 255, 0.07)",
+    borderRadius: 12,
+    padding: "12px 14px",
+  },
+  highlightTitle: {
+    fontSize: 13,
+    fontWeight: 700,
+    color: "#ffffff",
+    marginBottom: 4,
+    display: "flex",
+    alignItems: "center",
+  },
+  highlightText: {
+    margin: 0,
+    fontSize: 12,
+    color: "#94a3b8",
+    lineHeight: 1.5,
+  },
+  bottomBar: {
+    borderTop: "1px solid rgba(255, 255, 255, 0.06)",
+    background: "rgba(0, 0, 0, 0.2)",
+    padding: "16px clamp(18px, 4vw, 36px)",
+  },
+  bottomInner: {
+    maxWidth: 1220,
     margin: "0 auto",
     display: "flex",
     alignItems: "center",
@@ -32,18 +269,45 @@ const styles = {
     flexWrap: "wrap",
     gap: 12,
   },
-  brand: {
-    color: "#ffffff",
-    fontWeight: 900,
-    fontSize: 17,
-  },
   copy: {
-    margin: 0,
-    color: "#aab6c7",
-    fontSize: 13,
-  },
-  year: {
-    color: "#aab6c7",
     fontSize: 12,
+    color: "#64748b",
+  },
+  bottomRight: {
+    display: "flex",
+    alignItems: "center",
+    gap: 16,
+  },
+  statusIndicator: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    fontSize: 11,
+    fontWeight: 600,
+    color: "#34d399",
+    background: "rgba(52, 211, 153, 0.1)",
+    border: "1px solid rgba(52, 211, 153, 0.2)",
+    padding: "3px 9px",
+    borderRadius: 12,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: "50%",
+    background: "#34d399",
+    boxShadow: "0 0 8px #34d399",
+  },
+  backToTopBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    background: "rgba(255, 255, 255, 0.08)",
+    border: "1px solid rgba(255, 255, 255, 0.12)",
+    color: "#e2e8f0",
+    fontSize: 12,
+    cursor: "pointer",
+    display: "grid",
+    placeItems: "center",
+    transition: "all 0.2s ease",
   },
 };

@@ -65,7 +65,7 @@ export default function Profile({ student }) {
   const YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year", "Graduate", "Postgraduate", "Other"];
 
   return (
-    <div style={S.page}>
+    <div style={S.page} className="animate-fade-in">
       <div style={S.headerWrap}>
         <span style={S.eyebrow}>
           <i className="fa-solid fa-id-badge" style={{ marginRight: 6 }}></i>
@@ -79,7 +79,7 @@ export default function Profile({ student }) {
 
       <div style={S.layout}>
         {/* Left Column: Account Card */}
-        <aside style={S.sideCard}>
+        <aside style={S.sideCard} className="card-hover">
           <div style={S.avatar}>
             <i className="fa-solid fa-user-graduate"></i>
           </div>
@@ -127,7 +127,7 @@ export default function Profile({ student }) {
         </aside>
 
         {/* Right Column: Edit Profile Form with Dropdown Currency Selector */}
-        <main style={S.mainFormCard}>
+        <main style={S.mainFormCard} className="card-hover">
           <div style={S.formHeader}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={S.formIcon}>
@@ -238,7 +238,7 @@ export default function Profile({ student }) {
 
             {/* Submit & Messages */}
             <div style={S.actionRow}>
-              <button style={S.saveBtn} type="submit" disabled={saving}>
+              <button style={S.saveBtn} className="btn-glow" type="submit" disabled={saving}>
                 <i className="fa-solid fa-floppy-disk" style={{ marginRight: 8 }}></i>
                 {saving ? "Saving Changes…" : "Save Changes"}
               </button>

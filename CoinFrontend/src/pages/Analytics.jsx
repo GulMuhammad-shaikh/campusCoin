@@ -225,11 +225,14 @@ export default function Analytics({ student }) {
   );
 
   return (
-    <div style={S.page}>
+    <div style={S.page} className="animate-fade-in">
       {/* ── Header ── */}
       <div style={S.header}>
         <div>
-          <span style={S.eyebrow}>ANALYTICS</span>
+          <span style={S.eyebrow}>
+            <i className="fa-solid fa-chart-pie" style={{ marginRight: 6 }}></i>
+            VISUAL ANALYTICS
+          </span>
           <h1 style={S.title}>Financial Charts</h1>
           <p style={S.sub}>Visual overview of your income, expenses & savings</p>
         </div>
@@ -482,7 +485,7 @@ export default function Analytics({ student }) {
 // ─── Sub-components ────────────────────────────────────────────────────────────
 function ChartCard({ title, subtitle, children, headerRight, style }) {
   return (
-    <div style={{ ...S.card, ...style }}>
+    <div style={{ ...S.card, ...style }} className="card-hover">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 18 }}>
         <div>
           <h2 style={S.cardTitle}>{title}</h2>
@@ -497,7 +500,7 @@ function ChartCard({ title, subtitle, children, headerRight, style }) {
 
 function Pill({ label, value, color, bg }) {
   return (
-    <div style={{ ...S.pill, background: bg }}>
+    <div style={{ ...S.pill, background: bg }} className="card-hover">
       <span style={{ fontSize: 11, color, fontWeight: 700, letterSpacing: 0.5 }}>{label.toUpperCase()}</span>
       <strong style={{ fontSize: 18, color }}>{value}</strong>
     </div>

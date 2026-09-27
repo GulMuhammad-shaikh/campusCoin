@@ -78,11 +78,16 @@ export default function Register({ onRegister }) {
   };
 
   return (
-    <main style={styles.page}>
-      <section style={styles.card}>
-        <div style={styles.brandMark}>C</div>
+    <main style={styles.page} className="animate-fade-in">
+      <section style={styles.card} className="card-hover">
+        <div style={styles.brandMark}>
+          <i className="fa-solid fa-coins"></i>
+        </div>
 
-        <p style={styles.eyebrow}>GET STARTED</p>
+        <p style={styles.eyebrow}>
+          <i className="fa-solid fa-sparkles" style={{ marginRight: 6 }}></i>
+          GET STARTED
+        </p>
         <h1 style={styles.title}>Create your account</h1>
         <p style={styles.subtitle}>
           Join CampusCoin and start organizing your student finances.
@@ -161,7 +166,7 @@ export default function Register({ onRegister }) {
               title={showPassword ? "Hide password" : "Show password"}
               style={styles.eyeButton}
             >
-              {showPassword ? "🙈" : "👁"}
+              <i className={`fa-solid ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
             </button>
           </div>
 
@@ -198,11 +203,16 @@ export default function Register({ onRegister }) {
               }
               style={styles.eyeButton}
             >
-              {showConfirmPassword ? "🙈" : "👁"}
+              <i className={`fa-solid ${showConfirmPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
             </button>
           </div>
 
-          <button type="submit" disabled={loading} style={{ ...styles.submitButton, opacity: loading ? 0.7 : 1 }}>
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-glow"
+            style={{ ...styles.submitButton, opacity: loading ? 0.7 : 1 }}
+          >
             {loading ? "Creating account…" : "Create account"}
           </button>
         </form>

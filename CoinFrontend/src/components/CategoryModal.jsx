@@ -288,7 +288,7 @@ export default function CategoryModal({ onClose, onCategoryAdded }) {
       style={styles.backdrop}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div style={styles.panel}>
+      <div style={styles.panel} className="animate-scale-in">
         {/* Header */}
         <div style={styles.header}>
           <div style={styles.headerLeft}>
@@ -322,11 +322,12 @@ export default function CategoryModal({ onClose, onCategoryAdded }) {
           {/* ─── Top Split: 40 Quick Suggestions & Custom Form ─── */}
           <div style={styles.gridColumns}>
             {/* Side Card: 40 Category Suggestions */}
-            <div style={styles.suggestionCard}>
+            <div style={styles.suggestionCard} className="card-hover">
               <div style={styles.suggestionHeader}>
                 <div>
                   <h3 style={styles.sectionTitle}>
-                    💡 Quick Suggestions (40)
+                    <i className="fa-solid fa-lightbulb" style={{ marginRight: 8, color: "#f59e0b" }}></i>
+                    Quick Suggestions (40)
                   </h3>
                   <p style={styles.sectionSub}>
                     Click any category to quick-add or select
@@ -439,10 +440,20 @@ export default function CategoryModal({ onClose, onCategoryAdded }) {
             </div>
 
             {/* Side Card: Add / Edit Form */}
-            <div style={styles.formCard}>
+            <div style={styles.formCard} className="card-hover">
               <div style={styles.formCardHeader}>
                 <h3 style={styles.sectionTitle}>
-                  {editingId ? "✏️ Edit Category" : "+ Add / Custom Category"}
+                  {editingId ? (
+                    <>
+                      <i className="fa-solid fa-pen-to-square" style={{ marginRight: 6, color: "#2563eb" }}></i>
+                      Edit Category
+                    </>
+                  ) : (
+                    <>
+                      <i className="fa-solid fa-plus" style={{ marginRight: 6, color: "#10b981" }}></i>
+                      Add Custom Category
+                    </>
+                  )}
                 </h3>
                 {editingId && (
                   <button
@@ -510,6 +521,7 @@ export default function CategoryModal({ onClose, onCategoryAdded }) {
                   <button
                     type="submit"
                     disabled={saving}
+                    className="btn-glow"
                     style={{
                       ...styles.saveBtn,
                       background: saving
@@ -556,7 +568,7 @@ export default function CategoryModal({ onClose, onCategoryAdded }) {
             ) : (
               <div style={styles.twoColumnCategoryRow}>
                 {/* ── Income Categories Card ── */}
-                <div style={styles.typeCategoryCard}>
+                <div style={styles.typeCategoryCard} className="card-hover">
                   <div style={styles.typeCategoryHeader}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span style={styles.incomeIconBadge}>
@@ -649,7 +661,7 @@ export default function CategoryModal({ onClose, onCategoryAdded }) {
                 </div>
 
                 {/* ── Expense Categories Card ── */}
-                <div style={styles.typeCategoryCard}>
+                <div style={styles.typeCategoryCard} className="card-hover">
                   <div style={styles.typeCategoryHeader}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span style={styles.expenseIconBadge}>

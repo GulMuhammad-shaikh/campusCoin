@@ -146,7 +146,7 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
   );
 
   return (
-    <div style={S.page}>
+    <div style={S.page} className="animate-fade-in">
       {/* Header */}
       <div style={S.heading}>
         <div>
@@ -158,20 +158,20 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
           <p style={S.subtitle}>Here is your current financial status and recent activity.</p>
         </div>
         <div style={S.actions}>
-          <button style={S.addIncome} onClick={() => onOpenModal("income")}>
+          <button style={S.addIncome} className="btn-glow" onClick={() => onOpenModal("income")}>
             <i className="fa-solid fa-plus" style={{ marginRight: 6 }}></i>
             Add Income
           </button>
-          <button style={S.addExpense} onClick={() => onOpenModal("expense")}>
+          <button style={S.addExpense} className="btn-glow" onClick={() => onOpenModal("expense")}>
             <i className="fa-solid fa-minus" style={{ marginRight: 6 }}></i>
             Add Expense
           </button>
           <span style={S.divider} />
-          <button style={S.addCategory} onClick={() => onOpenModal("category")}>
+          <button style={S.addCategory} className="btn-glow" onClick={() => onOpenModal("category")}>
             <i className="fa-solid fa-tags" style={{ marginRight: 6 }}></i>
             Categories
           </button>
-          <button style={S.refreshBtn} onClick={loadDashboard} title="Refresh Data">
+          <button style={S.refreshBtn} className="btn-glow" onClick={loadDashboard} title="Refresh Data">
             <i className="fa-solid fa-rotate-right"></i>
           </button>
         </div>
@@ -188,7 +188,7 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
       )}
 
       {/* Main Balance Card */}
-      <section style={S.balanceCard}>
+      <section style={S.balanceCard} className="card-hover">
         <div style={{ flex: 1, minWidth: 260 }}>
           <span style={S.balanceLabel}>
             <i className="fa-solid fa-wallet" style={{ marginRight: 6 }}></i>
@@ -256,7 +256,7 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
 
       {/* Savings Goal Banner */}
       {savingsGoal > 0 && (
-        <div style={S.savingsBanner}>
+        <div style={S.savingsBanner} className="card-hover">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 8 }}>
             <span style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", display: "flex", alignItems: "center", gap: 6 }}>
               <i className="fa-solid fa-bullseye" style={{ color: "#6366f1" }}></i>
@@ -293,7 +293,7 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
       {/* Columns: Recent Transactions + Spending by Category */}
       <section style={S.columns}>
         {/* Recent Transactions */}
-        <div style={S.panel}>
+        <div style={S.panel} className="card-hover">
           <div style={S.panelHeader}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <i className="fa-solid fa-clock-rotate-left" style={{ color: "#64748b" }}></i>
@@ -373,7 +373,7 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
         </div>
 
         {/* Spending by Category */}
-        <div style={S.panel}>
+        <div style={S.panel} className="card-hover">
           <div style={S.panelHeader}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <i className="fa-solid fa-chart-pie" style={{ color: "#64748b" }}></i>
@@ -432,7 +432,7 @@ function KpiBadge({ label, value, icon, positive, neutral }) {
 
 function StatCard({ title, amount, color, iconClass }) {
   return (
-    <div style={S.statCard}>
+    <div style={S.statCard} className="card-hover">
       <span style={{ width: 36, height: 36, display: "grid", placeItems: "center", borderRadius: 10, fontSize: 15, color, background: `${color}15` }}>
         <i className={iconClass}></i>
       </span>

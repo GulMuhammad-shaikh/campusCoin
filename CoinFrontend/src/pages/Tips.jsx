@@ -151,7 +151,7 @@ export default function AiTips({ student }) {
   ];
 
   return (
-    <div style={S.page}>
+    <div style={S.page} className="animate-fade-in">
       {/* Header */}
       <div style={S.header}>
         <div>
@@ -164,7 +164,7 @@ export default function AiTips({ student }) {
             Personalized saving recommendations generated via Google Gemini using your live transaction data.
           </p>
         </div>
-        <button onClick={generateAiTips} disabled={loading} style={S.genBtn}>
+        <button onClick={generateAiTips} disabled={loading} style={S.genBtn} className="btn-glow">
           <i className="fa-solid fa-wand-magic-sparkles" style={{ marginRight: 8 }}></i>
           {loading ? "Analyzing Financials…" : "Generate AI Advisory"}
         </button>
@@ -299,7 +299,7 @@ export default function AiTips({ student }) {
 
 function TipCard({ iconClass, title, body, pinned, onPin, ai }) {
   return (
-    <article style={{ ...S.card, ...(pinned ? S.cardPinned : {}), ...(ai ? S.cardAi : {}) }}>
+    <article style={{ ...S.card, ...(pinned ? S.cardPinned : {}), ...(ai ? S.cardAi : {}) }} className="card-hover">
       <div style={S.cardTop}>
         <span style={{
           ...S.iconWrap,
@@ -330,7 +330,7 @@ function TipCard({ iconClass, title, body, pinned, onPin, ai }) {
 
 function SumCard({ label, value, color, icon }) {
   return (
-    <div style={{ ...S.sumCard, borderTop: `3px solid ${color}` }}>
+    <div style={{ ...S.sumCard, borderTop: `3px solid ${color}` }} className="card-hover">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ fontSize: 11, fontWeight: 700, color: "#64748b", letterSpacing: 0.5 }}>{label.toUpperCase()}</span>
         <i className={icon} style={{ color, fontSize: 12 }}></i>
