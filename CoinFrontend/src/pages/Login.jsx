@@ -3,148 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { authAPI } from "../utils/api";
 import { useTheme } from "../context/ThemeContext";
 
-export default function Login({ onLogin }) {
-  const navigate = useNavigate();
-  const { isDark } = useTheme();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setError("");
-
-    const normalizedEmail = email.trim().toLowerCase();
-
-    if (!normalizedEmail || !password) {
-      setError("Please enter both email and password.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await authAPI.login(normalizedEmail, password);
-
-      if (res?.token) {
-        localStorage.setItem("campusCoinToken", res.token);
-      }
-
-      const rawId = res.user?.user_id || res.user?._id || res.user?.id;
-      const signedInStudent = {
-        user_id: rawId,
-        _id: rawId,
-        id: rawId,
-        name: res.user?.name || "Student",
-        email: res.user?.email || normalizedEmail,
-        academic_year: res.user?.academic_year || "",
-        monthly_savings_goal: res.user?.monthly_savings_goal || 0,
-      };
-
-      if (typeof onLogin === "function") {
-        onLogin(signedInStudent);
-      }
-
-      navigate("/dashboard", { replace: true });
-    } catch (apiError) {
-      const msg =
-        apiError?.message ||
-        (typeof apiError === "string" ? apiError : "Incorrect email or password. Please try again.");
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <main style={getStyles(isDark).page} className="animate-fade-in">
-      <section style={getStyles(isDark).card} className="card-hover">
-        <div style={styles.brandMark}>
-          <i className="fa-solid fa-coins"></i>
-        </div>
-
-        <p style={styles.eyebrow}>
-          <i className="fa-solid fa-lock" style={{ marginRight: 6 }}></i>
-          WELCOME BACK
-        </p>
-        <h1 style={styles.title}>Sign in to CampusCoin</h1>
-        <p style={styles.subtitle}>
-          Manage your income, expenses, and savings in one place.
-        </p>
-
-        {error && (
-          <div role="alert" style={styles.error}>
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <label style={styles.label} htmlFor="login-email">
-            Email address
-          </label>
-          <input
-            id="login-email"
-            type="email"
-            name="email"
-            autoComplete="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-            style={styles.input}
-          />
-
-          <label style={styles.label} htmlFor="login-password">
-            Password
-          </label>
-
-          <div style={styles.passwordWrap}>
-            <input
-              id="login-password"
-              type={showPassword ? "text" : "password"}
-              name="password"
-              autoComplete="current-password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              style={styles.passwordInput}
-            />
-
-            <button
-              type="button"
-              onClick={() => setShowPassword((visible) => !visible)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-              title={showPassword ? "Hide password" : "Show password"}
-              style={styles.eyeButton}
-            >
-              <i className={`fa-solid ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
-            </button>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-glow"
-            style={{ ...styles.submitButton, opacity: loading ? 0.7 : 1 }}
-          >
-            {loading ? "Signing in…" : "Sign in"}
-          </button>
-        </form>
-
-        <p style={styles.footerText}>
-          Don’t have an account?{" "}
-          <Link to="/register" style={styles.link}>
-            Create an account
-          </Link>
-        </p>
-      </section>
-    </main>
-  );
-}
-
 function getStyles(isDark) {
   return {
     page: {
@@ -289,4 +147,146 @@ const styles = {
     fontWeight: 800,
     textDecoration: "none",
   },
-};
+};
+export default function Login({ onLogin }) {
+  const navigate = useNavigate();
+  const { isDark } = useTheme();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail || !password) {
+      setError("Please enter both email and password.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await authAPI.login(normalizedEmail, password);
+
+      if (res?.token) {
+        localStorage.setItem("campusCoinToken", res.token);
+      }
+
+      const rawId = res.user?.user_id || res.user?._id || res.user?.id;
+      const signedInStudent = {
+        user_id: rawId,
+        _id: rawId,
+        id: rawId,
+        name: res.user?.name || "Student",
+        email: res.user?.email || normalizedEmail,
+        academic_year: res.user?.academic_year || "",
+        monthly_savings_goal: res.user?.monthly_savings_goal || 0,
+      };
+
+      if (typeof onLogin === "function") {
+        onLogin(signedInStudent);
+      }
+
+      navigate("/dashboard", { replace: true });
+    } catch (apiError) {
+      const msg =
+        apiError?.message ||
+        (typeof apiError === "string" ? apiError : "Incorrect email or password. Please try again.");
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main style={getStyles(isDark).page} className="animate-fade-in">
+      <section style={getStyles(isDark).card} className="card-hover">
+        <div style={styles.brandMark}>
+          <i className="fa-solid fa-coins"></i>
+        </div>
+
+        <p style={styles.eyebrow}>
+          <i className="fa-solid fa-lock" style={{ marginRight: 6 }}></i>
+          WELCOME BACK
+        </p>
+        <h1 style={styles.title}>Sign in to CampusCoin</h1>
+        <p style={styles.subtitle}>
+          Manage your income, expenses, and savings in one place.
+        </p>
+
+        {error && (
+          <div role="alert" style={styles.error}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <label style={styles.label} htmlFor="login-email">
+            Email address
+          </label>
+          <input
+            id="login-email"
+            type="email"
+            name="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+            style={styles.input}
+          />
+
+          <label style={styles.label} htmlFor="login-password">
+            Password
+          </label>
+
+          <div style={styles.passwordWrap}>
+            <input
+              id="login-password"
+              type={showPassword ? "text" : "password"}
+              name="password"
+              autoComplete="current-password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              style={styles.passwordInput}
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword((visible) => !visible)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              title={showPassword ? "Hide password" : "Show password"}
+              style={styles.eyeButton}
+            >
+              <i className={`fa-solid ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+            </button>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-glow"
+            style={{ ...styles.submitButton, opacity: loading ? 0.7 : 1 }}
+          >
+            {loading ? "Signing in…" : "Sign in"}
+          </button>
+        </form>
+
+        <p style={styles.footerText}>
+          Don’t have an account?{" "}
+          <Link to="/register" style={styles.link}>
+            Create an account
+          </Link>
+        </p>
+      </section>
+    </main>
+  );
+}
+
