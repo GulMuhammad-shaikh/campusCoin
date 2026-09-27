@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { authAPI } from "../utils/api";
-import { CURRENCIES, getCurrencyCode, setCurrencyCode } from "../utils/transactions";
+import { CURRENCIES, getCurrencyCode, setCurrencyCode, getCurrency } from "../utils/transactions";
 
 export default function Profile({ student }) {
   const userId = student?.user_id || student?._id || student?.id;
@@ -9,17 +9,22 @@ export default function Profile({ student }) {
   const [name,         setName]         = useState(student?.name || "");
   const [academicYear, setAcademicYear] = useState(student?.academic_year || "");
   const [savingsGoal,  setSavingsGoal]  = useState(String(student?.monthly_savings_goal || ""));
+  const [currency,     setCurrency]     = useState(getCurrencyCode());
   const [saving,       setSaving]       = useState(false);
   const [profileMsg,   setProfileMsg]   = useState("");
-
-  // Currency
-  const [currency,     setCurrency]     = useState(getCurrencyCode());
 
   useEffect(() => {
     setName(student?.name || "");
     setAcademicYear(student?.academic_year || "");
     setSavingsGoal(String(student?.monthly_savings_goal || ""));
+    setCurrency(getCurrencyCode());
   }, [student]);
+
+  function handleCurrencySelect(newCode) {
+    setCurrency(newCode);
+    setCurrencyCode(newCode);
+    window.dispatchEvent(new CustomEvent("campusCoinCurrencyChanged", { detail: newCode }));
+  }
 
   async function handleSaveProfile(e) {
     e.preventDefault();
@@ -32,253 +37,463 @@ export default function Profile({ student }) {
         academic_year: academicYear.trim(),
         monthly_savings_goal: Number(savingsGoal) || 0,
       });
-      // Update localStorage so rest of app reflects immediately
+
+      // Save currency choice
+      setCurrencyCode(currency);
+
+      // Update localStorage so navbar, dashboard, and rest of app update immediately
       const stored = JSON.parse(localStorage.getItem("campusCoinCurrentStudent") || "{}");
       stored.name                 = name.trim();
       stored.academic_year        = academicYear.trim();
       stored.monthly_savings_goal = Number(savingsGoal) || 0;
       localStorage.setItem("campusCoinCurrentStudent", JSON.stringify(stored));
+
       window.dispatchEvent(new CustomEvent("campusCoinDataChanged"));
-      setProfileMsg("✅ Profile updated successfully.");
+      window.dispatchEvent(new CustomEvent("campusCoinCurrencyChanged", { detail: currency }));
+
+      setProfileMsg("Profile updated successfully.");
     } catch {
-      setProfileMsg("❌ Could not save. Please try again.");
+      setProfileMsg("Could not save profile. Please try again.");
     } finally {
       setSaving(false);
       setTimeout(() => setProfileMsg(""), 4000);
     }
   }
 
-  function handleCurrencyChange(code) {
-    setCurrency(code);
-    setCurrencyCode(code);
-    // Force re-render across app
-    window.dispatchEvent(new CustomEvent("campusCoinDataChanged"));
-  }
-
-  const selectedCur = CURRENCIES.find((c) => c.code === currency) || CURRENCIES[0];
+  const activeCur = CURRENCIES.find((c) => c.code === currency) || CURRENCIES[0];
 
   const YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year", "Graduate", "Postgraduate", "Other"];
 
   return (
     <div style={S.page}>
-      <span style={S.eyebrow}>YOUR ACCOUNT</span>
-      <h1 style={S.title}>Student Profile</h1>
-      <p style={S.subtitle}>Manage your account details, preferences, and currency settings.</p>
+      <div style={S.headerWrap}>
+        <span style={S.eyebrow}>
+          <i className="fa-solid fa-id-badge" style={{ marginRight: 6 }}></i>
+          ACCOUNT MANAGEMENT
+        </span>
+        <h1 style={S.title}>Student Profile & Settings</h1>
+        <p style={S.subtitle}>
+          Manage your personal details, academic standing, and currency display preferences.
+        </p>
+      </div>
 
-      <div style={S.grid}>
-        {/* ── Left column: Avatar + read-only info ── */}
-        <div style={S.leftCol}>
-          <div style={S.card}>
-            <div style={S.avatar}>
-              {(student?.name || "S").charAt(0).toUpperCase()}
-            </div>
-            <h2 style={S.cardName}>{student?.name || "Student"}</h2>
-            <p style={S.cardEmail}>{student?.email || "No email"}</p>
-            <div style={S.badge}>{academicYear || "Academic Year not set"}</div>
-
-            <div style={S.divider} />
-
-            <Row label="Monthly Savings Goal" value={
-              student?.monthly_savings_goal > 0
-                ? `${selectedCur.symbol} ${Number(student?.monthly_savings_goal || 0).toLocaleString()}`
-                : "Not set"
-            } />
-            <Row label="Currency" value={`${selectedCur.symbol}  ${selectedCur.code} — ${selectedCur.name}`} />
-            <Row label="Member since" value={
-              student?.created_at
-                ? new Date(student.created_at).toLocaleDateString("en-PK", { year: "numeric", month: "long" })
-                : "—"
-            } />
+      <div style={S.layout}>
+        {/* Left Column: Account Card */}
+        <aside style={S.sideCard}>
+          <div style={S.avatar}>
+            <i className="fa-solid fa-user-graduate"></i>
           </div>
-        </div>
+          <h2 style={S.cardName}>{student?.name || "Student"}</h2>
+          <p style={S.cardEmail}>
+            <i className="fa-regular fa-envelope" style={{ marginRight: 6 }}></i>
+            {student?.email || "No email"}
+          </p>
 
-        {/* ── Right column: edit forms ── */}
-        <div style={S.rightCol}>
+          <div style={S.curBadge}>
+            <i className="fa-solid fa-coins" style={{ marginRight: 6, color: "#07845e" }}></i>
+            <span>Active: <strong>{activeCur.code} ({activeCur.symbol})</strong></span>
+          </div>
 
-          {/* Edit Profile */}
-          <section style={S.card}>
-            <h2 style={S.sectionTitle}>✏️ Edit Profile</h2>
-            <p style={S.sectionSub}>Changes are saved to your account on the server.</p>
+          <div style={S.divider} />
 
-            <form onSubmit={handleSaveProfile} style={S.form}>
-              <Field label="Full Name" required>
-                <input
-                  style={S.input}
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your full name"
-                  required
-                />
-              </Field>
+          <div style={S.infoList}>
+            <div style={S.infoRow}>
+              <span style={S.infoLabel}>Academic Standing</span>
+              <strong style={S.infoVal}>{academicYear || "Not specified"}</strong>
+            </div>
 
-              <Field label="Academic Year">
-                <select style={S.input} value={academicYear} onChange={(e) => setAcademicYear(e.target.value)}>
-                  <option value="">Select year…</option>
-                  {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
-                </select>
-              </Field>
+            <div style={S.infoRow}>
+              <span style={S.infoLabel}>Monthly Savings Goal</span>
+              <strong style={S.infoVal}>
+                {student?.monthly_savings_goal > 0
+                  ? `${activeCur.symbol} ${Number(student?.monthly_savings_goal).toLocaleString()}`
+                  : "Not configured"}
+              </strong>
+            </div>
 
-              <Field label={`Monthly Savings Goal (${selectedCur.symbol})`}>
-                <input
-                  style={S.input}
-                  type="number"
-                  min="0"
-                  step="100"
-                  value={savingsGoal}
-                  onChange={(e) => setSavingsGoal(e.target.value)}
-                  placeholder="e.g. 5000"
-                />
-              </Field>
+            <div style={S.infoRow}>
+              <span style={S.infoLabel}>Currency Locale</span>
+              <strong style={S.infoVal}>{activeCur.name} ({activeCur.locale})</strong>
+            </div>
 
-              <Field label="Email Address">
-                <input style={{ ...S.input, background: "#f8fafc", color: "#94a3b8" }} value={student?.email || ""} readOnly />
-              </Field>
+            <div style={S.infoRow}>
+              <span style={S.infoLabel}>Account Status</span>
+              <span style={{ color: "#07845e", fontWeight: 700, fontSize: 13 }}>
+                <i className="fa-solid fa-circle-check" style={{ marginRight: 5 }}></i>
+                Active
+              </span>
+            </div>
+          </div>
+        </aside>
 
-              <div style={{ gridColumn: "1/-1", display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-                <button style={S.saveBtn} type="submit" disabled={saving}>
-                  {saving ? "Saving…" : "Save Changes"}
-                </button>
-                {profileMsg && (
-                  <span style={{ fontSize: 13, fontWeight: 700, color: profileMsg.startsWith("✅") ? "#07845e" : "#ef4444" }}>
-                    {profileMsg}
-                  </span>
-                )}
-              </div>
-            </form>
-          </section>
-
-          {/* Currency Selector */}
-          <section style={S.card}>
-            <h2 style={S.sectionTitle}>💱 Currency Preference</h2>
-            <p style={S.sectionSub}>
-              Choose how amounts are displayed across the entire app. Default is Pakistani Rupee (Rs.).
-            </p>
-
-            {/* Current selection highlight */}
-            <div style={S.currentCurrency}>
-              <span style={S.bigSymbol}>{selectedCur.symbol}</span>
+        {/* Right Column: Edit Profile Form with Dropdown Currency Selector */}
+        <main style={S.mainFormCard}>
+          <div style={S.formHeader}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={S.formIcon}>
+                <i className="fa-solid fa-sliders"></i>
+              </span>
               <div>
-                <strong style={{ fontSize: 15, color: "#17283e" }}>{selectedCur.name}</strong>
-                <span style={{ display: "block", fontSize: 12, color: "#94a3b8" }}>{selectedCur.code} · Currently selected</span>
+                <h2 style={S.sectionTitle}>Profile & Preferences</h2>
+                <p style={S.sectionSub}>Update your personal information and default currency.</p>
+              </div>
+            </div>
+          </div>
+
+          <form onSubmit={handleSaveProfile} style={S.form}>
+            {/* Full Name */}
+            <div style={S.field}>
+              <label style={S.label}>
+                <i className="fa-regular fa-user" style={{ marginRight: 6, color: "#64748b" }}></i>
+                Full Name
+              </label>
+              <input
+                style={S.input}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
+
+            {/* Currency Dropdown Selector */}
+            <div style={S.field}>
+              <label style={S.label}>
+                <i className="fa-solid fa-money-bill-transfer" style={{ marginRight: 6, color: "#07845e" }}></i>
+                Select Display Currency
+              </label>
+              <div style={S.selectWrap}>
+                <select
+                  style={S.select}
+                  value={currency}
+                  onChange={(e) => handleCurrencySelect(e.target.value)}
+                >
+                  {CURRENCIES.map((cur) => (
+                    <option key={cur.code} value={cur.code}>
+                      {cur.code} - {cur.name} ({cur.symbol})
+                    </option>
+                  ))}
+                </select>
+                <span style={S.selectArrow}>
+                  <i className="fa-solid fa-chevron-down"></i>
+                </span>
+              </div>
+              <span style={S.fieldHint}>
+                Current Symbol: <strong>{activeCur.symbol}</strong> ({activeCur.name}) - applied app-wide instantly
+              </span>
+            </div>
+
+            {/* Academic Year */}
+            <div style={S.field}>
+              <label style={S.label}>
+                <i className="fa-solid fa-graduation-cap" style={{ marginRight: 6, color: "#64748b" }}></i>
+                Academic Year
+              </label>
+              <div style={S.selectWrap}>
+                <select
+                  style={S.select}
+                  value={academicYear}
+                  onChange={(e) => setAcademicYear(e.target.value)}
+                >
+                  <option value="">Select academic year...</option>
+                  {YEARS.map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+                <span style={S.selectArrow}>
+                  <i className="fa-solid fa-chevron-down"></i>
+                </span>
               </div>
             </div>
 
-            {/* Grid of currencies */}
-            <div style={S.currencyGrid}>
-              {CURRENCIES.map((cur) => {
-                const active = cur.code === currency;
-                return (
-                  <button
-                    key={cur.code}
-                    onClick={() => handleCurrencyChange(cur.code)}
-                    style={{
-                      ...S.curBtn,
-                      ...(active ? S.curBtnActive : {}),
-                    }}
-                    title={cur.name}
-                  >
-                    <span style={S.curSymbol}>{cur.symbol}</span>
-                    <span style={S.curCode}>{cur.code}</span>
-                    <span style={S.curName}>{cur.name}</span>
-                    {active && <span style={S.checkMark}>✓</span>}
-                  </button>
-                );
-              })}
+            {/* Monthly Savings Goal */}
+            <div style={S.field}>
+              <label style={S.label}>
+                <i className="fa-solid fa-bullseye" style={{ marginRight: 6, color: "#64748b" }}></i>
+                Monthly Savings Goal ({activeCur.symbol})
+              </label>
+              <input
+                style={S.input}
+                type="number"
+                min="0"
+                step="100"
+                value={savingsGoal}
+                onChange={(e) => setSavingsGoal(e.target.value)}
+                placeholder="e.g. 5000"
+              />
             </div>
 
-            <p style={{ fontSize: 12, color: "#94a3b8", marginTop: 16 }}>
-              Currency preference is saved locally in your browser. Amounts on Dashboard, Analytics, Savings, and AI Tips pages will all update instantly.
-            </p>
-          </section>
+            {/* Email (Read only) */}
+            <div style={{ ...S.field, gridColumn: "1 / -1" }}>
+              <label style={S.label}>
+                <i className="fa-regular fa-envelope" style={{ marginRight: 6, color: "#64748b" }}></i>
+                Registered Email Address
+              </label>
+              <input
+                style={{ ...S.input, background: "#f8fafc", color: "#64748b", cursor: "not-allowed" }}
+                value={student?.email || ""}
+                readOnly
+              />
+            </div>
 
-        </div>
+            {/* Submit & Messages */}
+            <div style={S.actionRow}>
+              <button style={S.saveBtn} type="submit" disabled={saving}>
+                <i className="fa-solid fa-floppy-disk" style={{ marginRight: 8 }}></i>
+                {saving ? "Saving Changes…" : "Save Changes"}
+              </button>
+
+              {profileMsg && (
+                <div style={{
+                  ...S.msgBox,
+                  background: profileMsg.includes("success") ? "#ecfdf5" : "#fef2f2",
+                  color:      profileMsg.includes("success") ? "#047857" : "#b91c1c",
+                  borderColor: profileMsg.includes("success") ? "#a7f3d0" : "#fecaca",
+                }}>
+                  <i className={`fa-solid ${profileMsg.includes("success") ? "fa-circle-check" : "fa-triangle-exclamation"}`} style={{ marginRight: 6 }}></i>
+                  {profileMsg}
+                </div>
+              )}
+            </div>
+          </form>
+        </main>
       </div>
     </div>
   );
 }
 
-function Field({ label, children }) {
-  return (
-    <label style={S.fieldLabel}>
-      <span style={S.labelText}>{label}</span>
-      {children}
-    </label>
-  );
-}
-
-function Row({ label, value }) {
-  return (
-    <div style={S.detailRow}>
-      <span style={S.detailLabel}>{label}</span>
-      <span style={S.detailValue}>{value}</span>
-    </div>
-  );
-}
-
 const S = {
-  page:    { maxWidth: 1050, margin: "0 auto", padding: "42px 22px 70px", fontFamily: "Inter, Arial, sans-serif" },
-  eyebrow: { display: "block", color: "#07845e", fontSize: 11, fontWeight: 900, letterSpacing: 1.4, marginBottom: 6 },
-  title:   { color: "#142238", fontSize: "clamp(26px,4vw,32px)", margin: "0 0 6px", letterSpacing: "-1px" },
-  subtitle:{ color: "#718096", fontSize: 14, lineHeight: 1.6, marginBottom: 28 },
-
-  grid:    { display: "grid", gridTemplateColumns: "280px 1fr", gap: 22, alignItems: "start" },
-
-  leftCol:  { display: "flex", flexDirection: "column", gap: 18 },
-  rightCol: { display: "flex", flexDirection: "column", gap: 18 },
-
-  card: {
-    background: "#fff", border: "1px solid #e3e9ef", borderRadius: 18,
-    padding: "24px 24px", boxShadow: "0 8px 30px rgba(16,35,55,0.05)",
+  page: {
+    maxWidth: 1100,
+    margin: "0 auto",
+    padding: "36px 20px 70px",
+    fontFamily: "'Inter', Arial, sans-serif",
   },
-
-  avatar: {
-    width: 64, height: 64, display: "grid", placeItems: "center",
-    borderRadius: 20, background: "linear-gradient(135deg,#07845e,#059669)",
-    color: "#fff", fontSize: 28, fontWeight: 900, marginBottom: 14,
+  headerWrap: {
+    marginBottom: 28,
   },
-  cardName:  { margin: "0 0 4px", fontSize: 18, fontWeight: 800, color: "#17283e" },
-  cardEmail: { margin: "0 0 12px", fontSize: 13, color: "#94a3b8" },
-  badge:     { display: "inline-block", background: "#e2f7ef", color: "#07845e", fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 20 },
-  divider:   { height: 1, background: "#f1f5f9", margin: "18px 0" },
-  detailRow: { display: "flex", flexDirection: "column", gap: 3, padding: "10px 0", borderBottom: "1px solid #f8fafc" },
-  detailLabel:{ color: "#94a3b8", fontSize: 11, fontWeight: 600, letterSpacing: 0.3 },
-  detailValue:{ color: "#17283e", fontSize: 13, fontWeight: 600 },
-
-  sectionTitle: { margin: "0 0 4px", fontSize: 17, fontWeight: 800, color: "#17283e" },
-  sectionSub:   { margin: "0 0 20px", fontSize: 13, color: "#94a3b8" },
-
-  form:      { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16 },
-  fieldLabel:{ display: "flex", flexDirection: "column", gap: 7 },
-  labelText: { fontSize: 12, fontWeight: 700, color: "#526276" },
-  input:     { padding: "11px 13px", border: "1.5px solid #dce4eb", borderRadius: 10, fontSize: 14, background: "#fbfcfd", outline: "none", fontFamily: "inherit", width: "100%", boxSizing: "border-box" },
-  saveBtn:   { border: "none", borderRadius: 10, padding: "12px 24px", background: "linear-gradient(135deg,#07845e,#059669)", color: "#fff", fontWeight: 800, cursor: "pointer", fontFamily: "inherit", fontSize: 14 },
-
-  currentCurrency: {
-    display: "flex", alignItems: "center", gap: 16,
-    background: "linear-gradient(135deg,#e2f7ef,#eff6ff)", border: "1.5px solid #a7f3d0",
-    borderRadius: 14, padding: "16px 20px", marginBottom: 20,
+  eyebrow: {
+    display: "inline-flex",
+    alignItems: "center",
+    color: "#07845e",
+    fontSize: 12,
+    fontWeight: 800,
+    letterSpacing: 1.2,
+    marginBottom: 6,
   },
-  bigSymbol: { fontSize: 32, fontWeight: 900, color: "#07845e", minWidth: 40, textAlign: "center" },
-
-  currencyGrid: {
+  title: {
+    margin: "0 0 6px",
+    fontSize: "clamp(24px, 3.5vw, 32px)",
+    color: "#111827",
+    fontWeight: 800,
+    letterSpacing: "-0.6px",
+  },
+  subtitle: {
+    margin: 0,
+    color: "#64748b",
+    fontSize: 14,
+    lineHeight: 1.5,
+  },
+  layout: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill,minmax(130px,1fr))",
-    gap: 10,
+    gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))",
+    gap: 24,
+    alignItems: "start",
   },
-  curBtn: {
-    position: "relative", display: "flex", flexDirection: "column", alignItems: "center",
-    gap: 3, padding: "12px 8px", border: "1.5px solid #e2e8f0",
-    borderRadius: 12, background: "#fff", cursor: "pointer", fontFamily: "inherit",
-    transition: "all 0.15s ease",
+  sideCard: {
+    background: "#ffffff",
+    border: "1px solid #e2e8f0",
+    borderRadius: 16,
+    padding: "26px 22px",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.03)",
+    textAlign: "center",
   },
-  curBtnActive: {
-    border: "1.5px solid #07845e", background: "#e2f7ef",
-    boxShadow: "0 4px 16px rgba(7,132,94,0.15)",
+  avatar: {
+    width: 68,
+    height: 68,
+    borderRadius: "50%",
+    background: "linear-gradient(135deg, #07845e, #10b981)",
+    color: "#ffffff",
+    display: "grid",
+    placeItems: "center",
+    fontSize: 26,
+    margin: "0 auto 14px",
+    boxShadow: "0 8px 18px rgba(7, 132, 94, 0.2)",
   },
-  curSymbol: { fontSize: 18, fontWeight: 900, color: "#17283e" },
-  curCode:   { fontSize: 11, fontWeight: 800, color: "#526276" },
-  curName:   { fontSize: 9,  color: "#94a3b8", textAlign: "center", lineHeight: 1.3 },
-  checkMark: { position: "absolute", top: 6, right: 8, fontSize: 10, color: "#07845e", fontWeight: 900 },
-
-  "@media(max-width:680px)": { grid: { gridTemplateColumns: "1fr" } },
+  cardName: {
+    margin: "0 0 4px",
+    fontSize: 19,
+    fontWeight: 800,
+    color: "#0f172a",
+  },
+  cardEmail: {
+    margin: "0 0 14px",
+    fontSize: 13,
+    color: "#64748b",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  curBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    background: "#ecfdf5",
+    color: "#065f46",
+    border: "1px solid #a7f3d0",
+    padding: "5px 12px",
+    borderRadius: 20,
+    fontSize: 12,
+  },
+  divider: {
+    height: 1,
+    background: "#f1f5f9",
+    margin: "20px 0 16px",
+  },
+  infoList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+    textAlign: "left",
+  },
+  infoRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "8px 0",
+    borderBottom: "1px solid #f8fafc",
+    fontSize: 13,
+  },
+  infoLabel: {
+    color: "#64748b",
+  },
+  infoVal: {
+    color: "#0f172a",
+    fontWeight: 600,
+  },
+  mainFormCard: {
+    background: "#ffffff",
+    border: "1px solid #e2e8f0",
+    borderRadius: 16,
+    padding: "26px 26px",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.03)",
+  },
+  formHeader: {
+    marginBottom: 20,
+    paddingBottom: 14,
+    borderBottom: "1px solid #f1f5f9",
+  },
+  formIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    background: "#f1f5f9",
+    color: "#0f172a",
+    display: "grid",
+    placeItems: "center",
+    fontSize: 15,
+  },
+  sectionTitle: {
+    margin: "0 0 2px",
+    fontSize: 18,
+    fontWeight: 800,
+    color: "#0f172a",
+  },
+  sectionSub: {
+    margin: 0,
+    fontSize: 13,
+    color: "#64748b",
+  },
+  form: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+    gap: 18,
+  },
+  field: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 7,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: 700,
+    color: "#334155",
+    display: "flex",
+    alignItems: "center",
+  },
+  input: {
+    padding: "11px 14px",
+    border: "1.5px solid #e2e8f0",
+    borderRadius: 10,
+    fontSize: 14,
+    color: "#0f172a",
+    background: "#ffffff",
+    outline: "none",
+    fontFamily: "inherit",
+    boxSizing: "border-box",
+    width: "100%",
+    transition: "border-color 0.15s ease",
+  },
+  selectWrap: {
+    position: "relative",
+    width: "100%",
+  },
+  select: {
+    padding: "11px 36px 11px 14px",
+    border: "1.5px solid #e2e8f0",
+    borderRadius: 10,
+    fontSize: 14,
+    color: "#0f172a",
+    background: "#ffffff",
+    outline: "none",
+    fontFamily: "inherit",
+    boxSizing: "border-box",
+    width: "100%",
+    appearance: "none",
+    cursor: "pointer",
+  },
+  selectArrow: {
+    position: "absolute",
+    right: 14,
+    top: "50%",
+    transform: "translateY(-50%)",
+    pointerEvents: "none",
+    color: "#64748b",
+    fontSize: 12,
+  },
+  fieldHint: {
+    fontSize: 11,
+    color: "#64748b",
+    marginTop: 2,
+  },
+  actionRow: {
+    gridColumn: "1 / -1",
+    display: "flex",
+    alignItems: "center",
+    gap: 16,
+    flexWrap: "wrap",
+    marginTop: 8,
+  },
+  saveBtn: {
+    background: "linear-gradient(135deg, #07845e, #10b981)",
+    color: "#ffffff",
+    border: "none",
+    padding: "12px 24px",
+    borderRadius: 10,
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    boxShadow: "0 4px 14px rgba(7, 132, 94, 0.2)",
+    fontFamily: "inherit",
+  },
+  msgBox: {
+    padding: "10px 14px",
+    borderRadius: 9,
+    fontSize: 13,
+    fontWeight: 600,
+    border: "1px solid",
+    display: "inline-flex",
+    alignItems: "center",
+  },
 };

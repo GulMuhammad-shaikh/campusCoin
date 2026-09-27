@@ -144,8 +144,9 @@ export default function TransactionModal({
         {/* Header */}
         <div style={{ ...styles.header, borderBottom: `2px solid ${lightBg}` }}>
           <div style={styles.headerLeft}>
-            <span style={{ ...styles.typeTag, background: lightBg, color: accentColor }}>
-              {isEdit ? "✏️ EDIT TRANSACTION" : isIncome ? "↗ MONEY IN" : "↘ MONEY OUT"}
+            <span style={{ ...styles.typeTag, background: lightBg, color: accentColor, display: "inline-flex", alignItems: "center", gap: 5 }}>
+              <i className={`fa-solid ${isEdit ? "fa-pen-to-square" : isIncome ? "fa-arrow-up" : "fa-arrow-down"}`}></i>
+              {isEdit ? "EDIT TRANSACTION" : isIncome ? "MONEY IN" : "MONEY OUT"}
             </span>
             <h2 style={styles.modalTitle}>
               {isEdit
@@ -154,7 +155,7 @@ export default function TransactionModal({
             </h2>
           </div>
           <button type="button" onClick={onClose} style={styles.closeBtn} title="Cancel (Esc)">
-            ✕
+            <i className="fa-solid fa-xmark"></i>
           </button>
         </div>
 
@@ -169,7 +170,7 @@ export default function TransactionModal({
                 style={styles.input}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder={isIncome ? "e.g. Monthly allowance" : "e.g. KFC lunch"}
+                placeholder={isIncome ? "e.g. Monthly allowance" : "e.g. Campus cafe"}
                 required
                 autoFocus
               />
@@ -180,7 +181,8 @@ export default function TransactionModal({
                 <span>Category</span>
                 {onOpenCategoryModal && (
                   <button type="button" onClick={onOpenCategoryModal} style={styles.manageBtn}>
-                    ⚙ Manage / + Add
+                    <i className="fa-solid fa-gear" style={{ marginRight: 4 }}></i>
+                    Manage / Add
                   </button>
                 )}
               </div>
@@ -196,7 +198,7 @@ export default function TransactionModal({
             </label>
 
             <label style={styles.label}>
-              Amount (Rs.)
+              Amount
               <input
                 style={styles.input}
                 type="number"

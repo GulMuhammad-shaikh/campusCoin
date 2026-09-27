@@ -36,11 +36,27 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/auth",         require("./routes/authRoutes"));
-app.use("/categories",   require("./routes/categoryRoutes"));
-app.use("/transactions", require("./routes/transactionRoutes"));
-app.use("/budgets",      require("./routes/budgetRoutes"));
-app.use("/insights",     require("./routes/insightRoutes"));
+const authRoutes = require("./routes/authRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
+const transactionRoutes = require("./routes/transactionRoutes");
+const budgetRoutes = require("./routes/budgetRoutes");
+const insightRoutes = require("./routes/insightRoutes");
+
+// Support both /auth and /api/auth so deployment never fails regardless of path format
+app.use("/auth", authRoutes);
+app.use("/api/auth", authRoutes);
+
+app.use("/categories", categoryRoutes);
+app.use("/api/categories", categoryRoutes);
+
+app.use("/transactions", transactionRoutes);
+app.use("/api/transactions", transactionRoutes);
+
+app.use("/budgets", budgetRoutes);
+app.use("/api/budgets", budgetRoutes);
+
+app.use("/insights", insightRoutes);
+app.use("/api/insights", insightRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Route not found: ${req.method} ${req.originalUrl}` });

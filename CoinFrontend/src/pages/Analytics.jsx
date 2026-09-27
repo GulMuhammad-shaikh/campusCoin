@@ -252,12 +252,18 @@ export default function Analytics({ student }) {
               <option key={y} value={y}>{y}</option>
             ))}
           </select>
-          <button onClick={loadData} style={S.refreshBtn} title="Refresh">↺</button>
+          <button onClick={loadData} style={S.refreshBtn} title="Refresh">
+            <i className="fa-solid fa-rotate-right"></i>
+          </button>
         </div>
       </div>
 
       {error && (
-        <div style={S.errorBanner}>⚠ {error} <button onClick={loadData} style={S.retryBtn}>Retry</button></div>
+        <div style={S.errorBanner}>
+          <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: 6 }}></i>
+          {error}
+          <button onClick={loadData} style={S.retryBtn}>Retry</button>
+        </div>
       )}
 
       {/* ── Summary Pills ── */}
@@ -270,8 +276,13 @@ export default function Analytics({ student }) {
 
       {/* ── Chart 1: Daily Income vs Expenses Column Chart ── */}
       <ChartCard
-        title="📊 Daily Income vs Expenses"
-        subtitle={`Each day of ${monthNames[selectedMonth]} ${selectedYear} — green bars = income share, red = expenses`}
+        title={
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <i className="fa-solid fa-chart-column" style={{ color: "#07845e" }}></i>
+            Daily Income vs Expenses
+          </span>
+        }
+        subtitle={`Each day of ${monthNames[selectedMonth]} ${selectedYear} — actual daily transactions recorded`}
       >
         {columnData.length === 0 || (totalIncome === 0 && totalExpense === 0) ? (
           <EmptyChart msg="No transactions recorded for this month yet." />
@@ -292,7 +303,12 @@ export default function Analytics({ student }) {
 
       {/* ── Chart 2: Pie – Income / Expenses / Savings ── */}
       <ChartCard
-        title="🥧 Financial Distribution"
+        title={
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <i className="fa-solid fa-chart-pie" style={{ color: "#6366f1" }}></i>
+            Financial Distribution
+          </span>
+        }
         subtitle="Breakdown of where your money goes — expenses, savings goal, and remaining balance"
       >
         {pieData.length === 0 ? (
@@ -335,8 +351,14 @@ export default function Analytics({ student }) {
               })}
               {savings.goalAmount > 0 && (
                 <div style={{ marginTop: 12, padding: "10px 12px", background: "#eff6ff", borderRadius: 10, fontSize: 12, color: "#1d4ed8" }}>
-                  🎯 Savings goal: {formatRupees(savings.goalAmount)}
-                  {balance <= 0 && <div style={{ color: "#ef4444", marginTop: 4 }}>⚠ No remaining income to fund savings goal!</div>}
+                  <i className="fa-solid fa-bullseye" style={{ marginRight: 6 }}></i>
+                  Savings goal: {formatRupees(savings.goalAmount)}
+                  {balance <= 0 && (
+                    <div style={{ color: "#ef4444", marginTop: 4 }}>
+                      <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: 5 }}></i>
+                      No remaining income to fund savings goal!
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -346,7 +368,12 @@ export default function Analytics({ student }) {
 
       {/* ── Chart 3: Donut – Expenses by Category ── */}
       <ChartCard
-        title="🍩 Expenses by Category"
+        title={
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <i className="fa-solid fa-circle-dot" style={{ color: "#f59e0b" }}></i>
+            Expenses by Category
+          </span>
+        }
         subtitle="How your spending is distributed across categories this month"
       >
         {donutData.length === 0 ? (
@@ -402,7 +429,12 @@ export default function Analytics({ student }) {
 
       {/* ── Chart 4: Yearly Monthly Overview ── */}
       <ChartCard
-        title="📅 Yearly Cash Flow"
+        title={
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <i className="fa-solid fa-calendar-days" style={{ color: "#10b981" }}></i>
+            Yearly Cash Flow
+          </span>
+        }
         subtitle={`Monthly income vs expenses for ${yearlyChartYear} — full year overview`}
         headerRight={
           <select

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { authAPI, transactionAPI } from "../utils/api";
-import { formatRupees } from "../utils/transactions";
+import { formatRupees, getCurrency } from "../utils/transactions";
 
 export default function Savings({ student }) {
   const userId        = student?.user_id || student?._id || student?.id;
   const isValidId     = userId && /^[0-9a-fA-F]{24}$/.test(String(userId));
+  const activeCur     = getCurrency();
 
   const [goalInput,   setGoalInput]   = useState("");
   const [goalAmount,  setGoalAmount]  = useState(Number(student?.monthly_savings_goal || 0));
@@ -102,14 +103,13 @@ export default function Savings({ student }) {
     try {
       await authAPI.updateProfile(userId, { monthly_savings_goal: val });
       setGoalAmount(val);
-      // Update localStorage so dashboard reflects immediately
       const stored = JSON.parse(localStorage.getItem("campusCoinCurrentStudent") || "{}");
       stored.monthly_savings_goal = val;
       localStorage.setItem("campusCoinCurrentStudent", JSON.stringify(stored));
-      setSaveMsg("✅ Goal saved!");
+      setSaveMsg("Goal saved successfully.");
       setTimeout(() => setSaveMsg(""), 3000);
     } catch (err) {
-      setSaveMsg("❌ Could not save goal. Try again.");
+      setSaveMsg("Could not save goal. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -132,34 +132,43 @@ export default function Savings({ student }) {
 
   return (
     <div style={S.page}>
-      <span style={S.eyebrow}>PLAN AHEAD</span>
-      <h1 style={S.title}>Savings Goals</h1>
-      <p style={S.subtitle}>Set your monthly savings target and track your progress in real time.</p>
+      <div style={S.headerWrap}>
+        <span style={S.eyebrow}>
+          <i className="fa-solid fa-piggy-bank" style={{ marginRight: 6 }}></i>
+          FINANCIAL DISCIPLINE
+        </span>
+        <h1 style={S.title}>Savings Goals & Progress</h1>
+        <p style={S.subtitle}>Set your monthly savings target and monitor your capital accumulation in real time.</p>
+      </div>
 
-      {/* ── Top KPI row ── */}
+      {/* KPI row */}
       <div style={S.kpiGrid}>
-        <KpiCard label="Total Balance"     value={formatRupees(totalBal)}       color="#07845e" icon="💰" />
-        <KpiCard label="This Month Net"    value={formatRupees(monthlyNet)}      color={monthlyNet >= 0 ? "#07845e" : "#ef4444"} icon={monthlyNet >= 0 ? "↑" : "↓"} />
-        <KpiCard label="Monthly Income"    value={formatRupees(monthlyInc)}      color="#6366f1" icon="↗" />
-        <KpiCard label="Monthly Expenses"  value={formatRupees(monthlyExp)}      color="#ef4444" icon="↘" />
-        <KpiCard label="Savings Rate"      value={`${savingsRate.toFixed(1)}%`}  color="#8b5cf6" icon="%" />
+        <KpiCard label="Total Balance"    value={formatRupees(totalBal)}      color="#07845e" iconClass="fa-solid fa-wallet" />
+        <KpiCard label="This Month Net"   value={formatRupees(monthlyNet)}     color={monthlyNet >= 0 ? "#07845e" : "#ef4444"} iconClass={monthlyNet >= 0 ? "fa-solid fa-arrow-trend-up" : "fa-solid fa-arrow-trend-down"} />
+        <KpiCard label="Monthly Income"   value={formatRupees(monthlyInc)}     color="#6366f1" iconClass="fa-solid fa-arrow-up" />
+        <KpiCard label="Monthly Expenses" value={formatRupees(monthlyExp)}     color="#ef4444" iconClass="fa-solid fa-arrow-down" />
+        <KpiCard label="Savings Rate"     value={`${savingsRate.toFixed(1)}%`} color="#8b5cf6" iconClass="fa-solid fa-percent" />
         {lastMonthDiff !== null && (
           <KpiCard
             label="vs Last Month"
             value={`${lastMonthDiff >= 0 ? "+" : ""}${lastMonthDiff.toFixed(1)}%`}
             color={lastMonthDiff >= 0 ? "#07845e" : "#ef4444"}
-            icon={lastMonthDiff >= 0 ? "↑" : "↓"}
+            iconClass={lastMonthDiff >= 0 ? "fa-solid fa-arrow-trend-up" : "fa-solid fa-arrow-trend-down"}
           />
         )}
       </div>
 
-      {/* ── Set / Update Goal ── */}
+      {/* Set / Update Goal */}
       <section style={S.card}>
-        <h2 style={S.cardTitle}>🎯 Monthly Savings Goal</h2>
-        <p style={S.cardSub}>How much do you want to save this month? Synced with your account.</p>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+          <i className="fa-solid fa-bullseye" style={{ color: "#6366f1", fontSize: 18 }}></i>
+          <h2 style={S.cardTitle}>Monthly Savings Goal</h2>
+        </div>
+        <p style={S.cardSub}>Define your monthly savings target. Automatically synchronizes with your profile.</p>
+
         <form onSubmit={handleSaveGoal} style={S.goalForm}>
           <div style={S.goalInputWrap}>
-            <span style={S.rsSign}>Rs.</span>
+            <span style={S.rsSign}>{activeCur.symbol}</span>
             <input
               style={S.goalInput}
               type="number"
@@ -172,25 +181,43 @@ export default function Savings({ student }) {
             />
           </div>
           <button style={S.saveBtn} type="submit" disabled={saving}>
-            {saving ? "Saving…" : goalAmount > 0 ? "Update Goal" : "Set Goal"}
+            <i className="fa-solid fa-check" style={{ marginRight: 6 }}></i>
+            {saving ? "Saving…" : goalAmount > 0 ? "Update Target" : "Set Target"}
           </button>
         </form>
-        {saveMsg && <p style={{ marginTop: 10, fontSize: 13, fontWeight: 700, color: saveMsg.startsWith("✅") ? "#07845e" : "#ef4444" }}>{saveMsg}</p>}
+
+        {saveMsg && (
+          <div style={{
+            marginTop: 14,
+            fontSize: 13,
+            fontWeight: 600,
+            color: saveMsg.includes("success") ? "#07845e" : "#ef4444",
+            display: "flex",
+            alignItems: "center",
+            gap: 6
+          }}>
+            <i className={`fa-solid ${saveMsg.includes("success") ? "fa-circle-check" : "fa-circle-xmark"}`}></i>
+            {saveMsg}
+          </div>
+        )}
       </section>
 
-      {/* ── Progress Card ── */}
+      {/* Progress Card */}
       {goalAmount > 0 && (
         <section style={S.card}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
             <div>
-              <h2 style={S.cardTitle}>This Month's Progress</h2>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <i className="fa-solid fa-chart-line" style={{ color: "#07845e" }}></i>
+                <h2 style={S.cardTitle}>Current Month Progress</h2>
+              </div>
               <p style={S.cardSub}>{monthNames[thisMonth]} {thisYear}</p>
             </div>
             <div style={{ textAlign: "right" }}>
               <div style={{ fontSize: 28, fontWeight: 900, color: progress >= 100 ? "#07845e" : "#6366f1" }}>
                 {progress.toFixed(0)}%
               </div>
-              <span style={{ fontSize: 11, color: "#94a3b8" }}>of goal</span>
+              <span style={{ fontSize: 12, color: "#94a3b8" }}>of target reached</span>
             </div>
           </div>
 
@@ -204,28 +231,40 @@ export default function Savings({ student }) {
 
           <div style={S.progressMeta}>
             <span>Saved: <strong style={{ color: "#07845e" }}>{formatRupees(Math.max(0, monthlyNet))}</strong></span>
-            <span>Goal: <strong>{formatRupees(goalAmount)}</strong></span>
+            <span>Target: <strong>{formatRupees(goalAmount)}</strong></span>
           </div>
 
           {progress >= 100 ? (
-            <div style={S.successBanner}>🎉 You've reached your savings goal this month! Great work.</div>
+            <div style={S.successBanner}>
+              <i className="fa-solid fa-circle-check" style={{ marginRight: 8 }}></i>
+              Congratulations! You have reached your monthly savings target.
+            </div>
           ) : remaining > 0 ? (
-            <div style={S.infoBanner}>💡 Save <strong>{formatRupees(remaining)}</strong> more to reach your goal.</div>
+            <div style={S.infoBanner}>
+              <i className="fa-solid fa-circle-info" style={{ marginRight: 8 }}></i>
+              Save <strong>{formatRupees(remaining)}</strong> more this month to achieve your target.
+            </div>
           ) : (
-            <div style={S.warnBanner}>⚠ Your expenses exceed your income this month. Try to reduce spending.</div>
+            <div style={S.warnBanner}>
+              <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: 8 }}></i>
+              Your expenses currently exceed your income this month.
+            </div>
           )}
         </section>
       )}
 
-      {/* ── 6-Month History ── */}
+      {/* 6-Month History */}
       <section style={S.card}>
-        <h2 style={S.cardTitle}>📅 6-Month Savings History</h2>
-        <p style={S.cardSub}>Net savings (income − expenses) per month</p>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+          <i className="fa-solid fa-calendar-days" style={{ color: "#64748b" }}></i>
+          <h2 style={S.cardTitle}>6-Month Savings History</h2>
+        </div>
+        <p style={S.cardSub}>Net monthly accumulation (income minus expenses)</p>
         <div style={S.historyGrid}>
           {monthHistory.map((m) => {
-            const pct       = Math.abs(m.net) / maxHistory;
-            const barH      = Math.max(4, pct * 120);
-            const positive  = m.net >= 0;
+            const pct      = Math.abs(m.net) / maxHistory;
+            const barH     = Math.max(6, pct * 120);
+            const positive = m.net >= 0;
             return (
               <div key={m.label} style={S.histCol}>
                 <span style={{ fontSize: 11, fontWeight: 700, color: positive ? "#07845e" : "#ef4444" }}>
@@ -243,8 +282,8 @@ export default function Savings({ student }) {
                 </div>
                 <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>{m.label}</span>
                 {goalAmount > 0 && (
-                  <span style={{ fontSize: 10, color: positive && m.net >= goalAmount ? "#07845e" : "#94a3b8" }}>
-                    {positive && m.net >= goalAmount ? "✅" : ""}
+                  <span style={{ fontSize: 11, color: positive && m.net >= goalAmount ? "#07845e" : "transparent" }}>
+                    <i className="fa-solid fa-check"></i>
                   </span>
                 )}
               </div>
@@ -253,25 +292,31 @@ export default function Savings({ student }) {
         </div>
 
         {goalAmount > 0 && (
-          <p style={{ fontSize: 12, color: "#94a3b8", marginTop: 16, textAlign: "center" }}>
-            ✅ = Month where savings goal of {formatRupees(goalAmount)} was reached
+          <p style={{ fontSize: 12, color: "#94a3b8", marginTop: 16, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+            <i className="fa-solid fa-check" style={{ color: "#07845e" }}></i>
+            <span>Indicates months where savings goal of {formatRupees(goalAmount)} was achieved</span>
           </p>
         )}
       </section>
 
-      {/* ── Tips ── */}
+      {/* Financial Habits */}
       <section style={S.card}>
-        <h2 style={S.cardTitle}>💡 Saving Tips</h2>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+          <i className="fa-solid fa-lightbulb" style={{ color: "#f59e0b" }}></i>
+          <h2 style={S.cardTitle}>Core Financial Principles</h2>
+        </div>
         <div style={S.tipsGrid}>
           {[
-            { icon: "🎯", tip: "Automate your savings — decide on a fixed amount to \"pay yourself first\" each month." },
-            { icon: "📊", tip: "Track your top 3 expense categories. Small reductions there create the biggest impact." },
-            { icon: "☕", tip: "The '24-hour rule': wait a day before any non-essential purchase over Rs. 1,000." },
-            { icon: "📅", tip: "Review your expenses every Sunday to catch surprises before they compound." },
-          ].map(({ icon, tip }, i) => (
+            { iconClass: "fa-solid fa-wallet", tip: "Pay yourself first: allocate your savings target immediately upon receiving allowance or salary." },
+            { iconClass: "fa-solid fa-magnifying-glass-dollar", tip: "Track the largest 3 expense categories. Trimming recurring costs creates the largest delta." },
+            { iconClass: "fa-solid fa-clock", tip: "The 24-hour rule: wait a full day before finalizing any unplanned non-essential purchase." },
+            { iconClass: "fa-solid fa-calendar-check", tip: "Conduct a 5-minute weekend review to ensure all receipts are accounted for." },
+          ].map(({ iconClass, tip }, i) => (
             <div key={i} style={S.tipCard}>
-              <span style={{ fontSize: 22 }}>{icon}</span>
-              <p style={{ margin: 0, fontSize: 13, color: "#526276", lineHeight: 1.7 }}>{tip}</p>
+              <span style={{ width: 34, height: 34, borderRadius: 8, background: "#f1f5f9", display: "grid", placeItems: "center", color: "#334155", fontSize: 14 }}>
+                <i className={iconClass}></i>
+              </span>
+              <p style={{ margin: 0, fontSize: 13, color: "#475569", lineHeight: 1.6 }}>{tip}</p>
             </div>
           ))}
         </div>
@@ -280,46 +325,49 @@ export default function Savings({ student }) {
   );
 }
 
-function KpiCard({ label, value, color, icon }) {
+function KpiCard({ label, value, color, iconClass }) {
   return (
-    <div style={{ background: "#fff", border: "1px solid #e3e9ef", borderRadius: 14, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 8, boxShadow: "0 4px 16px rgba(16,35,55,0.04)" }}>
-      <span style={{ width: 32, height: 32, display: "grid", placeItems: "center", borderRadius: 9, fontSize: 16, fontWeight: 900, color, background: `${color}16` }}>{icon}</span>
-      <span style={{ color: "#718096", fontSize: 11, fontWeight: 600, letterSpacing: 0.3 }}>{label.toUpperCase()}</span>
-      <strong style={{ color, fontSize: 18, letterSpacing: "-0.5px" }}>{value}</strong>
+    <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 14, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 6, boxShadow: "0 2px 10px rgba(0,0,0,0.02)" }}>
+      <span style={{ width: 32, height: 32, display: "grid", placeItems: "center", borderRadius: 8, fontSize: 14, color, background: `${color}16` }}>
+        <i className={iconClass}></i>
+      </span>
+      <span style={{ color: "#64748b", fontSize: 11, fontWeight: 700, letterSpacing: 0.3 }}>{label.toUpperCase()}</span>
+      <strong style={{ color, fontSize: 17, letterSpacing: "-0.4px" }}>{value}</strong>
     </div>
   );
 }
 
 const S = {
-  center:  { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", fontFamily: "Inter, Arial, sans-serif" },
+  center:  { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", fontFamily: "'Inter', sans-serif" },
   spinner: { width: 38, height: 38, border: "4px solid #e2e8f0", borderTop: "4px solid #07845e", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
-  page:    { maxWidth: 960, margin: "0 auto", padding: "42px 22px 70px", fontFamily: "Inter, Arial, sans-serif" },
-  eyebrow: { display: "block", color: "#07845e", fontSize: 11, fontWeight: 900, letterSpacing: 1.4, marginBottom: 6 },
-  title:   { color: "#142238", fontSize: "clamp(26px,4vw,34px)", margin: "0 0 6px", letterSpacing: "-1px" },
-  subtitle:{ color: "#718096", fontSize: 14, lineHeight: 1.6, marginBottom: 28 },
+  page:    { maxWidth: 1000, margin: "0 auto", padding: "36px 20px 70px", fontFamily: "'Inter', Arial, sans-serif" },
+  headerWrap: { marginBottom: 24 },
+  eyebrow: { display: "inline-flex", alignItems: "center", color: "#07845e", fontSize: 11, fontWeight: 800, letterSpacing: 1.2, marginBottom: 6 },
+  title:   { color: "#0f172a", fontSize: "clamp(24px, 3.5vw, 32px)", margin: "0 0 6px", letterSpacing: "-0.8px", fontWeight: 800 },
+  subtitle:{ color: "#64748b", fontSize: 14, lineHeight: 1.5 },
 
-  kpiGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(140px,1fr))", gap: 14, marginBottom: 24 },
+  kpiGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 14, marginBottom: 20 },
 
-  card:    { background: "#fff", border: "1px solid #e3e9ef", borderRadius: 17, padding: "24px", marginBottom: 20, boxShadow: "0 8px 30px rgba(16,35,55,0.04)" },
-  cardTitle:{ color: "#17283e", fontSize: 18, fontWeight: 800, margin: "0 0 4px" },
-  cardSub: { color: "#94a3b8", fontSize: 13, margin: "0 0 20px" },
+  card:    { background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 16, padding: "24px", marginBottom: 20, boxShadow: "0 4px 20px rgba(0,0,0,0.02)" },
+  cardTitle:{ color: "#0f172a", fontSize: 17, fontWeight: 800, margin: 0 },
+  cardSub: { color: "#64748b", fontSize: 13, margin: "4px 0 18px" },
 
   goalForm:     { display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" },
-  goalInputWrap:{ display: "flex", alignItems: "center", border: "1.5px solid #dce4eb", borderRadius: 10, overflow: "hidden", background: "#fbfcfd", flexGrow: 1, maxWidth: 280 },
-  rsSign:       { padding: "12px 14px", background: "#f1f5f9", color: "#6b7280", fontSize: 14, fontWeight: 700, borderRight: "1px solid #dce4eb" },
-  goalInput:    { border: "none", background: "transparent", padding: "12px 14px", fontSize: 16, fontWeight: 700, outline: "none", width: "100%" },
-  saveBtn:      { border: "none", borderRadius: 10, padding: "13px 22px", background: "linear-gradient(135deg,#07845e,#059669)", color: "#fff", fontWeight: 800, cursor: "pointer", fontFamily: "inherit", fontSize: 14 },
+  goalInputWrap:{ display: "flex", alignItems: "center", border: "1.5px solid #e2e8f0", borderRadius: 10, overflow: "hidden", background: "#ffffff", flexGrow: 1, maxWidth: 280 },
+  rsSign:       { padding: "11px 14px", background: "#f8fafc", color: "#475569", fontSize: 13, fontWeight: 700, borderRight: "1px solid #e2e8f0" },
+  goalInput:    { border: "none", background: "transparent", padding: "11px 14px", fontSize: 15, fontWeight: 700, outline: "none", width: "100%", boxSizing: "border-box" },
+  saveBtn:      { border: "none", borderRadius: 10, padding: "11px 20px", background: "linear-gradient(135deg, #07845e, #10b981)", color: "#fff", fontWeight: 700, cursor: "pointer", fontFamily: "inherit", fontSize: 13, display: "inline-flex", alignItems: "center" },
 
-  progressTrack:{ height: 14, background: "#f1f5f9", borderRadius: 20, overflow: "hidden", marginBottom: 12 },
+  progressTrack:{ height: 12, background: "#f1f5f9", borderRadius: 20, overflow: "hidden", marginBottom: 12 },
   progressFill: { height: "100%", borderRadius: 20, transition: "width 0.7s ease" },
   progressMeta: { display: "flex", justifyContent: "space-between", fontSize: 13, color: "#64748b" },
-  successBanner:{ background: "#dcfce7", border: "1px solid #86efac", color: "#166534", borderRadius: 10, padding: "12px 16px", marginTop: 16, fontSize: 13 },
-  infoBanner:   { background: "#eff6ff", border: "1px solid #bfdbfe", color: "#1e40af", borderRadius: 10, padding: "12px 16px", marginTop: 16, fontSize: 13 },
-  warnBanner:   { background: "#fff7ed", border: "1px solid #fed7aa", color: "#9a3412", borderRadius: 10, padding: "12px 16px", marginTop: 16, fontSize: 13 },
+  successBanner:{ background: "#ecfdf5", border: "1px solid #a7f3d0", color: "#065f46", borderRadius: 10, padding: "12px 16px", marginTop: 16, fontSize: 13, display: "flex", alignItems: "center" },
+  infoBanner:   { background: "#eff6ff", border: "1px solid #bfdbfe", color: "#1e40af", borderRadius: 10, padding: "12px 16px", marginTop: 16, fontSize: 13, display: "flex", alignItems: "center" },
+  warnBanner:   { background: "#fff7ed", border: "1px solid #fed7aa", color: "#9a3412", borderRadius: 10, padding: "12px 16px", marginTop: 16, fontSize: 13, display: "flex", alignItems: "center" },
 
-  historyGrid:  { display: "flex", gap: 10, alignItems: "flex-end", height: 160, paddingTop: 20 },
+  historyGrid:  { display: "flex", gap: 10, alignItems: "flex-end", height: 160, paddingTop: 16 },
   histCol:      { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, height: "100%" },
 
-  tipsGrid:     { display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 14 },
+  tipsGrid:     { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: 14 },
   tipCard:      { background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 12, padding: "16px", display: "flex", flexDirection: "column", gap: 10 },
 };

@@ -1,49 +1,49 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { transactionAPI } from "../utils/api";
-import { formatRupees } from "../utils/transactions";
+import { formatRupees, getCurrency } from "../utils/transactions";
 
 const GEMINI_KEY = import.meta.env.VITE_GEMINI_KEY || "";
 const GEMINI_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
 
 const STATIC_TIPS = [
-  { icon: "📅", title: "Plan a weekly budget", body: "Decide how much you can spend on food, transport, study needs, and personal items each week." },
-  { icon: "⚡", title: "Log instantly", body: "Add a transaction the moment you spend. Delayed logging leads to forgotten entries and inaccurate records." },
-  { icon: "🎯", title: "Set a realistic savings goal", body: "Start small — even Rs. 500/month builds a strong habit. Increase the target as your income grows." },
-  { icon: "🔍", title: "Review your top category", body: "Check which category takes the biggest share each month and ask yourself if it matches your priorities." },
-  { icon: "🔁", title: "Track recurring charges", body: "Subscriptions and monthly bills are easy to forget. Log them once as recurring so they never slip through." },
-  { icon: "📊", title: "Use the analytics page", body: "Visit the Analytics tab regularly to spot patterns in your income and expenses across weeks and months." },
+  { iconClass: "fa-solid fa-calendar-check", title: "Plan a weekly budget", body: "Decide how much you can spend on food, transport, study needs, and personal items each week." },
+  { iconClass: "fa-solid fa-bolt-lightning", title: "Log transactions immediately", body: "Record purchases right when they occur. Delayed logging leads to forgotten expenses and inaccurate totals." },
+  { iconClass: "fa-solid fa-bullseye", title: "Establish an incremental target", body: "Start with a modest savings goal. Incremental habit-building produces more consistent long-term results." },
+  { iconClass: "fa-solid fa-magnifying-glass-chart", title: "Review primary category spending", body: "Analyze your largest expense category each month to determine whether it aligns with your budget." },
+  { iconClass: "fa-solid fa-arrows-rotate", title: "Monitor recurring subscriptions", body: "Digital subscriptions and monthly recurring charges compound quickly. Review and cancel idle services." },
+  { iconClass: "fa-solid fa-chart-line", title: "Audit analytics periodically", body: "Inspect your weekly and monthly trends on the Analytics page to catch upward spending drifts early." },
 ];
 
-function buildPrompt(summary, categories, studentName) {
+function buildPrompt(summary, categories, studentName, curSymbol) {
   const catLines = categories.length
-    ? categories.map((c) => `  - ${c.name}: Rs.${c.amount.toLocaleString()}`).join("\n")
+    ? categories.map((c) => `  - ${c.name}: ${curSymbol} ${c.amount.toLocaleString()}`).join("\n")
     : "  No expense categories recorded yet.";
 
-  return `You are a friendly financial advisor for a university student named ${studentName || "a student"} in Pakistan who uses a budgeting app called CampusCoin.
+  return `You are an expert financial advisor for a university student named ${studentName || "a student"} who uses a budgeting app called CampusCoin.
 
-Their current financial snapshot:
-- Total Income:  Rs.${(summary.totalIncome || 0).toLocaleString()}
-- Total Expenses: Rs.${(summary.totalExpense || 0).toLocaleString()}
-- Balance:        Rs.${(summary.balance || 0).toLocaleString()}
+Current Financial Snapshot:
+- Total Income:   ${curSymbol} ${(summary.totalIncome || 0).toLocaleString()}
+- Total Expenses: ${curSymbol} ${(summary.totalExpense || 0).toLocaleString()}
+- Net Balance:    ${curSymbol} ${(summary.balance || 0).toLocaleString()}
 
-Top spending categories this month:
+Top Expense Categories this month:
 ${catLines}
 
-Based on this real data, generate exactly 4 personalized, actionable saving tips. 
+Based on this actual data, generate exactly 4 personalized, actionable financial saving tips.
 Rules:
-- Each tip must be specific to their actual numbers above (mention category names or amounts where relevant)
-- Use simple, friendly language suitable for a student
-- Format your response as JSON array only, no extra text:
+- Be specific to their actual numbers and categories above.
+- Provide practical, realistic advice for university students.
+- Format your response as a valid JSON array only, without markdown quotes or explanation:
 [
-  {"title": "tip title here", "body": "detailed tip body here (2-3 sentences)"},
-  ...
+  {"title": "Clear concise tip title", "body": "2 to 3 sentences of specific, actionable advice."}
 ]`;
 }
 
 export default function AiTips({ student }) {
   const name = student?.name || student?.fullName || "Student";
   const userId = student?.user_id || student?._id || student?.id;
+  const activeCur = getCurrency();
 
   const [aiTips, setAiTips]         = useState([]);
   const [loading, setLoading]       = useState(false);
@@ -86,7 +86,7 @@ export default function AiTips({ student }) {
 
   const generateAiTips = useCallback(async () => {
     if (!GEMINI_KEY) {
-      setError("Gemini API key not set. Add VITE_GEMINI_KEY to your .env file.");
+      setError("Gemini API key is not configured. Add VITE_GEMINI_KEY to your environment variables.");
       return;
     }
     setLoading(true);
@@ -94,13 +94,13 @@ export default function AiTips({ student }) {
 
     const data = await loadFinancialData();
     if (!data) {
-      setError("Could not load your financial data. Make sure the backend is running.");
+      setError("Could not load financial records. Verify backend connectivity.");
       setLoading(false);
       return;
     }
 
     try {
-      const prompt = buildPrompt(data.sum, data.cats, name);
+      const prompt = buildPrompt(data.sum, data.cats, name, activeCur.symbol);
       const res = await fetch(GEMINI_URL, {
         method: "POST",
         headers: {
@@ -113,23 +113,23 @@ export default function AiTips({ student }) {
         }),
       });
 
-      if (!res.ok) throw new Error(`Gemini API error: ${res.status}`);
+      if (!res.ok) throw new Error(`Gemini API responded with status ${res.status}`);
 
       const json = await res.json();
       const rawText = json?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
       const match = rawText.match(/\[[\s\S]*\]/);
-      if (!match) throw new Error("Could not parse tips from AI response.");
+      if (!match) throw new Error("Could not parse structured recommendations from AI response.");
 
       const parsed = JSON.parse(match[0]);
       setAiTips(parsed);
       setLastGenerated(new Date().toLocaleTimeString());
     } catch (err) {
-      setError("AI tips generation failed: " + err.message);
+      setError("AI generation failed: " + err.message);
     } finally {
       setLoading(false);
     }
-  }, [loadFinancialData, name]);
+  }, [loadFinancialData, name, activeCur.symbol]);
 
   useEffect(() => {
     loadFinancialData();
@@ -143,50 +143,67 @@ export default function AiTips({ student }) {
     });
   }
 
-  const ICONS = ["💡", "📌", "🎯", "💰"];
+  const TIP_ICONS = [
+    "fa-solid fa-lightbulb",
+    "fa-solid fa-bullseye",
+    "fa-solid fa-chart-pie",
+    "fa-solid fa-piggy-bank",
+  ];
 
   return (
     <div style={S.page}>
       {/* Header */}
       <div style={S.header}>
         <div>
-          <span style={S.eyebrow}>SMART MONEY HABITS</span>
-          <h1 style={S.title}>AI Tips</h1>
+          <span style={S.eyebrow}>
+            <i className="fa-solid fa-brain" style={{ marginRight: 6 }}></i>
+            INTELLIGENT FINANCIAL ADVISORY
+          </span>
+          <h1 style={S.title}>AI Financial Advisory</h1>
           <p style={S.subtitle}>
-            Personalized saving advice powered by Google Gemini, based on your actual spending data.
+            Personalized saving recommendations generated via Google Gemini using your live transaction data.
           </p>
         </div>
         <button onClick={generateAiTips} disabled={loading} style={S.genBtn}>
-          {loading ? "Generating…" : "✨ Generate My Tips"}
+          <i className="fa-solid fa-wand-magic-sparkles" style={{ marginRight: 8 }}></i>
+          {loading ? "Analyzing Financials…" : "Generate AI Advisory"}
         </button>
       </div>
 
-      {/* Summary bar */}
+      {/* Financial Snapshot */}
       {summary && (
         <div style={S.summaryBar}>
-          <SumCard label="Income"   value={formatRupees(summary.totalIncome)}  color="#10b981" />
-          <SumCard label="Expenses" value={formatRupees(summary.totalExpense)} color="#ef4444" />
-          <SumCard label="Balance"  value={formatRupees(summary.balance)}      color={summary.balance >= 0 ? "#6366f1" : "#ef4444"} />
+          <SumCard label="Total Income"   value={formatRupees(summary.totalIncome)}  color="#07845e" icon="fa-solid fa-arrow-up" />
+          <SumCard label="Total Expenses" value={formatRupees(summary.totalExpense)} color="#ef4444" icon="fa-solid fa-arrow-down" />
+          <SumCard label="Net Balance"    value={formatRupees(summary.balance)}      color={summary.balance >= 0 ? "#6366f1" : "#ef4444"} icon="fa-solid fa-wallet" />
         </div>
       )}
 
-      {error && <div style={S.errorBox}>⚠ {error}</div>}
+      {error && (
+        <div style={S.errorBox}>
+          <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: 8 }}></i>
+          {error}
+        </div>
+      )}
 
-      {/* AI Tips */}
+      {/* AI Tips Section */}
       {(aiTips.length > 0 || loading) && (
         <section style={S.section}>
           <div style={S.sectionHead}>
             <div>
-              <h2 style={S.sectionTitle}>✨ Personalized AI Tips</h2>
-              {lastGenerated && <p style={S.sectionSub}>Generated at {lastGenerated} based on your transactions</p>}
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <i className="fa-solid fa-wand-magic-sparkles" style={{ color: "#6366f1" }}></i>
+                <h2 style={S.sectionTitle}>Personalized AI Recommendations</h2>
+              </div>
+              {lastGenerated && <p style={S.sectionSub}>Generated at {lastGenerated} from your transaction history</p>}
             </div>
           </div>
 
           {loading ? (
             <div style={S.loadingBox}>
               <div style={S.spinner} />
-              <p style={{ color: "#64748b", marginTop: 14, fontSize: 14 }}>
-                Gemini is analyzing your spending…
+              <p style={{ color: "#64748b", marginTop: 14, fontSize: 14, fontWeight: 500 }}>
+                Synthesizing tailored recommendations based on spending distribution…
               </p>
             </div>
           ) : (
@@ -194,7 +211,7 @@ export default function AiTips({ student }) {
               {aiTips.map((tip, i) => (
                 <TipCard
                   key={i}
-                  icon={ICONS[i] || "💡"}
+                  iconClass={TIP_ICONS[i % TIP_ICONS.length]}
                   title={tip.title}
                   body={tip.body}
                   pinned={pinned.includes(tip.title)}
@@ -207,36 +224,39 @@ export default function AiTips({ student }) {
         </section>
       )}
 
-      {/* No key state */}
+      {/* API Key Instructions if not set */}
       {!GEMINI_KEY && aiTips.length === 0 && !loading && (
         <div style={S.setupBox}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>🔑</div>
-          <h3 style={{ margin: "0 0 8px", color: "#17283e" }}>Set Up Your Free AI Key</h3>
-          <p style={{ color: "#718096", fontSize: 13, lineHeight: 1.7, maxWidth: 420 }}>
-            Get a free Google Gemini API key from{" "}
-            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: "#6366f1" }}>
-              aistudio.google.com
+          <div style={S.setupIcon}>
+            <i className="fa-solid fa-key"></i>
+          </div>
+          <h3 style={{ margin: "0 0 8px", color: "#0f172a", fontSize: 18, fontWeight: 800 }}>Connect Gemini AI Key</h3>
+          <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.6, maxWidth: 500, margin: "0 auto" }}>
+            To enable real-time AI financial advice, obtain a free API key from{" "}
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: "#6366f1", fontWeight: 600 }}>
+              Google AI Studio
             </a>{" "}
-            — no credit card required. Then add it to your frontend <code>.env</code> file:
+            and assign it as <code>VITE_GEMINI_KEY</code> in your environment variables.
           </p>
-          <code style={S.codeBlock}>VITE_GEMINI_KEY=your_key_here</code>
-          <p style={{ color: "#94a3b8", fontSize: 12, marginTop: 10 }}>Free tier: 15 requests/minute · No cost</p>
         </div>
       )}
 
-      {/* Static General Tips */}
+      {/* Static Best Practices */}
       <section style={S.section}>
         <div style={S.sectionHead}>
-          <div>
-            <h2 style={S.sectionTitle}>📚 General Budgeting Tips</h2>
-            <p style={S.sectionSub}>Timeless habits every student should build</p>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <i className="fa-solid fa-book-open" style={{ color: "#07845e" }}></i>
+            <div>
+              <h2 style={S.sectionTitle}>Essential Financial Habits</h2>
+              <p style={S.sectionSub}>Structured budgeting guidelines for university students</p>
+            </div>
           </div>
         </div>
         <div style={S.grid}>
           {STATIC_TIPS.map((tip, i) => (
             <TipCard
               key={i}
-              icon={tip.icon}
+              iconClass={tip.iconClass}
               title={tip.title}
               body={tip.body}
               pinned={pinned.includes(tip.title)}
@@ -246,22 +266,27 @@ export default function AiTips({ student }) {
         </div>
       </section>
 
-      {/* Pinned Tips */}
+      {/* Pinned Items */}
       {pinned.length > 0 && (
         <section style={S.section}>
           <div style={S.sectionHead}>
-            <div>
-              <h2 style={S.sectionTitle}>📌 Pinned Tips</h2>
-              <p style={S.sectionSub}>Tips you saved for quick reference</p>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <i className="fa-solid fa-thumbtack" style={{ color: "#6366f1" }}></i>
+              <div>
+                <h2 style={S.sectionTitle}>Pinned Recommendations</h2>
+                <p style={S.sectionSub}>Direct access to saved actionable advice</p>
+              </div>
             </div>
             <button onClick={() => { setPinned([]); localStorage.removeItem("campusCoinPinnedTips"); }} style={S.clearBtn}>
+              <i className="fa-solid fa-trash-can" style={{ marginRight: 6 }}></i>
               Clear all
             </button>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
             {pinned.map((t) => (
               <div key={t} style={S.pinnedTag}>
-                📌 {t}
+                <i className="fa-solid fa-thumbtack" style={{ fontSize: 11 }}></i>
+                <span>{t}</span>
                 <button onClick={() => togglePin(t)} style={S.removePin}>✕</button>
               </div>
             ))}
@@ -272,14 +297,29 @@ export default function AiTips({ student }) {
   );
 }
 
-function TipCard({ icon, title, body, pinned, onPin, ai }) {
+function TipCard({ iconClass, title, body, pinned, onPin, ai }) {
   return (
     <article style={{ ...S.card, ...(pinned ? S.cardPinned : {}), ...(ai ? S.cardAi : {}) }}>
       <div style={S.cardTop}>
-        <span style={S.icon}>{icon}</span>
-        {ai && <span style={S.aiBadge}>AI</span>}
-        <button onClick={onPin} style={{ ...S.pinBtn, color: pinned ? "#6366f1" : "#cbd5e1" }} title={pinned ? "Unpin" : "Pin"}>
-          {pinned ? "📌" : "🔗"}
+        <span style={{
+          ...S.iconWrap,
+          background: ai ? "#ede9fe" : "#f1f5f9",
+          color:      ai ? "#6366f1" : "#334155",
+        }}>
+          <i className={iconClass}></i>
+        </span>
+        {ai && (
+          <span style={S.aiBadge}>
+            <i className="fa-solid fa-sparkles" style={{ marginRight: 4, fontSize: 9 }}></i>
+            AI TAILORED
+          </span>
+        )}
+        <button
+          onClick={onPin}
+          style={{ ...S.pinBtn, color: pinned ? "#6366f1" : "#94a3b8" }}
+          title={pinned ? "Unpin tip" : "Pin tip"}
+        >
+          <i className="fa-solid fa-thumbtack"></i>
         </button>
       </div>
       <h2 style={S.cardTitle}>{title}</h2>
@@ -288,50 +328,54 @@ function TipCard({ icon, title, body, pinned, onPin, ai }) {
   );
 }
 
-function SumCard({ label, value, color }) {
+function SumCard({ label, value, color, icon }) {
   return (
     <div style={{ ...S.sumCard, borderTop: `3px solid ${color}` }}>
-      <span style={{ fontSize: 11, fontWeight: 700, color, letterSpacing: 0.5 }}>{label.toUpperCase()}</span>
-      <strong style={{ fontSize: 18, color }}>{value}</strong>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: "#64748b", letterSpacing: 0.5 }}>{label.toUpperCase()}</span>
+        <i className={icon} style={{ color, fontSize: 12 }}></i>
+      </div>
+      <strong style={{ fontSize: 18, color, marginTop: 4 }}>{value}</strong>
     </div>
   );
 }
 
 const S = {
-  page: { maxWidth: 1100, margin: "0 auto", padding: "42px 22px 70px", fontFamily: "Inter, Arial, sans-serif" },
-  header: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 18, marginBottom: 28 },
-  eyebrow: { display: "block", color: "#07845e", fontSize: 11, fontWeight: 900, letterSpacing: 1.4, marginBottom: 6 },
-  title: { margin: "0 0 6px", fontSize: "clamp(26px,4vw,34px)", color: "#142238", letterSpacing: "-1px" },
-  subtitle: { margin: 0, color: "#718096", fontSize: 14, lineHeight: 1.6 },
+  page: { maxWidth: 1100, margin: "0 auto", padding: "36px 20px 70px", fontFamily: "'Inter', Arial, sans-serif" },
+  header: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 18, marginBottom: 26 },
+  eyebrow: { display: "inline-flex", alignItems: "center", color: "#07845e", fontSize: 11, fontWeight: 800, letterSpacing: 1.2, marginBottom: 6 },
+  title: { margin: "0 0 6px", fontSize: "clamp(24px, 3.5vw, 32px)", color: "#0f172a", letterSpacing: "-0.8px", fontWeight: 800 },
+  subtitle: { margin: 0, color: "#64748b", fontSize: 14, lineHeight: 1.5 },
   genBtn: {
-    background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-    color: "#fff", border: "none", borderRadius: 12,
-    padding: "13px 22px", fontSize: 14, fontWeight: 800,
+    background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+    color: "#fff", border: "none", borderRadius: 10,
+    padding: "12px 20px", fontSize: 13, fontWeight: 700,
     cursor: "pointer", flexShrink: 0, fontFamily: "inherit",
-    boxShadow: "0 4px 20px rgba(99,102,241,0.35)",
+    boxShadow: "0 4px 14px rgba(79, 70, 229, 0.25)",
+    display: "inline-flex", alignItems: "center",
   },
-  summaryBar: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 14, marginBottom: 28 },
-  sumCard: { background: "#fff", border: "1px solid #e3e9ef", borderRadius: 14, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 6 },
-  errorBox: { background: "#fef2f2", border: "1px solid #fecaca", color: "#b91c1c", padding: "12px 16px", borderRadius: 10, marginBottom: 20, fontSize: 13 },
-  section: { marginBottom: 36 },
-  sectionHead: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, flexWrap: "wrap", gap: 10 },
-  sectionTitle: { margin: "0 0 4px", fontSize: 18, fontWeight: 800, color: "#17283e" },
-  sectionSub: { margin: 0, fontSize: 12, color: "#94a3b8" },
-  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 16 },
-  card: { background: "#fff", border: "1px solid #e3e9ef", borderRadius: 16, padding: 22, boxShadow: "0 4px 20px rgba(16,35,55,0.04)", transition: "box-shadow 0.2s" },
-  cardPinned: { border: "1.5px solid #6366f1", boxShadow: "0 4px 24px rgba(99,102,241,0.12)" },
-  cardAi: { background: "linear-gradient(135deg,#faf5ff,#eff6ff)", border: "1.5px solid #c4b5fd" },
+  summaryBar: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 24 },
+  sumCard: { background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 12, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 4, boxShadow: "0 2px 10px rgba(0,0,0,0.02)" },
+  errorBox: { background: "#fef2f2", border: "1px solid #fecaca", color: "#b91c1c", padding: "12px 16px", borderRadius: 10, marginBottom: 20, fontSize: 13, display: "flex", alignItems: "center" },
+  section: { marginBottom: 32 },
+  sectionHead: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 10 },
+  sectionTitle: { margin: 0, fontSize: 17, fontWeight: 800, color: "#0f172a" },
+  sectionSub: { margin: "3px 0 0", fontSize: 12, color: "#64748b" },
+  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 },
+  card: { background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 14, padding: 22, boxShadow: "0 2px 12px rgba(0,0,0,0.02)", transition: "all 0.15s ease" },
+  cardPinned: { border: "1.5px solid #6366f1", boxShadow: "0 4px 20px rgba(99, 102, 241, 0.1)" },
+  cardAi: { background: "linear-gradient(135deg, #faf5ff, #f8fafc)", border: "1.5px solid #ddd6fe" },
   cardTop: { display: "flex", alignItems: "center", gap: 8, marginBottom: 14 },
-  icon: { fontSize: 22 },
-  aiBadge: { background: "linear-gradient(135deg,#6366f1,#8b5cf6)", color: "#fff", fontSize: 10, fontWeight: 900, padding: "2px 7px", borderRadius: 20, letterSpacing: 1 },
-  pinBtn: { marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: 16, padding: 0 },
-  cardTitle: { margin: "0 0 8px", fontSize: 15, fontWeight: 800, color: "#17283e" },
-  cardBody: { margin: 0, color: "#64748b", fontSize: 13, lineHeight: 1.7 },
+  iconWrap: { width: 34, height: 34, borderRadius: 8, display: "grid", placeItems: "center", fontSize: 14 },
+  aiBadge: { background: "#ede9fe", color: "#6d28d9", fontSize: 10, fontWeight: 800, padding: "3px 8px", borderRadius: 20, letterSpacing: 0.5, display: "inline-flex", alignItems: "center" },
+  pinBtn: { marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: 14, padding: 4 },
+  cardTitle: { margin: "0 0 8px", fontSize: 15, fontWeight: 700, color: "#0f172a" },
+  cardBody: { margin: 0, color: "#475569", fontSize: 13, lineHeight: 1.6 },
   loadingBox: { display: "flex", flexDirection: "column", alignItems: "center", padding: "50px 20px" },
   spinner: { width: 36, height: 36, border: "3px solid #e2e8f0", borderTop: "3px solid #6366f1", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
-  setupBox: { background: "linear-gradient(135deg,#faf5ff,#eff6ff)", border: "1.5px solid #c4b5fd", borderRadius: 18, padding: "40px 32px", textAlign: "center", marginBottom: 36 },
-  codeBlock: { display: "block", background: "#1e1b4b", color: "#a5b4fc", padding: "12px 20px", borderRadius: 10, fontSize: 13, marginTop: 16, fontFamily: "monospace" },
-  clearBtn: { background: "none", border: "1px solid #e2e8f0", color: "#94a3b8", borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer" },
-  pinnedTag: { background: "#ede9fe", color: "#6366f1", borderRadius: 20, padding: "6px 14px", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 },
-  removePin: { background: "none", border: "none", color: "#6366f1", cursor: "pointer", fontSize: 13, padding: 0 },
+  setupBox: { background: "#f8fafc", border: "1px dashed #cbd5e1", borderRadius: 16, padding: "36px 24px", textAlign: "center", marginBottom: 32 },
+  setupIcon: { width: 44, height: 44, borderRadius: 12, background: "#ede9fe", color: "#6366f1", display: "grid", placeItems: "center", fontSize: 18, margin: "0 auto 12px" },
+  clearBtn: { background: "none", border: "1px solid #e2e8f0", color: "#64748b", borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer", display: "inline-flex", alignItems: "center" },
+  pinnedTag: { background: "#ede9fe", color: "#5b21b6", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 7 },
+  removePin: { background: "none", border: "none", color: "#6d28d9", cursor: "pointer", fontSize: 12, padding: 0, marginLeft: 2 },
 };

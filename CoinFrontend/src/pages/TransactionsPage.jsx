@@ -236,7 +236,19 @@ export default function TransactionsPage({ student, onClose }) {
                     color: filterType === t ? "#ffffff" : "#475569",
                   }}
                 >
-                  {t === "all" ? "All" : t === "income" ? "↗ Income" : "↘ Expenses"}
+                  {t === "all" ? (
+                    "All"
+                  ) : t === "income" ? (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                      <i className="fa-solid fa-arrow-up"></i>
+                      Income
+                    </span>
+                  ) : (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                      <i className="fa-solid fa-arrow-down"></i>
+                      Expenses
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -385,8 +397,12 @@ export default function TransactionsPage({ student, onClose }) {
                         ...styles.typeBadge,
                         background: item.type === "income" ? "#e2f7ef" : "#fff0f0",
                         color:      item.type === "income" ? "#07845e" : "#c84e4e",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 5,
                       }}>
-                        {item.type === "income" ? "↗ Income" : "↘ Expense"}
+                        <i className={`fa-solid ${item.type === "income" ? "fa-arrow-up" : "fa-arrow-down"}`}></i>
+                        {item.type === "income" ? "Income" : "Expense"}
                       </span>
                     </td>
                     <td style={{ ...styles.td, color: "#64748b", fontSize: 12 }}>
