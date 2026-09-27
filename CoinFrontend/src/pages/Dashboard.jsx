@@ -14,6 +14,7 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
   const [spendingCats, setSpendingCats] = useState([]);
   const [txnCount,     setTxnCount]     = useState(0);
   const [error,        setError]        = useState("");
+  const [, setCurrencyKey] = useState(0); // forces re-render on currency change
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
@@ -62,9 +63,14 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
 
   useEffect(() => {
     loadDashboard();
-    const h = () => loadDashboard();
+    const h  = () => loadDashboard();
+    const hc = () => setCurrencyKey((k) => k + 1);
     window.addEventListener("campusCoinDataChanged", h);
-    return () => window.removeEventListener("campusCoinDataChanged", h);
+    window.addEventListener("campusCoinCurrencyChanged", hc);
+    return () => {
+      window.removeEventListener("campusCoinDataChanged", h);
+      window.removeEventListener("campusCoinCurrencyChanged", hc);
+    };
   }, [loadDashboard]);
 
   const handleDelete = async (item) => {

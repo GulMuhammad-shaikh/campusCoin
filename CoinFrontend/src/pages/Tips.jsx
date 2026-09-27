@@ -4,7 +4,7 @@ import { formatRupees } from "../utils/transactions";
 
 const GEMINI_KEY = import.meta.env.VITE_GEMINI_KEY || "";
 const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
 
 const STATIC_TIPS = [
   { icon: "📅", title: "Plan a weekly budget", body: "Decide how much you can spend on food, transport, study needs, and personal items each week." },
@@ -101,9 +101,12 @@ export default function AiTips({ student }) {
 
     try {
       const prompt = buildPrompt(data.sum, data.cats, name);
-      const res = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
+      const res = await fetch(GEMINI_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-goog-api-key": GEMINI_KEY,
+        },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: { temperature: 0.7, maxOutputTokens: 800 },
