@@ -36,11 +36,13 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
       setAllTxns(txns);
       setTxnCount(txns.length);
 
-      setRecent(txns.slice(0, 5).map((t) => ({
+      setRecent(txns.slice(0, 4).map((t) => ({
         id:          t._id || t.id,
+        _id:         t._id || t.id,
         type:        t.type,
         description: t.description || "",
         category:    t.category_id?.name || t.category || "General",
+        category_id: t.category_id?._id || t.category_id || null,
         amount:      Number(t.amount || 0),
         date:        (t.date || "").slice(0, 10),
       })));
@@ -340,9 +342,22 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
                     <strong style={{ color: item.type === "income" ? "#07845e" : "#ef4444", fontSize: 13, whiteSpace: "nowrap" }}>
                       {item.type === "income" ? "+" : "−"} {formatRupees(item.amount)}
                     </strong>
-                    <button onClick={() => handleDelete(item)} style={S.iconDeleteBtn} title="Delete">
-                      <i className="fa-solid fa-trash-can"></i>
-                    </button>
+                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <button
+                        onClick={() => onOpenModal && onOpenModal("edit", item)}
+                        style={S.iconEditBtn}
+                        title="Edit transaction"
+                      >
+                        <i className="fa-solid fa-pen-to-square"></i>
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item)}
+                        style={S.iconDeleteBtn}
+                        title="Delete transaction"
+                      >
+                        <i className="fa-solid fa-trash-can"></i>
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -471,6 +486,7 @@ const S = {
   txnIcon:     { flex: "0 0 34px", width: 34, height: 34, display: "grid", placeItems: "center", borderRadius: 8, fontSize: 13 },
   txnName:     { display: "block", color: "#1e293b", fontSize: 13, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
   txnMeta:     { display: "block", color: "#94a3b8", fontSize: 11 },
+  iconEditBtn:  { background: "#eff6ff", border: "1px solid #bfdbfe", color: "#2563eb", borderRadius: 6, width: 28, height: 28, fontSize: 11, display: "grid", placeItems: "center", cursor: "pointer", padding: 0 },
   iconDeleteBtn:{ background: "#fef2f2", border: "1px solid #fecaca", color: "#ef4444", borderRadius: 6, width: 28, height: 28, fontSize: 11, display: "grid", placeItems: "center", cursor: "pointer", padding: 0 },
   viewAllBtn:  { background: "#f8fafc", border: "1px solid #e2e8f0", color: "#2563eb", borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", width: "100%", fontFamily: "inherit", display: "inline-flex", alignItems: "center", justifyContent: "center" },
 };

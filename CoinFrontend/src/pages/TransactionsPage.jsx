@@ -78,6 +78,7 @@ export default function TransactionsPage({ student, onClose }) {
         type:        t.type,
         description: t.description || "",
         category:    t.category_id?.name || t.category || "—",
+        category_id: t.category_id?._id || t.category_id || null,
         amount:      Number(t.amount || 0),
         date:        (t.date || "").slice(0, 10),
       }));
@@ -366,6 +367,7 @@ export default function TransactionsPage({ student, onClose }) {
                   <th style={styles.th}>Type</th>
                   <th style={styles.th}>Date</th>
                   <th style={{ ...styles.th, textAlign: "right" }}>Amount</th>
+                  <th style={{ ...styles.th, textAlign: "center", width: 90 }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -405,6 +407,24 @@ export default function TransactionsPage({ student, onClose }) {
                     <td style={{ ...styles.td, textAlign: "right", whiteSpace: "nowrap", fontWeight: 800, color: item.type === "income" ? "#07845e" : "#c84e4e" }}>
                       {item.type === "income" ? "+" : "−"} {formatRupees(item.amount)}
                     </td>
+                    <td style={{ ...styles.td, textAlign: "center", whiteSpace: "nowrap" }}>
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                        <button
+                          onClick={() => setModalConfig({ type: item.type, initialData: item })}
+                          style={styles.iconEditBtn}
+                          title="Edit transaction"
+                        >
+                          <i className="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item)}
+                          style={styles.iconDeleteBtn}
+                          title="Delete transaction"
+                        >
+                          <i className="fa-solid fa-trash-can"></i>
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -412,6 +432,20 @@ export default function TransactionsPage({ student, onClose }) {
           </div>
         )}
       </div>
+
+      {/* Edit / Update Modal */}
+      {modalConfig && (
+        <TransactionModal
+          student={student}
+          type={modalConfig.type || modalConfig.initialData?.type || "expense"}
+          initialData={modalConfig.initialData}
+          onClose={() => setModalConfig(null)}
+          onSuccess={() => {
+            setModalConfig(null);
+            fetchTransactions();
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -520,5 +554,33 @@ const styles = {
   typeBadge: {
     display: "inline-block", padding: "3px 9px", borderRadius: 6,
     fontSize: 11, fontWeight: 800, whiteSpace: "nowrap",
+  },
+  iconEditBtn: {
+    background: "#eff6ff",
+    border: "1px solid #bfdbfe",
+    color: "#2563eb",
+    borderRadius: 6,
+    width: 28,
+    height: 28,
+    fontSize: 11,
+    display: "grid",
+    placeItems: "center",
+    cursor: "pointer",
+    padding: 0,
+    transition: "all 0.15s ease",
+  },
+  iconDeleteBtn: {
+    background: "#fef2f2",
+    border: "1px solid #fecaca",
+    color: "#ef4444",
+    borderRadius: 6,
+    width: 28,
+    height: 28,
+    fontSize: 11,
+    display: "grid",
+    placeItems: "center",
+    cursor: "pointer",
+    padding: 0,
+    transition: "all 0.15s ease",
   },
 };

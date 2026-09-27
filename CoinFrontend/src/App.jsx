@@ -70,7 +70,6 @@ function ProtectedRoute({ children }) {
 
 function AppLayout() {
   const [student, setStudent] = useState(readAuthenticatedStudent);
-  const [modalType, setModalType] = useState(null); // null | "income" | "expense" | "category"
   const navigate = useNavigate();
 
   // Listen for auth expiration from API response interceptor
@@ -108,12 +107,17 @@ function AppLayout() {
     navigate("/login");
   }
 
-  function openModal(type) {
+  const [modalType, setModalType] = useState(null); // null | "income" | "expense" | "category" | "edit"
+  const [modalData, setModalData] = useState(null);
+
+  function openModal(type, data = null) {
     setModalType(type);
+    setModalData(data);
   }
 
   function closeModal() {
     setModalType(null);
+    setModalData(null);
   }
 
   return (
@@ -250,10 +254,11 @@ function AppLayout() {
       {!modalType && <Footer />}
 
       {/* Global Modals */}
-      {(modalType === "income" || modalType === "expense") && student && (
+      {(modalType === "income" || modalType === "expense" || modalType === "edit") && student && (
         <TransactionModal
           student={student}
-          type={modalType}
+          type={modalType === "edit" ? (modalData?.type || "expense") : modalType}
+          initialData={modalData}
           onClose={closeModal}
           onOpenCategoryModal={() => openModal("category")}
         />
