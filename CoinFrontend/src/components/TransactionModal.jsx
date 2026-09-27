@@ -37,7 +37,6 @@ export default function TransactionModal({
   const [category,       setCategory]       = useState(initialData?.category || defaultFallback[0]);
   const [amount,         setAmount]         = useState(initialData?.amount !== undefined ? String(initialData.amount) : "");
   const [date,           setDate]           = useState(initialData?.date ? String(initialData.date).slice(0, 10) : getToday());
-  const [note,           setNote]           = useState(initialData?.note || "");
   const [saving,         setSaving]         = useState(false);
   const [error,          setError]          = useState("");
 
@@ -94,6 +93,8 @@ export default function TransactionModal({
 
     setSaving(true);
     try {
+      const finalDesc = description.trim() || category || (isIncome ? "Income" : "Expense");
+
       if (isEdit) {
         const txnId = initialData._id || initialData.id;
         await transactionAPI.update(txnId, {
@@ -101,9 +102,8 @@ export default function TransactionModal({
           type,
           category,
           category_id,
-          description: description.trim(),
+          description: finalDesc,
           date,
-          note:        note.trim(),
         });
       } else {
         // Save to backend API
@@ -113,9 +113,8 @@ export default function TransactionModal({
           type,
           category,
           category_id,
-          description: description.trim(),
+          description: finalDesc,
           date,
-          note:        note.trim(),
         });
       }
 
@@ -165,13 +164,12 @@ export default function TransactionModal({
 
           <form onSubmit={handleSubmit} style={styles.form}>
             <label style={styles.label}>
-              {isIncome ? "Source / Description" : "Description / Store"}
+              {isIncome ? "Description (optional)" : "Description / Store (optional)"}
               <input
                 style={styles.input}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder={isIncome ? "e.g. Monthly allowance" : "e.g. Campus cafe"}
-                required
                 autoFocus
               />
             </label>
@@ -222,17 +220,7 @@ export default function TransactionModal({
               />
             </label>
 
-            <label style={{ ...styles.label, gridColumn: "1 / -1" }}>
-              Note (optional)
-              <textarea
-                style={{ ...styles.input, minHeight: 70, resize: "vertical" }}
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Add extra details if needed..."
-              />
-            </label>
-
-            <div style={styles.actions}>
+            <div style={{ ...styles.actions, gridColumn: "1 / -1" }}>
               <button type="button" onClick={onClose} style={styles.cancelBtn}>
                 Cancel
               </button>

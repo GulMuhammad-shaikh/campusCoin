@@ -19,7 +19,6 @@ export default function TransactionPage({ student, type }) {
   const [category, setCategory] = useState(defaultFallbackCategories[0]);
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(getToday());
-  const [note, setNote] = useState("");
   const [message, setMessage] = useState("");
 
   const loadCategories = useCallback(async () => {
@@ -46,19 +45,18 @@ export default function TransactionPage({ student, type }) {
     event.preventDefault();
     const numericAmount = Number(amount);
 
-    if (!description.trim() || !Number.isFinite(numericAmount) || numericAmount <= 0) {
-      setMessage("Please enter a description and an amount greater than zero.");
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+      setMessage("Please enter an amount greater than zero.");
       return;
     }
 
     const newRecord = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       type,
-      description: description.trim(),
+      description: description.trim() || category,
       category,
       amount: numericAmount,
       date,
-      note: note.trim(),
     };
 
     const updated = [newRecord, ...transactions];
@@ -66,10 +64,9 @@ export default function TransactionPage({ student, type }) {
     saveTransactions(student, updated);
 
     setDescription("");
-    setCategory(categories[0]);
+    setCategory(categoriesList[0] || "General");
     setAmount("");
     setDate(getToday());
-    setNote("");
     setMessage(`${isIncome ? "Income" : "Expense"} saved successfully!`);
     window.setTimeout(() => setMessage(""), 3000);
   }
@@ -130,13 +127,12 @@ export default function TransactionPage({ student, type }) {
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <label style={styles.label}>
-            {isIncome ? "Source / Description" : "Description / Store"}
+            {isIncome ? "Description (optional)" : "Description / Store (optional)"}
             <input
               style={styles.input}
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder={isIncome ? "e.g. Monthly salary" : "e.g. KFC lunch"}
-              required
+              placeholder={isIncome ? "e.g. Monthly salary" : "e.g. Campus cafe"}
             />
           </label>
 
@@ -156,7 +152,8 @@ export default function TransactionPage({ student, type }) {
                   padding: "0 2px",
                 }}
               >
-                ⚙ Manage / + Add Category
+                <i className="fa-solid fa-gear" style={{ marginRight: 4 }}></i>
+                Manage / Add Category
               </button>
             </div>
             <select
@@ -171,7 +168,7 @@ export default function TransactionPage({ student, type }) {
           </label>
 
           <label style={styles.label}>
-            Amount (Rs.)
+            Amount
             <input
               style={styles.input}
               type="number"
@@ -195,25 +192,17 @@ export default function TransactionPage({ student, type }) {
             />
           </label>
 
-          <label style={{ ...styles.label, gridColumn: "1 / -1" }}>
-            Note (optional)
-            <textarea
-              style={{ ...styles.input, minHeight: 85, resize: "vertical" }}
-              value={note}
-              onChange={(event) => setNote(event.target.value)}
-              placeholder="Add extra details if needed..."
-            />
-          </label>
-
-          <button
-            type="submit"
-            style={{
-              ...styles.submit,
-              background: isIncome ? "#07845e" : "#c84e4e",
-            }}
-          >
-            + Save {isIncome ? "income" : "expense"}
-          </button>
+          <div style={{ ...styles.actions, gridColumn: "1 / -1" }}>
+            <button
+              type="submit"
+              style={{
+                ...styles.submit,
+                background: isIncome ? "#07845e" : "#c84e4e",
+              }}
+            >
+              + Save {isIncome ? "income" : "expense"}
+            </button>
+          </div>
         </form>
       </section>
 
@@ -248,8 +237,7 @@ export default function TransactionPage({ student, type }) {
                 {records.map((item) => (
                   <tr key={item.id}>
                     <td style={styles.td}>
-                      <strong style={{ color: "#26384d" }}>{item.description}</strong>
-                      {item.note && <small style={styles.note}>{item.note}</small>}
+                      <strong style={{ color: "#26384d" }}>{item.description || item.category}</strong>
                     </td>
                     <td style={styles.td}>
                       <span style={{
@@ -465,11 +453,6 @@ const styles = {
     borderBottom: "1px solid #edf1f5",
     color: "#536477",
     verticalAlign: "middle",
-  },
-  note: {
-    display: "block",
-    color: "#8a98a9",
-    marginTop: 5,
   },
   categoryBadge: {
     display: "inline-block",

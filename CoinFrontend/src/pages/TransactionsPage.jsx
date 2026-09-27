@@ -80,7 +80,6 @@ export default function TransactionsPage({ student, onClose }) {
         category:    t.category_id?.name || t.category || "—",
         amount:      Number(t.amount || 0),
         date:        (t.date || "").slice(0, 10),
-        note:        t.note || "",
       }));
 
       setTransactions(apiTxns);
@@ -376,12 +375,7 @@ export default function TransactionsPage({ student, onClose }) {
                       {idx + 1}
                     </td>
                     <td style={styles.td}>
-                      <strong style={{ color: "#1e293b", fontSize: 13 }}>{item.description}</strong>
-                      {item.note && (
-                        <small style={{ display: "block", color: "#94a3b8", fontSize: 11, marginTop: 2 }}>
-                          {item.note}
-                        </small>
-                      )}
+                      <strong style={{ color: "#1e293b", fontSize: 13 }}>{item.description || item.category}</strong>
                     </td>
                     <td style={styles.td}>
                       <span style={{
