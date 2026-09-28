@@ -213,9 +213,9 @@ export default function AiTips({ student }) {
       {/* Financial Snapshot */}
       {summary && (
         <div style={S.summaryBar}>
-          <SumCard label="Total Income"   value={formatRupees(summary.totalIncome)}  color="#07845e" icon="fa-solid fa-arrow-up" />
-          <SumCard label="Total Expenses" value={formatRupees(summary.totalExpense)} color="#ef4444" icon="fa-solid fa-arrow-down" />
-          <SumCard label="Net Balance"    value={formatRupees(summary.balance)}      color={summary.balance >= 0 ? "#6366f1" : "#ef4444"} icon="fa-solid fa-wallet" />
+          <SumCard label="Total Income"   value={formatRupees(summary.totalIncome)}  color="#07845e" icon="fa-solid fa-arrow-up" S={S} />
+          <SumCard label="Total Expenses" value={formatRupees(summary.totalExpense)} color="#ef4444" icon="fa-solid fa-arrow-down" S={S} />
+          <SumCard label="Net Balance"    value={formatRupees(summary.balance)}      color={summary.balance >= 0 ? "#6366f1" : "#ef4444"} icon="fa-solid fa-wallet" S={S} />
         </div>
       )}
 
@@ -257,6 +257,7 @@ export default function AiTips({ student }) {
                   pinned={pinned.includes(tip.title)}
                   onPin={() => togglePin(tip.title)}
                   ai
+                  S={S}
                 />
               ))}
             </div>
@@ -286,6 +287,7 @@ export default function AiTips({ student }) {
               body={tip.body}
               pinned={pinned.includes(tip.title)}
               onPin={() => togglePin(tip.title)}
+              S={S}
             />
           ))}
         </div>
@@ -322,15 +324,23 @@ export default function AiTips({ student }) {
   );
 }
 
-function TipCard({ iconClass, title, body, pinned, onPin, ai }) {
+function TipCard({ iconClass, title, body, pinned, onPin, ai, S: propS }) {
+  const { isDark } = useTheme();
+  const S = propS || getStyles(isDark);
   return (
     <article style={{ ...S.card, ...(pinned ? S.cardPinned : {}), ...(ai ? S.cardAi : {}) }} className="card-hover">
       <div style={S.cardTop}>
         <span style={{
           ...S.iconWrap,
-          background: ai ? "rgba(139, 92, 246, 0.2)" : "rgba(255, 255, 255, 0.06)",
-          color:      ai ? "#c084fc" : "#60a5fa",
-          border:     ai ? "1px solid rgba(139, 92, 246, 0.4)" : "1px solid rgba(255, 255, 255, 0.08)",
+          background: ai
+            ? (isDark ? "rgba(139, 92, 246, 0.2)" : "rgba(139, 92, 246, 0.15)")
+            : (isDark ? "rgba(255, 255, 255, 0.06)" : "#f1f5f9"),
+          color: ai
+            ? (isDark ? "#c084fc" : "#7c3aed")
+            : (isDark ? "#60a5fa" : "#2563eb"),
+          border: ai
+            ? (isDark ? "1px solid rgba(139, 92, 246, 0.4)" : "1px solid rgba(139, 92, 246, 0.3)")
+            : (isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0"),
         }}>
           <i className={iconClass}></i>
         </span>
@@ -342,7 +352,7 @@ function TipCard({ iconClass, title, body, pinned, onPin, ai }) {
         )}
         <button
           onClick={onPin}
-          style={{ ...S.pinBtn, color: pinned ? "#818cf8" : "#64748b" }}
+          style={{ ...S.pinBtn, color: pinned ? "#818cf8" : (isDark ? "#64748b" : "#94a3b8") }}
           title={pinned ? "Unpin tip" : "Pin tip"}
         >
           <i className="fa-solid fa-thumbtack"></i>
@@ -354,13 +364,13 @@ function TipCard({ iconClass, title, body, pinned, onPin, ai }) {
   );
 }
 
-function SumCard({ label, value, color, icon }) {
+function SumCard({ label, value, color, icon, S: propS }) {
   const { isDark } = useTheme();
-  const S = getStyles(isDark);
+  const S = propS || getStyles(isDark);
   return (
     <div style={{ ...S.sumCard, borderTop: `3px solid ${color}` }} className="card-hover">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", letterSpacing: 0.5 }}>{label.toUpperCase()}</span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: isDark ? "#94a3b8" : "#64748b", letterSpacing: 0.5 }}>{label.toUpperCase()}</span>
         <i className={icon} style={{ color, fontSize: 13 }}></i>
       </div>
       <strong style={{ fontSize: 19, color, marginTop: 4 }}>{value}</strong>
@@ -395,7 +405,17 @@ function getStyles(isDark) {
       gap: 4,
       boxShadow: isDark ? "0 8px 30px rgba(0,0,0,0.25)" : "0 4px 16px rgba(0,0,0,0.05)"
     },
-    errorBox: { background: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239, 68, 68, 0.35)", color: "#fca5a5", padding: "12px 16px", borderRadius: 12, marginBottom: 20, fontSize: 13, display: "flex", alignItems: "center" },
+    errorBox: {
+      background: isDark ? "rgba(239, 68, 68, 0.15)" : "#fee2e2",
+      border: isDark ? "1px solid rgba(239, 68, 68, 0.35)" : "1px solid #fca5a5",
+      color: isDark ? "#fca5a5" : "#b91c1c",
+      padding: "12px 16px",
+      borderRadius: 12,
+      marginBottom: 20,
+      fontSize: 13,
+      display: "flex",
+      alignItems: "center"
+    },
     section: { marginBottom: 32 },
     sectionHead: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 10 },
     sectionTitle: { margin: 0, fontSize: 18, fontWeight: 800, color: isDark ? "#ffffff" : "#0f172a" },
@@ -417,16 +437,27 @@ function getStyles(isDark) {
     },
     cardTop: { display: "flex", alignItems: "center", gap: 8, marginBottom: 14 },
     iconWrap: { width: 36, height: 36, borderRadius: 10, display: "grid", placeItems: "center", fontSize: 14 },
-    aiBadge: { background: "rgba(139, 92, 246, 0.2)", color: isDark ? "#c084fc" : "#7c3aed", border: "1px solid rgba(139, 92, 246, 0.4)", fontSize: 10, fontWeight: 800, padding: "3px 8px", borderRadius: 20, letterSpacing: 0.5, display: "inline-flex", alignItems: "center" },
+    aiBadge: {
+      background: isDark ? "rgba(139, 92, 246, 0.2)" : "rgba(139, 92, 246, 0.15)",
+      color: isDark ? "#c084fc" : "#6d28d9",
+      border: isDark ? "1px solid rgba(139, 92, 246, 0.4)" : "1px solid #c4b5fd",
+      fontSize: 10,
+      fontWeight: 800,
+      padding: "3px 8px",
+      borderRadius: 20,
+      letterSpacing: 0.5,
+      display: "inline-flex",
+      alignItems: "center"
+    },
     pinBtn: { marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: 15, padding: 4 },
     cardTitle: { margin: "0 0 8px", fontSize: 16, fontWeight: 700, color: isDark ? "#ffffff" : "#0f172a" },
     cardBody: { margin: 0, color: isDark ? "#cbd5e1" : "#475569", fontSize: 13, lineHeight: 1.6 },
     loadingBox: { display: "flex", flexDirection: "column", alignItems: "center", padding: "50px 20px" },
-    spinner: { width: 36, height: 36, border: "3px solid rgba(255,255,255,0.1)", borderTop: "3px solid #6366f1", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
+    spinner: { width: 36, height: 36, border: isDark ? "3px solid rgba(255,255,255,0.1)" : "3px solid rgba(0,0,0,0.1)", borderTop: "3px solid #6366f1", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
     setupBox: { background: isDark ? "rgba(255, 255, 255, 0.03)" : "#f8fafc", border: isDark ? "1px dashed rgba(255, 255, 255, 0.15)" : "1px dashed #cbd5e1", borderRadius: 16, padding: "36px 24px", textAlign: "center", marginBottom: 32 },
     setupIcon: { width: 44, height: 44, borderRadius: 12, background: "rgba(99, 102, 241, 0.2)", color: "#818cf8", display: "grid", placeItems: "center", fontSize: 18, margin: "0 auto 12px" },
     clearBtn: { background: isDark ? "rgba(255, 255, 255, 0.05)" : "#f1f5f9", border: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #cbd5e1", color: isDark ? "#94a3b8" : "#475569", borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer", display: "inline-flex", alignItems: "center" },
-    pinnedTag: { background: "rgba(99, 102, 241, 0.2)", color: isDark ? "#a5b4fc" : "#4f46e5", border: "1px solid rgba(99, 102, 241, 0.3)", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 7 },
-    removePin: { background: "none", border: "none", color: "#c084fc", cursor: "pointer", fontSize: 12, padding: 0, marginLeft: 2 },
+    pinnedTag: { background: isDark ? "rgba(99, 102, 241, 0.2)" : "#e0e7ff", color: isDark ? "#a5b4fc" : "#4338ca", border: isDark ? "1px solid rgba(99, 102, 241, 0.3)" : "1px solid #c7d2fe", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 7 },
+    removePin: { background: "none", border: "none", color: isDark ? "#c084fc" : "#6366f1", cursor: "pointer", fontSize: 12, padding: 0, marginLeft: 2 },
   };
 }
