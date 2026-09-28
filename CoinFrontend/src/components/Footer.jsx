@@ -1,8 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
-import logoDark from "../assets/logo-dark.png";
-import logoLight from "../assets/logo-light.png";
+import logoIcon from "../assets/logo-icon.png";
 
 export default function Footer() {
   const { theme, toggleTheme, isDark } = useTheme();
@@ -23,10 +22,19 @@ export default function Footer() {
         <div style={styles.brandCol}>
           <Link to="/" style={styles.brandLink} aria-label="CampusCoin Home">
             <img
-              src={isDark ? logoDark : logoLight}
-              alt="CampusCoin HUB"
-              style={styles.logoImg}
+              src={logoIcon}
+              alt="CampusCoin Logo"
+              style={styles.brandIconImg}
             />
+            <div style={styles.brandTextWrap}>
+              <div style={styles.brandMainRow}>
+                <span style={styles.brandTitle}>
+                  Campus<span style={{ color: "#10b981" }}>Coin</span>
+                </span>
+                <span style={styles.versionBadge}>HUB</span>
+              </div>
+              <span style={styles.brandTagline}>TRACK • MANAGE • SAVE</span>
+            </div>
           </Link>
           <p style={styles.mission}>
             The smart financial companion built exclusively for university and college students. Master budgeting, track spending, and crush your savings goals.
@@ -182,15 +190,59 @@ function getStyles(isDark) { return {
     textDecoration: "none",
     display: "inline-flex",
     alignItems: "center",
-    transition: "transform 0.2s ease, opacity 0.2s ease",
-    marginBottom: 2,
+    gap: 12,
+    transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease",
+    marginBottom: 4,
+    userSelect: "none",
   },
-  logoImg: {
-    height: "clamp(38px, 4.5vw, 48px)",
-    width: "auto",
-    maxWidth: 240,
+  brandIconImg: {
+    width: 44,
+    height: 44,
     objectFit: "contain",
-    display: "block",
+    flexShrink: 0,
+    filter: isDark
+      ? "drop-shadow(0 4px 14px rgba(16, 185, 129, 0.4))"
+      : "drop-shadow(0 2px 10px rgba(16, 185, 129, 0.25))",
+  },
+  brandTextWrap: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    lineHeight: 1.15,
+  },
+  brandMainRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+  },
+  brandTitle: {
+    fontFamily: "var(--font-heading)",
+    fontSize: 22,
+    fontWeight: 800,
+    letterSpacing: "-0.5px",
+    color: isDark ? "#ffffff" : "#0f172a",
+    transition: "color 0.2s ease",
+    whiteSpace: "nowrap",
+  },
+  versionBadge: {
+    fontSize: 9,
+    fontWeight: 800,
+    padding: "2px 7px",
+    borderRadius: 6,
+    background: "rgba(16, 185, 129, 0.14)",
+    color: "#10b981",
+    border: "1px solid rgba(16, 185, 129, 0.25)",
+    letterSpacing: 0.8,
+  },
+  brandTagline: {
+    fontFamily: "var(--font-heading)",
+    fontSize: 8.5,
+    fontWeight: 700,
+    letterSpacing: 1.6,
+    color: isDark ? "#64748b" : "#94a3b8",
+    textTransform: "uppercase",
+    marginTop: 3,
+    whiteSpace: "nowrap",
   },
   mission: {
     margin: 0,

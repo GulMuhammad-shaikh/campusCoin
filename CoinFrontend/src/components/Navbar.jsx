@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
-import logoDark from "../assets/logo-dark.png";
-import logoLight from "../assets/logo-light.png";
+import logoIcon from "../assets/logo-icon.png";
 
 export default function Navbar({ student, onLogout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -73,10 +72,19 @@ export default function Navbar({ student, onLogout }) {
           aria-label="CampusCoin Home"
         >
           <img
-            src={isDark ? logoDark : logoLight}
-            alt="CampusCoin HUB"
-            style={currentStyles.logoImg}
+            src={logoIcon}
+            alt="CampusCoin Logo"
+            style={currentStyles.brandIconImg}
           />
+          <div style={currentStyles.brandTextWrap}>
+            <div style={currentStyles.brandMainRow}>
+              <span style={currentStyles.brandTitle}>
+                Campus<span style={{ color: "#10b981" }}>Coin</span>
+              </span>
+              <span style={currentStyles.versionBadge}>HUB</span>
+            </div>
+            <span style={currentStyles.brandTagline}>TRACK • MANAGE • SAVE</span>
+          </div>
         </Link>
 
         {/* Desktop Navigation */}
@@ -376,14 +384,59 @@ function getStyles(isDark) {
     textDecoration: "none",
     display: "inline-flex",
     alignItems: "center",
-    transition: "transform 0.2s ease, opacity 0.2s ease",
+    gap: 10,
+    transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease",
+    userSelect: "none",
   },
-  logoImg: {
-    height: "clamp(34px, 3.8vw, 42px)",
-    width: "auto",
-    maxWidth: 220,
+  brandIconImg: {
+    width: 40,
+    height: 40,
     objectFit: "contain",
-    display: "block",
+    flexShrink: 0,
+    filter: isDark
+      ? "drop-shadow(0 4px 12px rgba(16, 185, 129, 0.35))"
+      : "drop-shadow(0 2px 8px rgba(16, 185, 129, 0.25))",
+    transition: "transform 0.25s ease",
+  },
+  brandTextWrap: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    lineHeight: 1.15,
+  },
+  brandMainRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 7,
+  },
+  brandTitle: {
+    fontFamily: "var(--font-heading)",
+    fontSize: 21,
+    fontWeight: 800,
+    letterSpacing: "-0.5px",
+    color: isDark ? "#ffffff" : "#0f172a",
+    transition: "color 0.2s ease",
+    whiteSpace: "nowrap",
+  },
+  versionBadge: {
+    fontSize: 9,
+    fontWeight: 800,
+    padding: "2px 7px",
+    borderRadius: 6,
+    background: "rgba(16, 185, 129, 0.14)",
+    color: "#10b981",
+    border: "1px solid rgba(16, 185, 129, 0.25)",
+    letterSpacing: 0.8,
+  },
+  brandTagline: {
+    fontFamily: "var(--font-heading)",
+    fontSize: 8,
+    fontWeight: 700,
+    letterSpacing: 1.5,
+    color: isDark ? "#64748b" : "#94a3b8",
+    textTransform: "uppercase",
+    marginTop: 2,
+    whiteSpace: "nowrap",
   },
   desktopNav: {
     display: "flex",
