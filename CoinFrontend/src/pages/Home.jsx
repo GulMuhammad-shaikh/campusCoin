@@ -1,7 +1,10 @@
 import React from "react";
+import { useTheme } from "../context/ThemeContext";
 import { Link } from "react-router-dom";
 
 export default function Home() {
+  const { isDark } = useTheme();
+  const styles = getStyles(isDark);
   return (
     <div style={styles.page}>
       {/* ─── Hero Section ─── */}
@@ -156,9 +159,10 @@ const features = [
   },
 ];
 
-const styles = {
+function getStyles(isDark) {
+  return {
   page: {
-    color: "#0f172a",
+    color: isDark ? "#f8fafc" : "#0f172a",
     fontFamily: "var(--font-sans)",
   },
   hero: {
@@ -179,9 +183,9 @@ const styles = {
   pill: {
     display: "inline-flex",
     alignItems: "center",
-    background: "#ecfdf5",
-    color: "#059669",
-    border: "1px solid #a7f3d0",
+    background: isDark ? "rgba(16, 185, 129, 0.16)" : "#ecfdf5",
+    color: isDark ? "#34d399" : "#059669",
+    border: isDark ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid #a7f3d0",
     padding: "6px 14px",
     borderRadius: 30,
     fontSize: 11,
@@ -192,13 +196,13 @@ const styles = {
     fontSize: "clamp(38px, 5.2vw, 62px)",
     lineHeight: 1.08,
     letterSpacing: "-1.8px",
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     margin: "0 0 20px",
     fontWeight: 900,
     fontFamily: "var(--font-heading)",
   },
   description: {
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#475569",
     fontSize: 16,
     lineHeight: 1.7,
     maxWidth: 510,
@@ -226,15 +230,15 @@ const styles = {
   secondaryButton: {
     display: "inline-flex",
     alignItems: "center",
-    background: "rgba(255, 255, 255, 0.05)",
-    color: "#ffffff",
+    background: isDark ? "rgba(255, 255, 255, 0.05)" : "#f1f5f9",
+    color: isDark ? "#ffffff" : "#0f172a",
     textDecoration: "none",
     padding: "14px 22px",
-    border: "1px solid rgba(255, 255, 255, 0.12)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid #cbd5e1",
     borderRadius: 12,
     fontWeight: 700,
     fontSize: 14,
-    boxShadow: "0 4px 16px rgba(0, 0, 0, 0.2)",
+    boxShadow: isDark ? "0 4px 16px rgba(0, 0, 0, 0.2)" : "0 2px 8px rgba(0, 0, 0, 0.05)",
     transition: "all 0.25s ease",
   },
   socialProof: {
@@ -243,7 +247,7 @@ const styles = {
     gap: 12,
     marginTop: 26,
     paddingTop: 18,
-    borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+    borderTop: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
   },
   proofAvatars: {
     display: "flex",
@@ -259,20 +263,20 @@ const styles = {
     display: "grid",
     placeItems: "center",
     marginLeft: -6,
-    border: "2px solid #0b0f19",
+    border: isDark ? "2px solid #0b0f19" : "2px solid #ffffff",
   },
   smallNote: {
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#64748b",
     fontSize: 12,
     fontWeight: 500,
   },
   preview: {
-    background: "rgba(16, 24, 40, 0.75)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
+    background: isDark ? "rgba(16, 24, 40, 0.75)" : "#ffffff",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
     backdropFilter: "blur(20px)",
     borderRadius: 24,
     padding: "clamp(22px, 3.5vw, 32px)",
-    boxShadow: "0 25px 60px rgba(0, 0, 0, 0.4)",
+    boxShadow: isDark ? "0 25px 60px rgba(0, 0, 0, 0.4)" : "0 10px 40px rgba(15, 23, 42, 0.08)",
     maxWidth: 500,
     width: "100%",
     boxSizing: "border-box",
@@ -287,14 +291,14 @@ const styles = {
   },
   previewLabel: {
     display: "block",
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#64748b",
     fontSize: 10,
     letterSpacing: 1,
     fontWeight: 800,
     marginBottom: 6,
   },
   previewBalance: {
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     fontSize: 32,
     fontWeight: 900,
     letterSpacing: "-1px",
@@ -302,7 +306,7 @@ const styles = {
   },
   demoBadge: {
     background: "rgba(16, 185, 129, 0.15)",
-    color: "#34d399",
+    color: "#10b981",
     border: "1px solid rgba(16, 185, 129, 0.35)",
     padding: "6px 12px",
     borderRadius: 20,
@@ -317,20 +321,20 @@ const styles = {
     marginBottom: 22,
   },
   previewStat: {
-    border: "1px solid rgba(255, 255, 255, 0.08)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
     borderRadius: 14,
     padding: "12px 14px",
     display: "flex",
     flexDirection: "column",
     gap: 6,
-    background: "rgba(255, 255, 255, 0.03)",
+    background: isDark ? "rgba(255, 255, 255, 0.03)" : "#f8fafc",
   },
   iconGreen: {
     width: 28,
     height: 28,
     borderRadius: 8,
     background: "rgba(16, 185, 129, 0.15)",
-    color: "#34d399",
+    color: "#10b981",
     display: "grid",
     placeItems: "center",
     fontSize: 12,
@@ -340,15 +344,14 @@ const styles = {
     height: 28,
     borderRadius: 8,
     background: "rgba(239, 68, 68, 0.15)",
-    color: "#f87171",
+    color: "#ef4444",
     display: "grid",
     placeItems: "center",
     fontSize: 12,
   },
   statLabel: {
     fontSize: 11,
-    color: "#94a3b8",
-    fontWeight: 600,
+    color: isDark ? "#94a3b8" : "#64748b",
   },
   budgetHeader: {
     display: "flex",
@@ -359,12 +362,12 @@ const styles = {
   budgetSub: {
     display: "block",
     fontSize: 11,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#64748b",
   },
   track: {
     height: 10,
     borderRadius: 20,
-    background: "rgba(255, 255, 255, 0.08)",
+    background: isDark ? "rgba(255, 255, 255, 0.08)" : "#e2e8f0",
     overflow: "hidden",
     marginBottom: 16,
   },
@@ -379,9 +382,9 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     fontSize: 11,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#64748b",
     paddingTop: 10,
-    borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+    borderTop: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
   },
   features: {
     maxWidth: 1220,
@@ -394,7 +397,7 @@ const styles = {
   },
   headingTitle: {
     fontSize: "clamp(26px, 3.8vw, 36px)",
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     margin: "14px 0 8px",
     fontWeight: 800,
     letterSpacing: "-0.8px",
@@ -403,7 +406,7 @@ const styles = {
   headingSub: {
     margin: 0,
     fontSize: 15,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#475569",
   },
   featureGrid: {
     display: "grid",
@@ -411,22 +414,22 @@ const styles = {
     gap: 20,
   },
   featureCard: {
-    background: "rgba(16, 24, 40, 0.75)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
+    background: isDark ? "rgba(16, 24, 40, 0.75)" : "#ffffff",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
     backdropFilter: "blur(18px)",
     borderRadius: 18,
     padding: "26px",
     display: "flex",
     flexDirection: "column",
     gap: 10,
-    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.25)",
+    boxShadow: isDark ? "0 10px 30px rgba(0, 0, 0, 0.25)" : "0 4px 16px rgba(0, 0, 0, 0.05)",
   },
   featureIcon: {
     width: 44,
     height: 44,
     borderRadius: 12,
-    background: "rgba(255, 255, 255, 0.05)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
+    background: isDark ? "rgba(255, 255, 255, 0.05)" : "#f1f5f9",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
     display: "grid",
     placeItems: "center",
     marginBottom: 4,
@@ -435,12 +438,13 @@ const styles = {
     margin: 0,
     fontSize: 17,
     fontWeight: 800,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
   },
   featureText: {
     margin: 0,
     fontSize: 13,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#475569",
     lineHeight: 1.6,
   },
-};
+  };
+}

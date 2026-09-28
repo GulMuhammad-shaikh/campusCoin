@@ -434,11 +434,21 @@ html:not([data-theme="dark"]) h3[style*="color: #ffffff"],
 html[data-theme="light"] h3[style*="color: #ffffff"],
 html:not([data-theme="dark"]) h3[style*="color:#ffffff"],
 html[data-theme="light"] h3[style*="color:#ffffff"],
-html:not([data-theme="dark"]) strong[style*="color: #ffffff"],
-html[data-theme="light"] strong[style*="color: #ffffff"],
-html:not([data-theme="dark"]) strong[style*="color:#ffffff"],
-html[data-theme="light"] strong[style*="color:#ffffff"] {
+html:not([data-theme="dark"]) strong[style*="color: #ffffff"]:not(.btn-glow *):not(.holo-card *),
+html[data-theme="light"] strong[style*="color: #ffffff"]:not(.btn-glow *):not(.holo-card *),
+html:not([data-theme="dark"]) strong[style*="color:#ffffff"]:not(.btn-glow *):not(.holo-card *),
+html[data-theme="light"] strong[style*="color:#ffffff"]:not(.btn-glow *):not(.holo-card *) {
   color: #0f172a !important;
+}
+
+/* Ensure text inside dark holographic card and gradient buttons STAY WHITE in light mode */
+html[data-theme="light"] [style*="064e3b"] *,
+html[data-theme="light"] [style*="022c22"] *,
+html[data-theme="light"] .holo-card *,
+html[data-theme="light"] button[class*="btn"] *,
+html[data-theme="light"] .btn-glow,
+html[data-theme="light"] .btn-glow * {
+  color: #ffffff;
 }
 
 /* Light mode: text that's #e2e8f0, #cbd5e1, #94a3b8 — darken for readability */
@@ -1214,12 +1224,34 @@ img, video, canvas, svg {
   }
 }
 
-/* ─── Chatbot panel mobile ─── */
-@media (max-width: 440px) {
-  /* Panel already uses min(390px, calc(100vw - 32px)) — good */
-  /* Just ensure it doesn't go off-screen */
-  div[style*="position: fixed"][style*="bottom"][style*="right"] > div {
-    max-height: calc(100vh - 120px) !important;
+/* ─── Chatbot panel mobile responsive overlay ─── */
+@media (max-width: 520px) {
+  .chatbot-panel {
+    position: fixed !important;
+    bottom: 12px !important;
+    right: 12px !important;
+    left: 12px !important;
+    width: auto !important;
+    max-width: none !important;
+    height: calc(100dvh - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    border-radius: 18px !important;
+    z-index: 10000 !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45) !important;
+  }
+
+  /* Hide floating badge on small screens to avoid covering other elements */
+  span[style*="right: 68"],
+  span[style*="right:68"] {
+    display: none !important;
+  }
+
+  /* Chatbot floating trigger button sizing & positioning on mobile */
+  button[style*="bottom: 24"][style*="right: 24"] {
+    bottom: 16px !important;
+    right: 16px !important;
+    width: 52px !important;
+    height: 52px !important;
   }
 }
 

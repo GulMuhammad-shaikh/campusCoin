@@ -496,7 +496,7 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
               <div style={S.emptyIcon}>
                 <i className="fa-solid fa-receipt"></i>
               </div>
-              <strong style={{ color: "#ffffff", fontSize: 14 }}>No transactions logged yet</strong>
+              <strong style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 14 }}>No transactions logged yet</strong>
               <p style={{ fontSize: 12, color: "#94a3b8", margin: "6px 0 16px" }}>
                 Begin by logging your first campus allowance or expense.
               </p>
@@ -848,7 +848,7 @@ function getStyles(isDark) {
     fontSize: "clamp(32px, 4.5vw, 44px)",
     fontWeight: 900,
     letterSpacing: "-1px",
-    color: isDark ? "#ffffff" : "#0f172a",
+    color: "#ffffff",
     textShadow: "0 2px 12px rgba(0, 0, 0, 0.5)",
   },
   cardCurrencyNote: {
@@ -872,7 +872,7 @@ function getStyles(isDark) {
   cardStudentName: {
     fontSize: 13,
     fontWeight: 800,
-    color: isDark ? "#ffffff" : "#0f172a",
+    color: "#ffffff",
     letterSpacing: 0.5,
   },
   cardDigits: {
