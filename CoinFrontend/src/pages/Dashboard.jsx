@@ -614,7 +614,10 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
   );
 }
 
-function MetricCard({ title, amount, color, icon, sub, isDark, S }) {
+function MetricCard({ title, amount, color, icon, sub, isDark: propIsDark, S: propS }) {
+  const theme = useTheme();
+  const isDark = propIsDark !== undefined ? propIsDark : theme?.isDark;
+  const S = propS || getStyles(isDark);
   return (
     <div style={S.metricCard} className="card-hover">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

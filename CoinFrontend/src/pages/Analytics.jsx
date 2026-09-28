@@ -305,7 +305,7 @@ export default function Analytics({ student }) {
         ) : (
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={columnData} margin={{ top: 10, right: 20, left: 10, bottom: 5 }} barCategoryGap="20%">
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f4f8" />
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "rgba(255, 255, 255, 0.08)" : "#f0f4f8"} />
               <XAxis dataKey="day" tick={{ fontSize: 11, fill: "#64748b" }} label={{ value: "Day", position: "insideBottom", offset: -2, fontSize: 11, fill: "#94a3b8" }} height={38} />
               <YAxis tickFormatter={shortRs} tick={{ fontSize: 11, fill: "#64748b" }} width={70} />
               <Tooltip content={<DayTooltip />} />
@@ -366,8 +366,8 @@ export default function Analytics({ student }) {
                     <div key={entry.name} style={S.pieLegendRow}>
                       <span style={{ ...S.pieDot, background: entry.color }} />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: "#ffffff" }}>{entry.name}</div>
-                        <div style={{ fontSize: 12, color: "#94a3b8" }}>{formatRupees(entry.value)} · {pct}%</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: isDark ? "#ffffff" : "#0f172a" }}>{entry.name}</div>
+                        <div style={{ fontSize: 12, color: isDark ? "#94a3b8" : "#475569" }}>{formatRupees(entry.value)} · {pct}%</div>
                       </div>
                     </div>
                   );
@@ -436,12 +436,12 @@ export default function Analytics({ student }) {
                     <div key={entry.name} style={S.pieLegendRow}>
                       <span style={{ ...S.pieDot, background: entry.color }} />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: "#ffffff" }}>{entry.name}</div>
-                        <div style={{ fontSize: 12, color: "#94a3b8" }}>{formatRupees(entry.value)} · {pct}%</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: isDark ? "#ffffff" : "#0f172a" }}>{entry.name}</div>
+                        <div style={{ fontSize: 12, color: isDark ? "#94a3b8" : "#475569" }}>{formatRupees(entry.value)} · {pct}%</div>
                       </div>
                       {/* mini bar */}
                       <div style={{ width: 70 }}>
-                        <div style={{ height: 6, background: "rgba(255, 255, 255, 0.08)", borderRadius: 20, overflow: "hidden" }}>
+                        <div style={{ height: 6, background: isDark ? "rgba(255, 255, 255, 0.08)" : "#e2e8f0", borderRadius: 20, overflow: "hidden" }}>
                           <div style={{ height: "100%", width: `${pct}%`, background: entry.color, borderRadius: 20 }} />
                         </div>
                       </div>
@@ -480,7 +480,7 @@ export default function Analytics({ student }) {
         ) : (
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={yearlyData} margin={{ top: 10, right: 20, left: 10, bottom: 5 }} barCategoryGap="25%">
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f4f8" />
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "rgba(255, 255, 255, 0.08)" : "#f0f4f8"} />
               <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#64748b" }} />
               <YAxis tickFormatter={shortRs} tick={{ fontSize: 11, fill: "#64748b" }} width={70} />
               <Tooltip contentStyle={tooltipStyle} formatter={(v, n) => [formatRupees(v), n]} />
@@ -497,6 +497,8 @@ export default function Analytics({ student }) {
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 function ChartCard({ title, subtitle, children, headerRight, style }) {
+  const { isDark } = useTheme();
+  const S = getStyles(isDark);
   return (
     <div style={{ ...S.card, ...style }} className="card-hover">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 18 }}>
@@ -512,6 +514,8 @@ function ChartCard({ title, subtitle, children, headerRight, style }) {
 }
 
 function Pill({ label, value, color, bg }) {
+  const { isDark } = useTheme();
+  const S = getStyles(isDark);
   return (
     <div style={{ ...S.pill, background: bg }} className="card-hover">
       <span style={{ fontSize: 11, color, fontWeight: 700, letterSpacing: 0.5 }}>{label.toUpperCase()}</span>
@@ -521,6 +525,8 @@ function Pill({ label, value, color, bg }) {
 }
 
 function EmptyChart({ msg }) {
+  const { isDark } = useTheme();
+  const S = getStyles(isDark);
   return (
     <div style={S.empty}>
       <i className="fa-solid fa-inbox" style={{ fontSize: 36, color: "#94a3b8" }}></i>
@@ -587,7 +593,7 @@ function getStyles(isDark) {
   sub: { margin: 0, color: isDark ? "#94a3b8" : "#475569", fontSize: 14 },
   selectors: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" },
   select: {
-    border: "1px solid rgba(255, 255, 255, 0.12)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid #cbd5e1",
     borderRadius: 10,
     padding: "9px 14px",
     fontSize: 13,
@@ -597,9 +603,9 @@ function getStyles(isDark) {
     cursor: "pointer",
   },
   refreshBtn: {
-    background: "rgba(255, 255, 255, 0.06)",
+    background: isDark ? "rgba(255, 255, 255, 0.06)" : "#f1f5f9",
     color: isDark ? "#ffffff" : "#0f172a",
-    border: "1px solid rgba(255, 255, 255, 0.12)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid #cbd5e1",
     width: 38,
     height: 38,
     borderRadius: 10,
@@ -644,17 +650,17 @@ function getStyles(isDark) {
     display: "flex",
     flexDirection: "column",
     gap: 6,
-    border: "1px solid rgba(255, 255, 255, 0.08)",
-    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.4)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
+    boxShadow: isDark ? "0 10px 25px -5px rgba(0, 0, 0, 0.4)" : "0 4px 14px rgba(0, 0, 0, 0.04)",
   },
   card: {
     background: isDark ? "rgba(16, 24, 40, 0.75)" : "#ffffff",
     backdropFilter: "blur(18px)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
     borderRadius: 20,
     padding: "26px 28px",
     marginBottom: 22,
-    boxShadow: "0 20px 45px -12px rgba(0, 0, 0, 0.65)",
+    boxShadow: isDark ? "0 20px 45px -12px rgba(0, 0, 0, 0.65)" : "0 10px 30px rgba(0, 0, 0, 0.06)",
   },
   cardTitle: {
     margin: 0,
@@ -673,7 +679,7 @@ function getStyles(isDark) {
     alignItems: "center",
     gap: 12,
     padding: "9px 0",
-    borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+    borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.06)" : "1px solid #f1f5f9",
   },
   pieDot: {
     width: 12,
