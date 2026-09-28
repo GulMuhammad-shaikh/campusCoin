@@ -31,7 +31,7 @@ const SUGGESTIONS = [
 
 export default function AiChatbot({ student }) {
   const { isDark } = useTheme();
-  
+  const styles = getStyles(isDark);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState("");
@@ -260,7 +260,7 @@ Comprehensive Knowledge About CampusCoin Website:
 
       {/* ── Chat Window Modal / Panel ── */}
       {isOpen && (
-        <aside style={styles.chatPanel} className="animate-scale-in" aria-label="CampusCoin AI Chat">
+        <aside style={styles.chatPanel} className="chatbot-panel animate-scale-in" aria-label="CampusCoin AI Chat">
           {/* Header */}
           <div style={styles.header}>
             <div style={styles.headerLeft}>
@@ -325,6 +325,7 @@ Comprehensive Knowledge About CampusCoin Website:
                     </div>
                   )}
                   <div
+                    className={isUser ? "chatbot-user-bubble" : "chatbot-bot-bubble"}
                     style={{
                       ...styles.messageBubble,
                       ...(isUser ? styles.userBubble : styles.botBubble),
@@ -333,7 +334,7 @@ Comprehensive Knowledge About CampusCoin Website:
                     <div style={styles.messageText}>
                       {m.text.split("\n").map((line, lineIdx) => (
                         <p key={lineIdx} style={{ margin: "3px 0", lineHeight: 1.55 }}>
-                          {formatMarkdownLine(line)}
+                          {formatMarkdownLine(line, isDark, isUser)}
                         </p>
                       ))}
                     </div>
@@ -364,6 +365,7 @@ Comprehensive Knowledge About CampusCoin Website:
             <input
               ref={inputRef}
               type="text"
+              className="chatbot-input"
               style={styles.input}
               placeholder="Ask about website, balance, budget..."
               value={input}
@@ -389,12 +391,13 @@ Comprehensive Knowledge About CampusCoin Website:
 }
 
 // Lightweight inline renderer for bold markdown **text**
-function formatMarkdownLine(text) {
+function formatMarkdownLine(text, isDark, isUser) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) {
+      const boldColor = isUser ? "#ffffff" : (isDark ? "#ffffff" : "#0f172a");
       return (
-        <strong key={i} style={{ color: "#ffffff", fontWeight: 800 }}>
+        <strong key={i} style={{ color: boldColor, fontWeight: 800 }}>
           {part.slice(2, -2)}
         </strong>
       );
@@ -403,7 +406,8 @@ function formatMarkdownLine(text) {
   });
 }
 
-const styles = {
+function getStyles(isDark) {
+  return {
   floatingButton: {
     position: "fixed",
     bottom: 24,
@@ -433,16 +437,16 @@ const styles = {
   floatingBadge: {
     position: "absolute",
     right: 68,
-    background: "rgba(15, 23, 42, 0.9)",
+    background: isDark ? "rgba(15, 23, 42, 0.9)" : "rgba(255, 255, 255, 0.96)",
     backdropFilter: "blur(12px)",
-    color: "#ffffff",
-    border: "1px solid rgba(255, 255, 255, 0.12)",
+    color: isDark ? "#ffffff" : "#0f172a",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.1)",
     padding: "6px 12px",
     borderRadius: 20,
     fontSize: 12,
     fontWeight: 700,
     whiteSpace: "nowrap",
-    boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+    boxShadow: isDark ? "0 8px 24px rgba(0,0,0,0.3)" : "0 8px 24px rgba(15, 23, 42, 0.12)",
     display: "flex",
     alignItems: "center",
     gap: 6,
@@ -461,11 +465,14 @@ const styles = {
     right: 24,
     width: "min(390px, calc(100vw - 32px))",
     height: "min(560px, calc(100vh - 120px))",
-    background: "rgba(13, 20, 36, 0.94)",
+    background: isDark ? "rgba(13, 20, 36, 0.96)" : "#ffffff",
     backdropFilter: "blur(22px)",
-    border: "1px solid rgba(255, 255, 255, 0.12)",
+    WebkitBackdropFilter: "blur(22px)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.12)",
     borderRadius: 20,
-    boxShadow: "0 25px 60px rgba(0, 0, 0, 0.55), 0 0 40px rgba(99, 102, 241, 0.15)",
+    boxShadow: isDark
+      ? "0 25px 60px rgba(0, 0, 0, 0.55), 0 0 40px rgba(99, 102, 241, 0.15)"
+      : "0 20px 50px rgba(15, 23, 42, 0.16), 0 0 30px rgba(16, 185, 129, 0.08)",
     display: "flex",
     flexDirection: "column",
     zIndex: 9998,
@@ -474,8 +481,8 @@ const styles = {
   },
   header: {
     padding: "14px 18px",
-    background: "rgba(255, 255, 255, 0.04)",
-    borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+    background: isDark ? "rgba(255, 255, 255, 0.04)" : "#f8fafc",
+    borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
@@ -504,27 +511,27 @@ const styles = {
     height: 9,
     borderRadius: "50%",
     background: "#10b981",
-    border: "2px solid #0d1424",
+    border: isDark ? "2px solid #0d1424" : "2px solid #ffffff",
   },
   headerTitle: {
     margin: 0,
     fontSize: 15,
     fontWeight: 800,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     letterSpacing: "-0.2px",
   },
   headerSub: {
     fontSize: 11,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#64748b",
   },
   headerActions: {
     display: "flex",
     gap: 4,
   },
   headerIconBtn: {
-    background: "none",
+    background: isDark ? "none" : "rgba(0, 0, 0, 0.04)",
     border: "none",
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#64748b",
     width: 30,
     height: 30,
     borderRadius: 8,
@@ -536,8 +543,8 @@ const styles = {
   },
   suggestionsWrap: {
     padding: "8px 12px",
-    background: "rgba(0, 0, 0, 0.15)",
-    borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
+    background: isDark ? "rgba(0, 0, 0, 0.2)" : "#f1f5f9",
+    borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid #e2e8f0",
     overflowX: "auto",
   },
   suggestionsScroll: {
@@ -546,9 +553,9 @@ const styles = {
     whiteSpace: "nowrap",
   },
   suggestionChip: {
-    background: "rgba(255, 255, 255, 0.06)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
-    color: "#cbd5e1",
+    background: isDark ? "rgba(255, 255, 255, 0.06)" : "#ffffff",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #cbd5e1",
+    color: isDark ? "#cbd5e1" : "#1e293b",
     borderRadius: 14,
     padding: "5px 11px",
     fontSize: 11,
@@ -556,6 +563,7 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.15s ease",
     whiteSpace: "nowrap",
+    boxShadow: isDark ? "none" : "0 1px 3px rgba(0, 0, 0, 0.05)",
   },
   messagesContainer: {
     flex: 1,
@@ -564,6 +572,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: 12,
+    background: isDark ? "transparent" : "#f8fafc",
   },
   messageRow: {
     display: "flex",
@@ -574,8 +583,8 @@ const styles = {
     width: 24,
     height: 24,
     borderRadius: 6,
-    background: "rgba(99, 102, 241, 0.2)",
-    color: "#818cf8",
+    background: isDark ? "rgba(99, 102, 241, 0.2)" : "rgba(16, 185, 129, 0.15)",
+    color: isDark ? "#818cf8" : "#059669",
     display: "grid",
     placeItems: "center",
     fontSize: 10,
@@ -590,19 +599,21 @@ const styles = {
     wordBreak: "break-word",
   },
   userBubble: {
-    background: "linear-gradient(135deg, #4f46e5, #6366f1)",
+    background: "linear-gradient(135deg, #10b981, #059669)",
     color: "#ffffff",
     borderTopRightRadius: 4,
-    boxShadow: "0 4px 14px rgba(79, 70, 229, 0.3)",
+    boxShadow: "0 4px 14px rgba(16, 185, 129, 0.25)",
   },
   botBubble: {
-    background: "rgba(255, 255, 255, 0.06)",
-    border: "1px solid rgba(255, 255, 255, 0.09)",
-    color: "#e2e8f0",
+    background: isDark ? "rgba(255, 255, 255, 0.06)" : "#ffffff",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.09)" : "1px solid #e2e8f0",
+    color: isDark ? "#e2e8f0" : "#0f172a",
     borderTopLeftRadius: 4,
+    boxShadow: isDark ? "none" : "0 2px 8px rgba(15, 23, 42, 0.05)",
   },
   messageText: {
     fontSize: 13,
+    color: isDark ? "#e2e8f0" : "#0f172a",
   },
   typingIndicator: {
     display: "flex",
@@ -614,25 +625,25 @@ const styles = {
     width: 6,
     height: 6,
     borderRadius: "50%",
-    background: "#a5b4fc",
+    background: isDark ? "#a5b4fc" : "#10b981",
     display: "inline-block",
     animation: "typingPulse 1.2s infinite ease-in-out",
   },
   inputArea: {
     padding: "12px 14px",
-    background: "rgba(255, 255, 255, 0.04)",
-    borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+    background: isDark ? "rgba(255, 255, 255, 0.04)" : "#ffffff",
+    borderTop: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
     display: "flex",
     alignItems: "center",
     gap: 10,
   },
   input: {
     flex: 1,
-    background: "rgba(255, 255, 255, 0.06)",
-    border: "1px solid rgba(255, 255, 255, 0.1)",
+    background: isDark ? "rgba(255, 255, 255, 0.06)" : "#f1f5f9",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #cbd5e1",
     borderRadius: 12,
     padding: "11px 14px",
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     fontSize: 13,
     fontFamily: "inherit",
     outline: "none",
@@ -649,4 +660,5 @@ const styles = {
     fontSize: 13,
     transition: "all 0.15s ease",
   },
-};
+  };
+}

@@ -487,10 +487,37 @@ html[data-theme="light"] td {
 /* Light mode chatbot panel */
 html:not([data-theme="dark"]) .chatbot-panel,
 html[data-theme="light"] .chatbot-panel {
-  background: rgba(255, 255, 255, 0.96) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
   border-color: rgba(0, 0, 0, 0.1) !important;
   box-shadow: 0 25px 50px rgba(15, 23, 42, 0.15) !important;
   color: #0f172a !important;
+}
+
+html:not([data-theme="dark"]) .chatbot-bot-bubble,
+html[data-theme="light"] .chatbot-bot-bubble {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+}
+
+html:not([data-theme="dark"]) .chatbot-bot-bubble p,
+html[data-theme="light"] .chatbot-bot-bubble p,
+html:not([data-theme="dark"]) .chatbot-bot-bubble strong,
+html[data-theme="light"] .chatbot-bot-bubble strong {
+  color: #0f172a !important;
+}
+
+html:not([data-theme="dark"]) .chatbot-input,
+html[data-theme="light"] .chatbot-input {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+html:not([data-theme="dark"]) .chatbot-input::placeholder,
+html[data-theme="light"] .chatbot-input::placeholder {
+  color: #64748b !important;
 }
 
 /* Light mode: analytics select/refresh button */
