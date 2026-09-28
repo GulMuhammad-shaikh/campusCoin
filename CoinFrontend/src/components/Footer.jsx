@@ -1,6 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import logoDark from "../assets/logo-dark.png";
+import logoLight from "../assets/logo-light.png";
 
 export default function Footer() {
   const { theme, toggleTheme, isDark } = useTheme();
@@ -19,14 +21,13 @@ export default function Footer() {
       <div style={styles.inner}>
         {/* Brand & Mission Column */}
         <div style={styles.brandCol}>
-          <div style={styles.brand}>
-            <span style={styles.logoIcon}>
-              <i className="fa-solid fa-coins"></i>
-            </span>
-            <div style={styles.brandText}>
-              Campus<span style={{ color: "#10b981" }}>Coin</span>
-            </div>
-          </div>
+          <Link to="/" style={styles.brandLink} aria-label="CampusCoin Home">
+            <img
+              src={isDark ? logoDark : logoLight}
+              alt="CampusCoin HUB"
+              style={styles.logoImg}
+            />
+          </Link>
           <p style={styles.mission}>
             The smart financial companion built exclusively for university and college students. Master budgeting, track spending, and crush your savings goals.
           </p>
@@ -177,28 +178,19 @@ function getStyles(isDark) { return {
     gap: 14,
     maxWidth: 420,
   },
-  brand: {
-    display: "flex",
+  brandLink: {
+    textDecoration: "none",
+    display: "inline-flex",
     alignItems: "center",
-    gap: 10,
-    color: isDark ? "#ffffff" : "#0f172a",
-    fontWeight: 800,
-    fontSize: 22,
-    letterSpacing: "-0.5px",
+    transition: "transform 0.2s ease, opacity 0.2s ease",
+    marginBottom: 2,
   },
-  logoIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    background: "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)",
-    display: "grid",
-    placeItems: "center",
-    color: "#ffffff",
-    fontSize: 16,
-    boxShadow: "0 0 15px rgba(16, 185, 129, 0.35)",
-  },
-  brandText: {
-    fontFamily: "var(--font-heading)",
+  logoImg: {
+    height: "clamp(38px, 4.5vw, 48px)",
+    width: "auto",
+    maxWidth: 240,
+    objectFit: "contain",
+    display: "block",
   },
   mission: {
     margin: 0,

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import logoDark from "../assets/logo-dark.png";
+import logoLight from "../assets/logo-light.png";
 
 export default function Navbar({ student, onLogout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -64,14 +66,17 @@ export default function Navbar({ student, onLogout }) {
     <header style={currentStyles.header}>
       <div style={currentStyles.inner}>
         {/* Brand / Logo */}
-        <Link to={student ? "/dashboard" : "/"} style={currentStyles.brand} onClick={() => setMobileMenuOpen(false)}>
-          <span style={currentStyles.logoIcon}>
-            <i className="fa-solid fa-coins"></i>
-          </span>
-          <div style={currentStyles.brandText}>
-            Campus<span style={{ color: "#10b981" }}>Coin</span>
-          </div>
-          <span style={currentStyles.versionBadge}>HUB</span>
+        <Link
+          to={student ? "/dashboard" : "/"}
+          style={currentStyles.brand}
+          onClick={() => setMobileMenuOpen(false)}
+          aria-label="CampusCoin Home"
+        >
+          <img
+            src={isDark ? logoDark : logoLight}
+            alt="CampusCoin HUB"
+            style={currentStyles.logoImg}
+          />
         </Link>
 
         {/* Desktop Navigation */}
@@ -369,39 +374,16 @@ function getStyles(isDark) {
   },
   brand: {
     textDecoration: "none",
-    display: "flex",
+    display: "inline-flex",
     alignItems: "center",
-    gap: 8,
-    color: isDark ? "#ffffff" : "#0f172a",
-    fontWeight: 800,
-    fontSize: 21,
-    letterSpacing: "-0.5px",
-    transition: "transform 0.2s ease, color 0.2s ease",
+    transition: "transform 0.2s ease, opacity 0.2s ease",
   },
-  logoIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    background: "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)",
-    display: "grid",
-    placeItems: "center",
-    color: "#ffffff",
-    fontSize: 18,
-    boxShadow: "0 0 18px rgba(16, 185, 129, 0.45)",
-    transition: "transform 0.3s ease",
-  },
-  brandText: {
-    fontFamily: "var(--font-heading)",
-  },
-  versionBadge: {
-    fontSize: 9,
-    fontWeight: 800,
-    padding: "2px 7px",
-    borderRadius: 6,
-    background: "rgba(16, 185, 129, 0.14)",
-    color: "#10b981",
-    border: "1px solid rgba(16, 185, 129, 0.25)",
-    letterSpacing: 0.8,
+  logoImg: {
+    height: "clamp(34px, 3.8vw, 42px)",
+    width: "auto",
+    maxWidth: 220,
+    objectFit: "contain",
+    display: "block",
   },
   desktopNav: {
     display: "flex",
