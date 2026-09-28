@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useTheme } from "../context/ThemeContext";
 import { authAPI, transactionAPI } from "../utils/api";
 import { formatRupees, getCurrency } from "../utils/transactions";
 import { fireConfetti, fireCelebration } from "../utils/confetti";
 import sound from "../utils/audio";
 
 export default function Savings({ student }) {
+  const { isDark } = useTheme();
+  const S = getStyles(isDark);
   const userId        = student?.user_id || student?._id || student?.id;
   const isValidId     = userId && /^[0-9a-fA-F]{24}$/.test(String(userId));
   const activeCur     = getCurrency();
@@ -147,14 +150,13 @@ export default function Savings({ student }) {
 
       {/* KPI row */}
       <div style={S.kpiGrid} className="cc-kpi-grid">
-        <KpiCard label="Total Balance"    value={formatRupees(totalBal)}      color="#07845e" iconClass="fa-solid fa-wallet" />
-        <KpiCard label="This Month Net"   value={formatRupees(monthlyNet)}     color={monthlyNet >= 0 ? "#07845e" : "#ef4444"} iconClass={monthlyNet >= 0 ? "fa-solid fa-arrow-trend-up" : "fa-solid fa-arrow-trend-down"} />
-        <KpiCard label="Monthly Income"   value={formatRupees(monthlyInc)}     color="#6366f1" iconClass="fa-solid fa-arrow-up" />
-        <KpiCard label="Monthly Expenses" value={formatRupees(monthlyExp)}     color="#ef4444" iconClass="fa-solid fa-arrow-down" />
-        <KpiCard label="Savings Rate"     value={`${savingsRate.toFixed(1)}%`} color="#8b5cf6" iconClass="fa-solid fa-percent" />
+        <KpiCard isDark={isDark} label="Total Balance"    value={formatRupees(totalBal)}      color="#07845e" iconClass="fa-solid fa-wallet" />
+        <KpiCard isDark={isDark} label="This Month Net"   value={formatRupees(monthlyNet)}     color={monthlyNet >= 0 ? "#07845e" : "#ef4444"} iconClass={monthlyNet >= 0 ? "fa-solid fa-arrow-trend-up" : "fa-solid fa-arrow-trend-down"} />
+        <KpiCard isDark={isDark} label="Monthly Income"   value={formatRupees(monthlyInc)}     color="#6366f1" iconClass="fa-solid fa-arrow-up" />
+        <KpiCard isDark={isDark} label="Monthly Expenses" value={formatRupees(monthlyExp)}     color="#ef4444" iconClass="fa-solid fa-arrow-down" />
+        <KpiCard isDark={isDark} label="Savings Rate"     value={`${savingsRate.toFixed(1)}%`} color="#8b5cf6" iconClass="fa-solid fa-percent" />
         {lastMonthDiff !== null && (
-          <KpiCard
-            label="vs Last Month"
+          <KpiCard isDark={isDark} label="vs Last Month"
             value={`${lastMonthDiff >= 0 ? "+" : ""}${lastMonthDiff.toFixed(1)}%`}
             color={lastMonthDiff >= 0 ? "#07845e" : "#ef4444"}
             iconClass={lastMonthDiff >= 0 ? "fa-solid fa-arrow-trend-up" : "fa-solid fa-arrow-trend-down"}
@@ -329,11 +331,11 @@ export default function Savings({ student }) {
   );
 }
 
-function KpiCard({ label, value, color, iconClass }) {
+function KpiCard({ label, value, color, iconClass, isDark }) {
   return (
     <div style={{
-      background: "rgba(16, 24, 40, 0.75)",
-      border: "1px solid rgba(255, 255, 255, 0.08)",
+      background: isDark ? "rgba(16, 24, 40, 0.75)" : "#ffffff",
+      border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
       backdropFilter: "blur(16px)",
       borderRadius: 14,
       padding: "16px 18px",
@@ -345,36 +347,37 @@ function KpiCard({ label, value, color, iconClass }) {
       <span style={{ width: 34, height: 34, display: "grid", placeItems: "center", borderRadius: 10, fontSize: 14, color, background: `${color}20`, border: `1px solid ${color}35` }}>
         <i className={iconClass}></i>
       </span>
-      <span style={{ color: "#94a3b8", fontSize: 11, fontWeight: 700, letterSpacing: 0.5 }}>{label.toUpperCase()}</span>
+      <span style={{ color: isDark ? "#94a3b8" : "#475569", fontSize: 11, fontWeight: 700, letterSpacing: 0.5 }}>{label.toUpperCase()}</span>
       <strong style={{ color, fontSize: 18, letterSpacing: "-0.4px" }}>{value}</strong>
     </div>
   );
 }
 
-const S = {
+function getStyles(isDark) {
+  return {
   center:  { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", fontFamily: "'Plus Jakarta Sans', sans-serif" },
   spinner: { width: 38, height: 38, border: "4px solid rgba(255,255,255,0.1)", borderTop: "4px solid #10b981", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
   page:    { maxWidth: 1000, margin: "0 auto", padding: "36px 20px 70px", fontFamily: "'Plus Jakarta Sans', sans-serif", color: "#f8fafc" },
   headerWrap: { marginBottom: 24 },
   eyebrow: { display: "inline-flex", alignItems: "center", color: "#10b981", fontSize: 11, fontWeight: 800, letterSpacing: 1.2, marginBottom: 6 },
-  title:   { color: "#ffffff", fontSize: "clamp(24px, 3.5vw, 32px)", margin: "0 0 6px", letterSpacing: "-0.8px", fontWeight: 800 },
-  subtitle:{ color: "#94a3b8", fontSize: 14, lineHeight: 1.5 },
+  title:   { color: isDark ? "#ffffff" : "#0f172a", fontSize: "clamp(24px, 3.5vw, 32px)", margin: "0 0 6px", letterSpacing: "-0.8px", fontWeight: 800 },
+  subtitle:{ color: isDark ? "#94a3b8" : "#475569", fontSize: 14, lineHeight: 1.5 },
 
   kpiGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 14, marginBottom: 20 },
 
-  card:    { background: "rgba(16, 24, 40, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", backdropFilter: "blur(18px)", borderRadius: 16, padding: "24px", marginBottom: 20, boxShadow: "0 10px 32px rgba(0,0,0,0.3)" },
-  cardTitle:{ color: "#ffffff", fontSize: 17, fontWeight: 800, margin: 0 },
-  cardSub: { color: "#94a3b8", fontSize: 13, margin: "4px 0 18px" },
+  card:    { background: isDark ? "rgba(16, 24, 40, 0.75)" : "#ffffff", border: "1px solid rgba(255, 255, 255, 0.08)", backdropFilter: "blur(18px)", borderRadius: 16, padding: "24px", marginBottom: 20, boxShadow: "0 10px 32px rgba(0,0,0,0.3)" },
+  cardTitle:{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 17, fontWeight: 800, margin: 0 },
+  cardSub: { color: isDark ? "#94a3b8" : "#475569", fontSize: 13, margin: "4px 0 18px" },
 
   goalForm:     { display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" },
   goalInputWrap:{ display: "flex", alignItems: "center", border: "1.5px solid rgba(255, 255, 255, 0.12)", borderRadius: 12, overflow: "hidden", background: "rgba(255, 255, 255, 0.05)", flexGrow: 1, maxWidth: 300 },
   rsSign:       { padding: "12px 16px", background: "rgba(255, 255, 255, 0.08)", color: "#10b981", fontSize: 14, fontWeight: 800, borderRight: "1px solid rgba(255, 255, 255, 0.1)" },
-  goalInput:    { border: "none", background: "transparent", padding: "12px 14px", fontSize: 15, fontWeight: 700, outline: "none", width: "100%", boxSizing: "border-box", color: "#ffffff" },
+  goalInput:    { border: "none", background: "transparent", padding: "12px 14px", fontSize: 15, fontWeight: 700, outline: "none", width: "100%", boxSizing: "border-box", color: isDark ? "#ffffff" : "#0f172a" },
   saveBtn:      { border: "none", borderRadius: 12, padding: "12px 22px", background: "linear-gradient(135deg, #10b981, #059669)", color: "#fff", fontWeight: 800, cursor: "pointer", fontFamily: "inherit", fontSize: 13, display: "inline-flex", alignItems: "center", boxShadow: "0 4px 16px rgba(16,185,129,0.3)" },
 
   progressTrack:{ height: 14, background: "rgba(255, 255, 255, 0.07)", borderRadius: 20, overflow: "hidden", marginBottom: 12, border: "1px solid rgba(255, 255, 255, 0.05)" },
   progressFill: { height: "100%", borderRadius: 20, transition: "width 0.7s ease" },
-  progressMeta: { display: "flex", justifyContent: "space-between", fontSize: 13, color: "#94a3b8" },
+  progressMeta: { display: "flex", justifyContent: "space-between", fontSize: 13, color: isDark ? "#94a3b8" : "#475569" },
   successBanner:{ background: "rgba(16, 185, 129, 0.15)", border: "1px solid rgba(16, 185, 129, 0.35)", color: "#34d399", borderRadius: 12, padding: "12px 16px", marginTop: 16, fontSize: 13, display: "flex", alignItems: "center" },
   infoBanner:   { background: "rgba(59, 130, 246, 0.15)", border: "1px solid rgba(59, 130, 246, 0.35)", color: "#60a5fa", borderRadius: 12, padding: "12px 16px", marginTop: 16, fontSize: 13, display: "flex", alignItems: "center" },
   warnBanner:   { background: "rgba(245, 158, 11, 0.15)", border: "1px solid rgba(245, 158, 11, 0.35)", color: "#fbbf24", borderRadius: 12, padding: "12px 16px", marginTop: 16, fontSize: 13, display: "flex", alignItems: "center" },
@@ -384,4 +387,5 @@ const S = {
 
   tipsGrid:     { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: 14 },
   tipCard:      { background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.06)", borderRadius: 12, padding: "16px", display: "flex", flexDirection: "column", gap: 10 },
-};
+  };
+}

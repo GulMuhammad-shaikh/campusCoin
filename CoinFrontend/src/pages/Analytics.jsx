@@ -78,6 +78,7 @@ function renderPieLabel({ cx, cy, midAngle, innerRadius, outerRadius, name, perc
 // ─── Main Analytics Page ──────────────────────────────────────────────────────
 export default function Analytics({ student }) {
   const { isDark } = useTheme();
+  const S = getStyles(isDark);
   const userId = student?.user_id || student?._id || student?.id;
 
   const tooltipStyle = {
@@ -529,7 +530,8 @@ function EmptyChart({ msg }) {
 }
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
-const S = {
+function getStyles(isDark) {
+  return {
   twoColChartsRow: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 460px), 1fr))",
@@ -578,11 +580,11 @@ const S = {
   title: {
     margin: "0 0 6px",
     fontSize: "clamp(26px, 4vw, 36px)",
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     letterSpacing: "-0.8px",
     fontWeight: 900,
   },
-  sub: { margin: 0, color: "#94a3b8", fontSize: 14 },
+  sub: { margin: 0, color: isDark ? "#94a3b8" : "#475569", fontSize: 14 },
   selectors: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" },
   select: {
     border: "1px solid rgba(255, 255, 255, 0.12)",
@@ -590,13 +592,13 @@ const S = {
     padding: "9px 14px",
     fontSize: 13,
     fontFamily: "inherit",
-    background: "rgba(16, 24, 40, 0.8)",
-    color: "#ffffff",
+    background: isDark ? "rgba(16, 24, 40, 0.8)" : "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     cursor: "pointer",
   },
   refreshBtn: {
     background: "rgba(255, 255, 255, 0.06)",
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     border: "1px solid rgba(255, 255, 255, 0.12)",
     width: 38,
     height: 38,
@@ -623,7 +625,7 @@ const S = {
   retryBtn: {
     background: "#f43f5e",
     border: "none",
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     borderRadius: 8,
     padding: "6px 12px",
     fontSize: 12,
@@ -646,7 +648,7 @@ const S = {
     boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.4)",
   },
   card: {
-    background: "rgba(16, 24, 40, 0.75)",
+    background: isDark ? "rgba(16, 24, 40, 0.75)" : "#ffffff",
     backdropFilter: "blur(18px)",
     border: "1px solid rgba(255, 255, 255, 0.08)",
     borderRadius: 20,
@@ -658,12 +660,12 @@ const S = {
     margin: 0,
     fontSize: 18,
     fontWeight: 800,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
   },
   cardSub: {
     margin: "6px 0 0",
     fontSize: 12,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#475569",
     lineHeight: 1.5,
   },
   pieLegendRow: {
@@ -683,4 +685,5 @@ const S = {
     textAlign: "center",
     padding: "50px 20px",
   },
-};
+  };
+}

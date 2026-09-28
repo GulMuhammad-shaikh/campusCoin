@@ -6,8 +6,9 @@ import sound from "../utils/audio";
 import { useTheme } from "../context/ThemeContext";
 
 export default function Profile({ student }) {
-  const userId = student?.user_id || student?._id || student?.id;
   const { theme, setTheme, isDark } = useTheme();
+  const S = getStyles(isDark);
+  const userId = student?.user_id || student?._id || student?.id;
 
   // Editable profile fields
   const [name,         setName]         = useState(student?.name || "");
@@ -330,7 +331,8 @@ export default function Profile({ student }) {
   );
 }
 
-const S = {
+function getStyles(isDark) {
+  return {
   page: {
     maxWidth: 1100,
     margin: "0 auto",
@@ -353,13 +355,13 @@ const S = {
   title: {
     margin: "0 0 6px",
     fontSize: "clamp(24px, 3.5vw, 32px)",
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     fontWeight: 800,
     letterSpacing: "-0.6px",
   },
   subtitle: {
     margin: 0,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#475569",
     fontSize: 14,
     lineHeight: 1.5,
   },
@@ -370,7 +372,7 @@ const S = {
     alignItems: "start",
   },
   sideCard: {
-    background: "rgba(16, 24, 40, 0.75)",
+    background: isDark ? "rgba(16, 24, 40, 0.75)" : "#ffffff",
     border: "1px solid rgba(255, 255, 255, 0.08)",
     backdropFilter: "blur(18px)",
     borderRadius: 16,
@@ -383,7 +385,7 @@ const S = {
     height: 68,
     borderRadius: "50%",
     background: "linear-gradient(135deg, #10b981, #059669)",
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     display: "grid",
     placeItems: "center",
     fontSize: 26,
@@ -394,12 +396,12 @@ const S = {
     margin: "0 0 4px",
     fontSize: 20,
     fontWeight: 800,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
   },
   cardEmail: {
     margin: "0 0 14px",
     fontSize: 13,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#475569",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -434,14 +436,14 @@ const S = {
     fontSize: 13,
   },
   infoLabel: {
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#475569",
   },
   infoVal: {
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     fontWeight: 600,
   },
   mainFormCard: {
-    background: "rgba(16, 24, 40, 0.75)",
+    background: isDark ? "rgba(16, 24, 40, 0.75)" : "#ffffff",
     border: "1px solid rgba(255, 255, 255, 0.08)",
     backdropFilter: "blur(18px)",
     borderRadius: 16,
@@ -468,12 +470,12 @@ const S = {
     margin: "0 0 2px",
     fontSize: 18,
     fontWeight: 800,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
   },
   sectionSub: {
     margin: 0,
     fontSize: 13,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#475569",
   },
   form: {
     display: "grid",
@@ -497,7 +499,7 @@ const S = {
     border: "1.5px solid rgba(255, 255, 255, 0.12)",
     borderRadius: 10,
     fontSize: 14,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     background: "rgba(255, 255, 255, 0.05)",
     outline: "none",
     fontFamily: "inherit",
@@ -514,7 +516,7 @@ const S = {
     border: "1.5px solid rgba(255, 255, 255, 0.12)",
     borderRadius: 10,
     fontSize: 14,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     background: "#141d30",
     outline: "none",
     fontFamily: "inherit",
@@ -529,12 +531,12 @@ const S = {
     top: "50%",
     transform: "translateY(-50%)",
     pointerEvents: "none",
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#475569",
     fontSize: 12,
   },
   fieldHint: {
     fontSize: 11,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#475569",
     marginTop: 2,
   },
   actionRow: {
@@ -547,7 +549,7 @@ const S = {
   },
   saveBtn: {
     background: "linear-gradient(135deg, #10b981, #059669)",
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     border: "none",
     padding: "12px 24px",
     borderRadius: 10,
@@ -568,4 +570,5 @@ const S = {
     display: "inline-flex",
     alignItems: "center",
   },
-};
+  };
+}

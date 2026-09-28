@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useTheme } from "../context/ThemeContext";
 import { transactionAPI, categoryAPI } from "../utils/api";
 import { getTransactions, formatRupees } from "../utils/transactions";
 import TransactionModal from "../components/TransactionModal";
@@ -18,6 +19,8 @@ import sound from "../utils/audio";
  *  - onClose: function to go back (called from modal or parent)
  */
 export default function TransactionsPage({ student, onClose }) {
+  const { isDark } = useTheme();
+  const styles = getStyles(isDark);
   // ─── Filter State ───────────────────────────────────────────────
   const todayDate = new Date();
   const currentMonthStr = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, "0")}`;
@@ -409,12 +412,12 @@ export default function TransactionsPage({ student, onClose }) {
               </thead>
               <tbody>
                 {displayTxns.map((item, idx) => (
-                  <tr key={item.id} style={idx % 2 === 0 ? {} : { background: "#fafbfc" }}>
+                  <tr key={item.id} style={idx % 2 === 0 ? {} : { background: isDark ? "rgba(255, 255, 255, 0.02)" : "#fafbfc" }}>
                     <td style={{ ...styles.td, color: "#94a3b8", width: 36 }}>
                       {idx + 1}
                     </td>
                     <td style={styles.td}>
-                      <strong style={{ color: "#1e293b", fontSize: 13 }}>{item.description || item.category}</strong>
+                      <strong style={{ color: isDark ? "#ffffff" : "#0f172a", fontSize: 13 }}>{item.description || item.category}</strong>
                     </td>
                     <td style={styles.td}>
                       <span style={{
@@ -487,7 +490,8 @@ export default function TransactionsPage({ student, onClose }) {
   );
 }
 
-const styles = {
+function getStyles(isDark) {
+  return {
   page: {
     maxWidth: 1120,
     margin: "0 auto",
@@ -504,8 +508,8 @@ const styles = {
     marginBottom: 22,
   },
   eyebrow: { display: "block", color: "#10b981", fontSize: 11, fontWeight: 900, letterSpacing: 1.4, marginBottom: 6 },
-  title: { margin: "0 0 6px", fontSize: "clamp(24px, 3.5vw, 34px)", color: "#ffffff", letterSpacing: "-0.8px", fontWeight: 800 },
-  subtitle: { margin: 0, color: "#94a3b8", fontSize: 13 },
+  title: { margin: "0 0 6px", fontSize: "clamp(24px, 3.5vw, 34px)", color: isDark ? "#ffffff" : "#0f172a", letterSpacing: "-0.8px", fontWeight: 800 },
+  subtitle: { margin: 0, color: isDark ? "#94a3b8" : "#475569", fontSize: 13 },
   backBtn: {
     background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "#60a5fa",
     borderRadius: 10, padding: "10px 18px", fontSize: 13, fontWeight: 800,
@@ -518,16 +522,16 @@ const styles = {
     marginBottom: 18,
   },
   sumCard: {
-    background: "rgba(16, 24, 40, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", backdropFilter: "blur(16px)", borderRadius: 14,
+    background: isDark ? "rgba(16, 24, 40, 0.75)" : "#ffffff", border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0", backdropFilter: "blur(16px)", borderRadius: 14,
     padding: "16px 18px", display: "flex", flexDirection: "column", gap: 6,
-    boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+    boxShadow: isDark ? "0 8px 24px rgba(0,0,0,0.25)" : "0 4px 16px rgba(0,0,0,0.05)",
   },
-  sumLabel:  { fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8 },
+  sumLabel:  { fontSize: 11, fontWeight: 700, color: isDark ? "#94a3b8" : "#475569", textTransform: "uppercase", letterSpacing: 0.8 },
   sumAmount: { fontSize: 20, fontWeight: 900 },
   filterCard: {
-    background: "rgba(16, 24, 40, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", backdropFilter: "blur(18px)", borderRadius: 16,
+    background: isDark ? "rgba(16, 24, 40, 0.75)" : "#ffffff", border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0", backdropFilter: "blur(18px)", borderRadius: 16,
     padding: "20px 22px", marginBottom: 18, display: "flex",
-    flexDirection: "column", gap: 14, boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+    flexDirection: "column", gap: 14, boxShadow: isDark ? "0 10px 30px rgba(0,0,0,0.3)" : "0 4px 16px rgba(0,0,0,0.05)",
   },
   filterRow: {
     display: "flex",
@@ -536,7 +540,7 @@ const styles = {
     alignItems: "flex-end",
   },
   filterGroup: { display: "flex", flexDirection: "column", gap: 6, flex: 1, minWidth: 140 },
-  filterLabel: { fontSize: 11, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8 },
+  filterLabel: { fontSize: 11, fontWeight: 800, color: isDark ? "#94a3b8" : "#475569", textTransform: "uppercase", letterSpacing: 0.8 },
   typeGroup: { display: "flex", gap: 6, flexWrap: "wrap" },
   typeBtn: {
     border: "none", borderRadius: 8, padding: "8px 14px",
@@ -545,22 +549,22 @@ const styles = {
   },
   select: {
     width: "100%", boxSizing: "border-box", border: "1px solid rgba(255, 255, 255, 0.12)",
-    background: "#141d30", borderRadius: 10, padding: "10px 12px",
-    fontSize: 13, color: "#ffffff", fontFamily: "inherit", outline: "none",
+    background: isDark ? "#141d30" : "#ffffff", border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid #cbd5e1", borderRadius: 10, padding: "10px 12px",
+    fontSize: 13, color: isDark ? "#ffffff" : "#0f172a", fontFamily: "inherit", outline: "none",
   },
   searchInput: {
     width: "100%", boxSizing: "border-box", border: "1px solid rgba(255, 255, 255, 0.12)",
-    background: "rgba(255, 255, 255, 0.05)", borderRadius: 10, padding: "10px 12px",
-    fontSize: 13, color: "#ffffff", fontFamily: "inherit", outline: "none",
+    background: isDark ? "rgba(255, 255, 255, 0.05)" : "#ffffff", border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid #cbd5e1", borderRadius: 10, padding: "10px 12px",
+    fontSize: 13, color: isDark ? "#ffffff" : "#0f172a", fontFamily: "inherit", outline: "none",
   },
   dateInput: {
     width: "100%", boxSizing: "border-box", border: "1px solid rgba(255, 255, 255, 0.12)",
     background: "rgba(255, 255, 255, 0.05)", borderRadius: 10, padding: "10px 12px",
-    fontSize: 13, color: "#ffffff", fontFamily: "inherit", outline: "none",
+    fontSize: 13, color: isDark ? "#ffffff" : "#0f172a", fontFamily: "inherit", outline: "none",
   },
   tableCard: {
-    background: "rgba(16, 24, 40, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", backdropFilter: "blur(18px)", borderRadius: 16,
-    padding: "6px 0", boxShadow: "0 10px 30px rgba(0,0,0,0.3)", overflow: "hidden",
+    background: isDark ? "rgba(16, 24, 40, 0.75)" : "#ffffff", border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0", backdropFilter: "blur(18px)", borderRadius: 16,
+    padding: "6px 0", boxShadow: isDark ? "0 10px 30px rgba(0,0,0,0.3)" : "0 4px 16px rgba(0,0,0,0.05)", overflow: "hidden",
   },
   errorBox: {
     background: "rgba(245, 158, 11, 0.15)", border: "1px solid rgba(245, 158, 11, 0.3)", color: "#fbbf24",
@@ -573,18 +577,18 @@ const styles = {
     margin: "0 auto",
     animation: "spin 0.8s linear infinite",
   },
-  emptyWrap: { textAlign: "center", padding: "50px 20px", color: "#94a3b8" },
+  emptyWrap: { textAlign: "center", padding: "50px 20px", color: isDark ? "#94a3b8" : "#475569" },
   emptyIcon: { fontSize: 36, marginBottom: 12 },
   table: {
     width: "100%", minWidth: 640, borderCollapse: "collapse",
     fontSize: 13, textAlign: "left",
   },
   th: {
-    color: "#94a3b8", fontSize: 10, letterSpacing: 0.8, textTransform: "uppercase",
-    padding: "13px 16px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", fontWeight: 800,
-    background: "rgba(255, 255, 255, 0.02)",
+    color: isDark ? "#94a3b8" : "#475569", fontSize: 10, letterSpacing: 0.8, textTransform: "uppercase",
+    padding: "13px 16px", borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0", fontWeight: 800,
+    background: isDark ? "rgba(255, 255, 255, 0.02)" : "#f8fafc",
   },
-  td: { padding: "14px 16px", borderBottom: "1px solid rgba(255, 255, 255, 0.05)", verticalAlign: "middle", color: "#cbd5e1" },
+  td: { padding: "14px 16px", borderBottom: isDark ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid #f1f5f9", verticalAlign: "middle", color: isDark ? "#cbd5e1" : "#334155" },
   catBadge: {
     display: "inline-block", padding: "4px 10px", borderRadius: 20,
     fontSize: 11, fontWeight: 700, whiteSpace: "nowrap",
@@ -621,4 +625,5 @@ const styles = {
     padding: 0,
     transition: "all 0.15s ease",
   },
-};
+  };
+}

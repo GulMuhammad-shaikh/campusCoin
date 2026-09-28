@@ -8,6 +8,7 @@ import { useTheme } from "../context/ThemeContext";
 
 export default function Dashboard({ student, onOpenModal, onViewAll }) {
   const { isDark } = useTheme();
+  const S = getStyles(isDark);
   const [summary, setSummary]           = useState({ totalIncome: 0, totalExpense: 0, balance: 0 });
   const [recent, setRecent]             = useState([]);
   const [allTxns, setAllTxns]           = useState([]);
@@ -340,7 +341,7 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
               <span style={{ fontSize: 24, fontWeight: 900, color: studentRank.color }}>
                 {healthScore}
               </span>
-              <span style={{ fontSize: 10, color: "#94a3b8" }}>/100</span>
+              <span style={{ fontSize: 10, color: isDark ? "#94a3b8" : "#64748b" }}>/100</span>
             </div>
           </div>
 
@@ -401,10 +402,10 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
                 <i className="fa-solid fa-bullseye"></i>
               </span>
               <div>
-                <strong style={{ fontSize: 14, color: "#ffffff" }}>
+                <strong style={{ fontSize: 14, color: isDark ? "#ffffff" : "#0f172a" }}>
                   Monthly Savings Target: {formatRupees(savingsGoal)}
                 </strong>
-                <div style={{ fontSize: 12, color: "#94a3b8" }}>
+                <div style={{ fontSize: 12, color: isDark ? "#94a3b8" : "#475569" }}>
                   Saved: <strong style={{ color: "#34d399" }}>{formatRupees(Math.max(0, kpi.thisNet))}</strong> ·
                   Remaining: <strong style={{ color: "#fbbf24" }}>{formatRupees(Math.max(0, savingsGoal - kpi.thisNet))}</strong>
                 </div>
@@ -437,29 +438,25 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
 
       {/* ─── 4 Quick KPI Glass Cards ─── */}
       <div style={S.kpiGrid} className="cc-kpi-grid">
-        <MetricCard
-          title="Total Inflow"
+        <MetricCard isDark={isDark} S={S} title="Total Inflow"
           amount={formatRupees(summary.totalIncome || 0)}
           color="#10b981"
           icon="fa-solid fa-arrow-trend-up"
           sub="All logged allowances & income"
         />
-        <MetricCard
-          title="Total Outflow"
+        <MetricCard isDark={isDark} S={S} title="Total Outflow"
           amount={formatRupees(summary.totalExpense || 0)}
           color="#f43f5e"
           icon="fa-solid fa-arrow-trend-down"
           sub="Campus food, transit & bills"
         />
-        <MetricCard
-          title="Total Records"
+        <MetricCard isDark={isDark} S={S} title="Total Records"
           amount={String(txnCount)}
           color="#38bdf8"
           icon="fa-solid fa-receipt"
           sub="Synced with database"
         />
-        <MetricCard
-          title="Savings Rate"
+        <MetricCard isDark={isDark} S={S} title="Savings Rate"
           amount={summary.totalIncome > 0 ? `${(((summary.totalIncome - summary.totalExpense) / summary.totalIncome) * 100).toFixed(1)}%` : "—"}
           color="#a855f7"
           icon="fa-solid fa-piggy-bank"
@@ -600,8 +597,8 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
                 return (
                   <div key={item.name} style={S.catRow}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                      <span style={{ fontSize: 13, color: "#e2e8f0", fontWeight: 600 }}>{item.name}</span>
-                      <strong style={{ fontSize: 13, color: "#ffffff" }}>{formatRupees(item.amount)}</strong>
+                      <span style={{ fontSize: 13, color: isDark ? "#e2e8f0" : "#0f172a", fontWeight: 600 }}>{item.name}</span>
+                      <strong style={{ fontSize: 13, color: isDark ? "#ffffff" : "#0f172a" }}>{formatRupees(item.amount)}</strong>
                     </div>
                     <div style={S.catBarTrack}>
                       <div style={{ ...S.catBarFill, width: `${pct}%`, background: color }} />
@@ -617,7 +614,7 @@ export default function Dashboard({ student, onOpenModal, onViewAll }) {
   );
 }
 
-function MetricCard({ title, amount, color, icon, sub }) {
+function MetricCard({ title, amount, color, icon, sub, isDark, S }) {
   return (
     <div style={S.metricCard} className="card-hover">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -626,13 +623,14 @@ function MetricCard({ title, amount, color, icon, sub }) {
           <i className={icon}></i>
         </span>
       </div>
-      <strong style={{ ...S.metricAmount, color: "#ffffff" }}>{amount}</strong>
+      <strong style={{ ...S.metricAmount, color: isDark ? "#ffffff" : "#0f172a" }}>{amount}</strong>
       <span style={S.metricSub}>{sub}</span>
     </div>
   );
 }
 
-const S = {
+function getStyles(isDark) {
+  return {
   page: {
     maxWidth: 1220,
     margin: "0 auto",
@@ -700,12 +698,12 @@ const S = {
     margin: "0 0 4px",
     fontSize: "clamp(26px, 4vw, 36px)",
     fontWeight: 900,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     letterSpacing: "-0.8px",
   },
   welcomeSub: {
     margin: 0,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#475569",
     fontSize: 14,
   },
   speedActions: {
@@ -716,7 +714,7 @@ const S = {
   },
   addIncomeBtn: {
     background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     border: "none",
     borderRadius: 12,
     padding: "10px 16px",
@@ -728,9 +726,9 @@ const S = {
     boxShadow: "0 4px 18px rgba(16, 185, 129, 0.35)",
   },
   addExpenseBtn: {
-    background: "rgba(244, 63, 94, 0.14)",
-    color: "#fca5a5",
-    border: "1px solid rgba(244, 63, 94, 0.3)",
+    background: isDark ? "rgba(244, 63, 94, 0.14)" : "#fee2e2",
+    color: isDark ? "#fca5a5" : "#e11d48",
+    border: isDark ? "1px solid rgba(244, 63, 94, 0.3)" : "1px solid #fca5a5",
     borderRadius: 12,
     padding: "10px 16px",
     fontWeight: 700,
@@ -740,9 +738,9 @@ const S = {
     alignItems: "center",
   },
   addCategoryBtn: {
-    background: "rgba(99, 102, 241, 0.14)",
-    color: "#c7d2fe",
-    border: "1px solid rgba(99, 102, 241, 0.3)",
+    background: isDark ? "rgba(99, 102, 241, 0.14)" : "#e0e7ff",
+    color: isDark ? "#c7d2fe" : "#4338ca",
+    border: isDark ? "1px solid rgba(99, 102, 241, 0.3)" : "1px solid #c7d2fe",
     borderRadius: 12,
     padding: "10px 16px",
     fontWeight: 700,
@@ -765,9 +763,9 @@ const S = {
     boxShadow: "0 4px 15px rgba(245, 158, 11, 0.35)",
   },
   refreshBtn: {
-    background: "rgba(255, 255, 255, 0.06)",
-    border: "1px solid rgba(255, 255, 255, 0.12)",
-    color: "#cbd5e1",
+    background: isDark ? "rgba(255, 255, 255, 0.06)" : "#f1f5f9",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid #cbd5e1",
+    color: isDark ? "#cbd5e1" : "#334155",
     borderRadius: 12,
     width: 40,
     height: 40,
@@ -847,7 +845,7 @@ const S = {
     fontSize: "clamp(32px, 4.5vw, 44px)",
     fontWeight: 900,
     letterSpacing: "-1px",
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     textShadow: "0 2px 12px rgba(0, 0, 0, 0.5)",
   },
   cardCurrencyNote: {
@@ -871,7 +869,7 @@ const S = {
   cardStudentName: {
     fontSize: 13,
     fontWeight: 800,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     letterSpacing: 0.5,
   },
   cardDigits: {
@@ -883,15 +881,15 @@ const S = {
 
   /* Health Widget */
   healthWidget: {
-    background: "rgba(16, 24, 40, 0.75)",
+    background: isDark ? "rgba(16, 24, 40, 0.75)" : "#ffffff",
     backdropFilter: "blur(18px)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
     borderRadius: 20,
     padding: "24px 26px",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    boxShadow: "0 20px 45px -12px rgba(0, 0, 0, 0.65)",
+    boxShadow: isDark ? "0 20px 45px -12px rgba(0, 0, 0, 0.65)" : "0 10px 30px rgba(0, 0, 0, 0.06)",
   },
   healthHeader: {
     display: "flex",
@@ -910,13 +908,13 @@ const S = {
     margin: 0,
     fontSize: 20,
     fontWeight: 800,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
   },
   scoreCircle: {
     display: "flex",
     alignItems: "baseline",
-    background: "rgba(255, 255, 255, 0.05)",
-    border: "1px solid rgba(255, 255, 255, 0.1)",
+    background: isDark ? "rgba(255, 255, 255, 0.05)" : "#f1f5f9",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #cbd5e1",
     padding: "6px 14px",
     borderRadius: 14,
   },
@@ -931,30 +929,30 @@ const S = {
     display: "inline-flex",
     alignItems: "center",
     gap: 6,
-    background: "rgba(255, 255, 255, 0.04)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
+    background: isDark ? "rgba(255, 255, 255, 0.04)" : "#f1f5f9",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #cbd5e1",
     padding: "6px 12px",
     borderRadius: 10,
     fontSize: 12,
     fontWeight: 700,
-    color: "#e2e8f0",
+    color: isDark ? "#e2e8f0" : "#0f172a",
   },
   sparklineWrap: {
-    background: "rgba(0, 0, 0, 0.2)",
+    background: isDark ? "rgba(0, 0, 0, 0.2)" : "#f8fafc",
     borderRadius: 12,
     padding: "10px 14px",
-    border: "1px solid rgba(255, 255, 255, 0.05)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid #e2e8f0",
   },
 
   /* Savings Banner */
   savingsBanner: {
-    background: "rgba(16, 24, 40, 0.75)",
+    background: isDark ? "rgba(16, 24, 40, 0.75)" : "#ffffff",
     backdropFilter: "blur(18px)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
     borderRadius: 18,
     padding: "18px 24px",
     marginBottom: 22,
-    boxShadow: "0 15px 35px -10px rgba(0, 0, 0, 0.5)",
+    boxShadow: isDark ? "0 15px 35px -10px rgba(0, 0, 0, 0.5)" : "0 10px 30px rgba(0, 0, 0, 0.06)",
   },
   savingsHeaderRow: {
     display: "flex",
@@ -983,7 +981,7 @@ const S = {
   },
   goalTrack: {
     height: 10,
-    background: "rgba(255, 255, 255, 0.06)",
+    background: isDark ? "rgba(255, 255, 255, 0.06)" : "#e2e8f0",
     borderRadius: 20,
     overflow: "hidden",
   },
@@ -1001,19 +999,20 @@ const S = {
     marginBottom: 22,
   },
   metricCard: {
-    background: "rgba(16, 24, 40, 0.75)",
+    background: isDark ? "rgba(16, 24, 40, 0.75)" : "#ffffff",
     backdropFilter: "blur(18px)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
     borderRadius: 16,
     padding: "18px 20px",
     display: "flex",
     flexDirection: "column",
     gap: 6,
+    boxShadow: isDark ? "none" : "0 6px 20px rgba(0, 0, 0, 0.04)",
   },
   metricTitle: {
     fontSize: 11,
     fontWeight: 700,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#475569",
     letterSpacing: 0.5,
     textTransform: "uppercase",
   },
@@ -1042,12 +1041,12 @@ const S = {
     gap: 20,
   },
   glassPanel: {
-    background: "rgba(16, 24, 40, 0.75)",
+    background: isDark ? "rgba(16, 24, 40, 0.75)" : "#ffffff",
     backdropFilter: "blur(18px)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
     borderRadius: 20,
     padding: "24px",
-    boxShadow: "0 20px 45px -12px rgba(0, 0, 0, 0.65)",
+    boxShadow: isDark ? "0 20px 45px -12px rgba(0, 0, 0, 0.65)" : "0 10px 30px rgba(0, 0, 0, 0.06)",
   },
   panelHeader: {
     display: "flex",
@@ -1069,17 +1068,17 @@ const S = {
     margin: 0,
     fontSize: 17,
     fontWeight: 800,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
   },
   panelSubtitle: {
     margin: "2px 0 0",
     fontSize: 12,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#475569",
   },
   quickAddBtn: {
     background: "rgba(255, 255, 255, 0.06)",
     border: "1px solid rgba(255, 255, 255, 0.12)",
-    color: "#e2e8f0",
+    color: isDark ? "#e2e8f0" : "#1e293b",
     padding: "6px 12px",
     borderRadius: 8,
     fontSize: 12,
@@ -1095,7 +1094,7 @@ const S = {
     height: 50,
     borderRadius: 14,
     background: "rgba(255, 255, 255, 0.04)",
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#475569",
     fontSize: 22,
     display: "grid",
     placeItems: "center",
@@ -1112,8 +1111,8 @@ const S = {
     alignItems: "center",
     gap: 12,
     padding: "12px 14px",
-    background: "rgba(255, 255, 255, 0.02)",
-    border: "1px solid rgba(255, 255, 255, 0.05)",
+    background: isDark ? "rgba(255, 255, 255, 0.02)" : "#f8fafc",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid #f1f5f9",
     borderRadius: 12,
     transition: "background 0.2s ease",
   },
@@ -1136,7 +1135,7 @@ const S = {
     display: "block",
     fontSize: 13,
     fontWeight: 700,
-    color: "#ffffff",
+    color: isDark ? "#ffffff" : "#0f172a",
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
@@ -1144,7 +1143,7 @@ const S = {
   txnCategory: {
     display: "block",
     fontSize: 11,
-    color: "#94a3b8",
+    color: isDark ? "#94a3b8" : "#475569",
   },
   txnRight: {
     display: "flex",
@@ -1177,9 +1176,9 @@ const S = {
     placeItems: "center",
   },
   viewAllHistoryBtn: {
-    background: "rgba(255, 255, 255, 0.04)",
-    border: "1px solid rgba(255, 255, 255, 0.1)",
-    color: "#34d399",
+    background: isDark ? "rgba(255, 255, 255, 0.04)" : "#f0fdf4",
+    border: isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid #bbf7d0",
+    color: isDark ? "#34d399" : "#15803d",
     borderRadius: 12,
     padding: "12px",
     fontSize: 13,
@@ -1210,7 +1209,7 @@ const S = {
   },
   catBarTrack: {
     height: 7,
-    background: "rgba(255, 255, 255, 0.06)",
+    background: isDark ? "rgba(255, 255, 255, 0.06)" : "#e2e8f0",
     borderRadius: 20,
     overflow: "hidden",
   },
@@ -1219,4 +1218,5 @@ const S = {
     borderRadius: 20,
     transition: "width 0.6s ease",
   },
-};
+  };
+}
